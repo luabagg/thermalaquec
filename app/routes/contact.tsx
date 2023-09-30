@@ -7,6 +7,6 @@ export const meta: MetaFunction = () => {
 
 export default function ContactPage() {
   return (
-    <Contact></Contact>
+    <Contact />
   );
 }

@@ -22,10 +22,6 @@ export const links: LinksFunction = () => [
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
   {
     rel: "stylesheet",
-    href: globalStylesUrl
-  },
-  {
-    rel: "stylesheet",
     href: tailwindUrl
   },
   {

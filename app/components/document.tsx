@@ -7,14 +7,14 @@ import {
 } from "@remix-run/react";
 import * as React from "react";
 import RouteChangeAnnouncement from "~/components/utils/routeChangeAnnouncement"
-import Footer from "./pages/footer";
-import Menu from "./pages/menu";
+import Footer from "./utils/footer";
+import Navbar from "./utils/navbar";
 
 const lang = "pt-br"
 
 export default function Document({
   title,
-  children,
+  children
 }: {
   title?: string;
   children: React.ReactNode;
@@ -27,11 +27,11 @@ export default function Document({
         <Links />
       </head>
       <body>
-        <div className="app">
-          <Menu></Menu>
+        <>
+          <Navbar></Navbar>
           {children}
           <Footer></Footer>
-        </div>
+        </>
         <RouteChangeAnnouncement />
         <ScrollRestoration />
         <Scripts />

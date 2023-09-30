@@ -1,18 +1,6 @@
-import { useState } from 'react'
-import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Link } from '@remix-run/react'
 
-const navigation = [
-  { name: 'Product', href: '#' },
-  { name: 'Features', href: '#' },
-  { name: 'Marketplace', href: '#' },
-  { name: 'Company', href: '#' },
-]
-
 export default function Hero() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
   return (
     <section id="hero">
       <div>

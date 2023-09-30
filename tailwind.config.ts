@@ -11,6 +11,7 @@ export default {
         'current': 'currentColor',
         'black': colors.black,
         'white': colors.white,
+        'cream': colors.white,
         'gray': colors.gray,
         'emerald': colors.emerald,
         'indigo': colors.indigo,

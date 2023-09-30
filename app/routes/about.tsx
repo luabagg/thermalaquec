@@ -7,6 +7,6 @@ export const meta: MetaFunction = () => {
 
 export default function AboutPage() {
   return (
-    <About></About>
+    <About />
   );
 }
