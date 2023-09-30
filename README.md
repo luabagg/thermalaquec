@@ -1,3 +1,7 @@
+# Thermal Aquecimento
+
+Solar energy and home heating company portfolio website. It aims to attract potential clients, increase sales and expand the customer base.
+
 # Welcome to Remix!
 
 - [Remix Docs](https://remix.run/docs)
