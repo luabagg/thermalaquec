@@ -1,28 +1,34 @@
-const colors = require('tailwindcss/colors')
-
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss'
 
 export default {
-  content: ["./app/**/*.{js,jsx,ts,tsx}"],
+  content: ['./app/**/*.{js,jsx,ts,tsx}'],
   theme: {
+    fontFamily: {
+      sans: ['Raleway', 'sans-serif'],
+      sansbold: ['Raleway-heavy', 'sans-serif'],
+      serif: ['Merriweather', 'serif'],
+    },
     extend: {
       colors: {
-        'transparent': 'transparent',
-        'current': 'currentColor',
-        'black': colors.black,
-        'white': colors.white,
-        'cream': colors.white,
-        'gray': colors.gray,
-        'emerald': colors.emerald,
-        'indigo': colors.indigo,
-        'yellow': colors.yellow,
+        'white': "#FCFCFC",
+        'ebony': '#080402',
+        'gray-dark-900': '#0F1215',
+        'gray-dark-500': '#1F2225',
+        'yellow': '#FFD51E',
         'red-dark': '#810000'
       },
-      fontFamily: {
-        sans: ['Graphik', 'sans-serif'],
-        serif: ['Merriweather', 'serif'],
+      spacing: {
+        '4xl': '48rem',
+        '8xl': '96rem',
+        '9xl': '128rem',
+        '.25': '25%',
+        '.50': '50%',
+        '.75': '75%',
       },
+      borderRadius: {
+        '4xl': '2rem',
+      }
     },
   },
   plugins: [],
-} satisfies Config;
+} satisfies Config
