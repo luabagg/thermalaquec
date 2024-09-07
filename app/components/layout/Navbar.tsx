@@ -33,7 +33,7 @@ export default function Navbar() {
     `}>
 
       <div className="flex justify-center h-full">
-        <Link to="/" id="logo" className="cursor-default">
+        <Link to="#" id="logo" className="cursor-default">
           <img src={logo} alt="logo" className="w-40 min-w-40" />
         </Link>
 

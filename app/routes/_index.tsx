@@ -1,5 +1,5 @@
 import type { MetaFunction } from "@vercel/remix";
-import Hero from "~/components/Hero";
+import Hero from "~/components/home/Hero";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -12,6 +12,6 @@ export default function Index() {
   return (
     <>
       <Hero />
-    </>
+      </>
   );
 }

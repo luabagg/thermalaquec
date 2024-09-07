@@ -18,15 +18,37 @@ export default {
         'red-dark': '#810000'
       },
       spacing: {
-        '4xl': '48rem',
-        '8xl': '96rem',
-        '9xl': '128rem',
         '.25': '25%',
         '.50': '50%',
         '.75': '75%',
       },
-      borderRadius: {
-        '4xl': '2rem',
+      boxShadow: {
+        'inset-clean': 'inset 0 1px 0 rgba(255,255,255,0.2)',
+        'xs-clean': '0 1px 0 rgba(255,255,255,0.2)',
+      },
+      keyframes: {
+        fadeInUp: {
+          from: {
+            transform: "translate3d(0,20px,0)",
+            opacity: "0"
+          },
+          to: {
+            transform: "translate3d(0,0,0)",
+          }
+        },
+        fadeInDown: {
+          from: {
+            transform: "translate3d(0,-20px,0)",
+            opacity: "0"
+          },
+          to: {
+            transform: "translate3d(0,0,0)",
+          }
+        }
+      },
+      animation: {
+        'fadeInUp': 'fadeInUp 500ms ease-in',
+        'fadeInDown': 'fadeInDown 500ms ease-in',
       }
     },
   },
