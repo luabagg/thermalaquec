@@ -14,7 +14,7 @@ export default {
         'ebony': '#080402',
         'gray-dark-900': '#0F1215',
         'gray-dark-500': '#1F2225',
-        'yellow': '#FFD51E',
+        'yellow': "#FFD600",
         'red-dark': '#810000'
       },
       spacing: {
