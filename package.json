@@ -13,6 +13,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/base": "^5.0.0-beta.40",
+    "@mui/icons-material": "^6.0.2",
     "@mui/material": "^6.0.2",
     "@remix-run/node": "^2.11.2",
     "@remix-run/react": "^2.11.2",

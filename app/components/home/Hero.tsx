@@ -1,10 +1,11 @@
 import * as React from 'react';
 import heroBg from "/images/hero-background.png";
 import { Link } from '@remix-run/react';
-import { Box, Container, MobileStepper, Typography } from '@mui/material';
+import { Box, Container, Typography } from '@mui/material';
 import { Button } from '@mui/base';
 import { Underline } from './Underline';
 import { KeyboardArrowDown, KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { MobileStepper } from './MobileStepper';
 
 const steps: Array<{ title: React.ReactNode, text: string }> = [
   {
@@ -44,6 +45,26 @@ export default function Hero() {
     });
   };
 
+  const [dragging, setDragging] = React.useState(false);
+  const [startX, setStartX] = React.useState(0);
+  const [currentX, setCurrentX] = React.useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setDragging(true);
+    setStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragging) setCurrentX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragging) {
+      setDragging(false);
+      currentX > startX ? handleBack() : handleNext();
+    }
+  };
+
   React.useEffect(() => {
     const interval = setInterval(() => {
       handleNext();
@@ -60,27 +81,22 @@ export default function Hero() {
       "
         style={{ backgroundImage: `url(${heroBg})` }}
       >
-        <Container maxWidth="md" className='text-center lg:text-left'>
-          <HeroSection {...steps[activeStep]} />
+        <Container
+          maxWidth="md"
+          className='text-center lg:text-left'
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <HeroSection key={activeStep} {...steps[activeStep]} />
           <MobileStepper
-            variant="dots"
             steps={maxSteps}
-            position="static"
             activeStep={activeStep}
-            sx={{ maxWidth: 200, backgroundColor: 'transparent' }}
-            className='mt-20 animate-fadeInUp'
-            nextButton={
-              <Button onClick={handleNext}>
-                <KeyboardArrowRight className='text-gray-500' />
-
-              </Button>
-            }
-            backButton={
-              <Button onClick={handleBack}>
-                <KeyboardArrowLeft className='text-gray-500' />
-              </Button>
-            }
-          />
+            onStepClick={(step: number) => setActiveStep(step)}
+            className='
+              flex mt-20
+              justify-center lg:justify-start
+            '/>
         </Container>
       </div>
 
