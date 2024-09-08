@@ -14,6 +14,8 @@ export default {
         'ebony': '#080402',
         'gray-dark-900': '#0F1215',
         'gray-dark-500': '#1F2225',
+        'slate-dark-500': "#12151B",
+        'slate-dark-300': '#1C212A',
         'yellow': "#FFD600",
         'red-dark': '#810000'
       },
@@ -21,6 +23,9 @@ export default {
         '.25': '25%',
         '.50': '50%',
         '.75': '75%',
+      },
+      borderWidth: {
+        '1': '1px',
       },
       boxShadow: {
         'inset-clean': 'inset 0 1px 0 rgba(255,255,255,0.2)',
@@ -44,9 +49,15 @@ export default {
           to: {
             transform: "translate3d(0,0,0)",
           }
+        },
+        fadeIn: {
+          from: {
+            opacity: "0"
+          },
         }
       },
       animation: {
+        'fadeIn': 'fadeIn 200ms ease-in',
         'fadeInUp': 'fadeInUp 500ms ease-in',
         'fadeInDown': 'fadeInDown 500ms ease-in',
       }

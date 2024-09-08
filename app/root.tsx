@@ -64,7 +64,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="
-        bg-gray-dark-900
+        bg-slate-dark-500
         text-white
         font-serif leading-3
       ">

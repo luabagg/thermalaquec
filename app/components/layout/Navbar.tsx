@@ -1,6 +1,8 @@
 import { Link, useLocation } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
 import React, { useEffect, useState } from 'react';
+import { Box, IconButton, Toolbar } from "@mui/material";
+import { Menu } from "@mui/icons-material";
 
 const navigationMap = [
   { name: "Home", href: "/" },
@@ -24,28 +26,35 @@ export default function Navbar() {
   const opaque = "bg-ebony shadow-sm shadow-gray-dark-500";
   const applyOpaque = useOpaque() || !isHomepage ? opaque : "";
 
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuVisible(!isMenuVisible);
+  };
+
   return (
     <header id="navigation" aria-label="Global Navigation" className={`
-      top-0 z-50 h-16 w-full
+      top-0 z-40 h-16 w-full
       transition-colors ease-out duration-500
       ${display}
       ${applyOpaque}
     `}>
-
-      <div className="flex justify-center h-full">
+      <Toolbar className="flex justify-center h-full">
         <Link to="#" id="logo" className="cursor-default">
           <img src={logo} alt="logo" className="w-40 min-w-40" />
         </Link>
 
-        <NavSection>
-          {
-            navigationMap.map((args) => {
-              return <NavItem key={args.name} href={args.href}>
-                {args.name}
-              </NavItem>
-            })
-          }
-        </NavSection>
+        <Box id="default-menu" className="hidden md:flex">
+          <NavSection>
+            {
+              navigationMap.map((args) => {
+                return <NavItem key={args.name} href={args.href}>
+                  {args.name}
+                </NavItem>
+              })
+            }
+          </NavSection>
+        </Box>
 
         <NavSection>
           {
@@ -56,14 +65,80 @@ export default function Navbar() {
             })
           }
         </NavSection>
-      </div>
+
+        <Box className="flex md:hidden">
+          <IconButton
+            size="large"
+            edge="end"
+            color="inherit"
+            aria-label="menu"
+            onClick={toggleMenu}
+            sx={{ mr: 2 }}
+          >
+            <Menu className=" active:text-yellow" />
+          </IconButton>
+        </Box>
+      </Toolbar>
+
+      <Box id="mobile-menu" className={`
+        ${isMenuVisible ? "block" : "hidden"}
+        animate-fadeIn
+      `}>
+        <MobileMenu>
+          {
+            navigationMap.map((args) => {
+              return <MobileMenuItem key={args.name} href={args.href}>
+                {args.name}
+              </MobileMenuItem>
+            })
+          }
+        </MobileMenu>
+      </Box>
     </header>
+  );
+}
+
+const MobileMenu = function ({ children }: { children: React.ReactNode }) {
+  return (
+    <Box className="
+      fixed z-50 left-0 top-16
+      w-full h-auto p-6
+      rounded-b-md
+      bg-slate-dark-300
+      shadow-sm shadow-gray-dark-500
+    ">
+      {children}
+    </Box>
+  );
+}
+
+const MobileMenuItem = function ({ children, href }: { children: React.ReactNode, href: string }) {
+  const active = "text-yellow";
+  const applyActive = useActive(href) ? active : "";
+
+  return (
+    <Box className={`
+      flex h-full p-4 items-center
+      uppercase tracking-widest
+      text-xs
+      border-b-1 border-dashed border-slate-dark-500
+      font-sansbold font-extrabold
+      ${applyActive}
+    `}>
+      <Link to={href}>
+        {children}
+      </Link>
+    </Box>
   );
 }
 
 const NavSection = function ({ children }: { children: React.ReactNode }) {
   return (
-    <nav className="flex mx-14 items-center space-x-8">
+    <nav className="
+      flex items-center
+      mx-4 lg:mx-14
+      space-x-4 lg:space-x-8
+    ">
       {children}
     </nav>
   );
@@ -74,7 +149,7 @@ const NavItem = function ({ children, href }: { children: React.ReactNode, href:
   const applyActive = useActive(href) ? active : "";
 
   return (
-    <Link to={href} className={`
+    <Box className={`
       flex h-full p-1 items-center
       uppercase tracking-widest
       text-xs leading-3
@@ -83,8 +158,10 @@ const NavItem = function ({ children, href }: { children: React.ReactNode, href:
       transition-colors ease-out duration-250
       ${applyActive}
     `}>
-      {children}
-    </Link>
+      <Link to={href} >
+        {children}
+      </Link>
+    </Box>
   );
 }
 
@@ -107,7 +184,7 @@ function useOpaque(): boolean {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  return offset > 30 || width < viewportMobile
+  return offset > 30 || width <= viewportMobile
 }
 
 function useActive(href: string): boolean {

@@ -75,7 +75,7 @@ export default function Hero() {
 
   return (
     <section id="hero">
-      <div className="
+      <Box className="
         w-full h-auto py-40
         bg-cover bg-center
       "
@@ -98,7 +98,7 @@ export default function Hero() {
               justify-center lg:justify-start
             '/>
         </Container>
-      </div>
+      </Box>
 
       <Box className="relative flex flex-col items-center">
         <Button href="/services" className="
