@@ -101,8 +101,8 @@ const NavSection = function ({ children }: { children: React.ReactNode }) {
   return (
     <nav className="
       flex items-center
-      mx-4 lg:mx-14
-      lg:space-x-2
+      mx-4 sm:mx-14
+      sm:space-x-2
     ">
       {children}
     </nav>
