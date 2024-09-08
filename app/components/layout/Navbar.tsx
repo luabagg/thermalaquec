@@ -1,9 +1,11 @@
 import { Link, useLocation } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, IconButton, Toolbar } from "@mui/material";
 import { Menu, Instagram, Email, Facebook, } from "@mui/icons-material";
 import NavLink from "./NavLink";
+import { useHomepage } from "../utils/hooks/useHomepage";
+import { useClickOutside } from "../utils/hooks/clickedOutside";
 
 const navigationMap = [
   { name: "Home", href: "/" },
@@ -27,9 +29,12 @@ export default function Navbar() {
   const applyOpaque = (useOpaque() || !isHomepage) ? "bg-ebony shadow-sm shadow-gray-dark-500" : "";
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const menuRef = useRef(null);
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
   };
+
+  useClickOutside(menuRef, () => setIsMenuVisible(false));
 
   return (
     <header id="navigation" aria-label="Global Navigation" className={`
@@ -79,7 +84,7 @@ export default function Navbar() {
         </Box>
       </Toolbar>
 
-      <Box id="mobile-menu" className={`
+      <Box id="mobile-menu" ref={menuRef} className={`
         ${isMenuVisible ? "block" : "hidden"}
         animate-fadeIn
       `}>
@@ -150,12 +155,6 @@ const MobileMenuItem = function ({ children, href }: { children: React.ReactNode
       </NavLink>
     </Box>
   );
-}
-
-function useHomepage(): boolean {
-  const location = useLocation();
-
-  return location["pathname"] == "/";
 }
 
 function useOpaque(): boolean {
