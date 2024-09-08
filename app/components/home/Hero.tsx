@@ -2,10 +2,10 @@ import * as React from 'react';
 import heroBg from "/images/hero-background.png";
 import { Link } from '@remix-run/react';
 import { Box, Container, Typography } from '@mui/material';
-import { Button } from '@mui/base';
 import { Underline } from './Underline';
-import { KeyboardArrowDown, KeyboardArrowLeft, KeyboardArrowRight } from '@mui/icons-material';
+import { KeyboardArrowDown } from '@mui/icons-material';
 import { MobileStepper } from './MobileStepper';
+import LargeButton from '../utils/LargeButton';
 
 const steps: Array<{ title: React.ReactNode, text: string }> = [
   {
@@ -100,20 +100,14 @@ export default function Hero() {
         </Container>
       </Box>
 
-      <Box className="relative flex flex-col items-center">
-        <Button href="/services" className="
-          lg:ml-.25 -my-6
-          w-48 py-4
-          rounded-sm shadow-inset-clean
-          uppercase tracking-widest
-          text-center text-xs leading-3
-          font-sansbold font-extrabold
-          bg-red-dark hover:bg-yellow
-          text-white hover:text-ebony
-          transition-colors ease-out duration-500
-        ">
+      <Box className="
+        flex flex-col
+        lg:ml-.25 -my-6
+        items-center
+      ">
+        <LargeButton href="/services">
           Saiba mais <KeyboardArrowDown />
-        </Button>
+        </LargeButton>
       </Box>
     </section>
   );
