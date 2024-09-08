@@ -1,6 +1,5 @@
+import { createTheme } from '@mui/material/styles';
 import { colors } from '@mui/material';
-import pkg from '@mui/material/styles';
-const { createTheme } = pkg;
 
 // Create a theme instance.
 const theme = createTheme({
