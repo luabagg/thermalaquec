@@ -2,7 +2,8 @@ import { Link, useLocation } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
 import React, { useEffect, useState } from 'react';
 import { Box, IconButton, Toolbar } from "@mui/material";
-import { Menu } from "@mui/icons-material";
+import { Menu, Instagram, Email, Facebook, } from "@mui/icons-material";
+import NavLink from "./NavLink";
 
 const navigationMap = [
   { name: "Home", href: "/" },
@@ -13,9 +14,9 @@ const navigationMap = [
 ]
 
 const socialMap = [
-  { icon: "fab fa-instagram", href: "https://www.instagram.com/thermalaquec" },
-  { icon: "fas fa-envelope-square", href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
-  { icon: "fab fa-facebook-square", href: "https://www.instagram.com/thermalaquec" },
+  { icon: Instagram, href: "https://www.instagram.com/thermalaquec" },
+  { icon: Email, href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
+  { icon: Facebook, href: "https://www.facebook.com/thermalaquec" },
 ]
 
 const viewportMobile = 768;
@@ -23,11 +24,9 @@ const viewportMobile = 768;
 export default function Navbar() {
   const isHomepage = useHomepage();
   const display = isHomepage ? "fixed" : "sticky";
-  const opaque = "bg-ebony shadow-sm shadow-gray-dark-500";
-  const applyOpaque = useOpaque() || !isHomepage ? opaque : "";
+  const applyOpaque = (useOpaque() || !isHomepage) ? "bg-ebony shadow-sm shadow-gray-dark-500" : "";
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
-
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
   };
@@ -41,7 +40,7 @@ export default function Navbar() {
     `}>
       <Toolbar className="flex justify-center h-full">
         <Link to="#" id="logo" className="cursor-default">
-          <img src={logo} alt="logo" className="w-40 min-w-40" />
+          <img src={logo} alt="logo" className="w-40 min-w-32" />
         </Link>
 
         <Box id="default-menu" className="hidden md:flex">
@@ -59,8 +58,8 @@ export default function Navbar() {
         <NavSection>
           {
             socialMap.map((args) => {
-              return <NavItem key={args.icon} href={args.href}>
-                <i className={`${args.icon} text-xl`}></i>
+              return <NavItem key={args.href} href={args.href}>
+                {<args.icon />}
               </NavItem>
             })
           }
@@ -98,46 +97,12 @@ export default function Navbar() {
   );
 }
 
-const MobileMenu = function ({ children }: { children: React.ReactNode }) {
-  return (
-    <Box className="
-      fixed z-50 left-0 top-16
-      w-full h-auto p-6
-      rounded-b-md
-      bg-slate-dark-300
-      shadow-sm shadow-gray-dark-500
-    ">
-      {children}
-    </Box>
-  );
-}
-
-const MobileMenuItem = function ({ children, href }: { children: React.ReactNode, href: string }) {
-  const active = "text-yellow";
-  const applyActive = useActive(href) ? active : "";
-
-  return (
-    <Box className={`
-      flex h-full p-4 items-center
-      uppercase tracking-widest
-      text-xs
-      border-b-1 border-dashed border-slate-dark-500
-      font-sansbold font-extrabold
-      ${applyActive}
-    `}>
-      <Link to={href}>
-        {children}
-      </Link>
-    </Box>
-  );
-}
-
 const NavSection = function ({ children }: { children: React.ReactNode }) {
   return (
     <nav className="
       flex items-center
       mx-4 lg:mx-14
-      space-x-4 lg:space-x-8
+      lg:space-x-2
     ">
       {children}
     </nav>
@@ -145,22 +110,44 @@ const NavSection = function ({ children }: { children: React.ReactNode }) {
 }
 
 const NavItem = function ({ children, href }: { children: React.ReactNode, href: string }) {
-  const active = "text-yellow border-b-2 border-white";
-  const applyActive = useActive(href) ? active : "";
+  const active = useActive(href);
+  const applyActive = active ? "border-b-2 border-white" : "";
 
   return (
     <Box className={`
-      flex h-full p-1 items-center
-      uppercase tracking-widest
-      text-xs leading-3
-      font-sansbold font-extrabold
-      hover:text-yellow
-      transition-colors ease-out duration-250
+      p-2 lg:p-4 h-16
       ${applyActive}
     `}>
-      <Link to={href} >
+      <NavLink href={href} active={active} >
         {children}
-      </Link>
+      </NavLink>
+    </Box>
+  );
+}
+
+const MobileMenu = function ({ children }: { children: React.ReactNode }) {
+  return (
+    <nav className="
+      fixed z-50 left-0 top-16
+      w-full h-auto p-6
+      rounded-b-md
+      bg-slate-dark-300
+      shadow-sm shadow-gray-dark-500
+    ">
+      {children}
+    </nav>
+  );
+}
+
+const MobileMenuItem = function ({ children, href }: { children: React.ReactNode, href: string }) {
+  return (
+    <Box className="
+      p-4 h-16
+      border-b-1 border-dashed border-slate-dark-500
+    ">
+      <NavLink href={href} active={useActive(href)} >
+        {children}
+      </NavLink>
     </Box>
   );
 }

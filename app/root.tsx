@@ -30,10 +30,6 @@ export const links: LinksFunction = () => [
     href: "/favicon.ico",
     type: "image/x-icon",
   },
-  {
-    rel: "stylesheet",
-    href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  },
   ...getMuiLinks()
 ];
 
