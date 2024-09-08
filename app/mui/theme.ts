@@ -1,16 +1,20 @@
 import { createTheme, colors } from '@mui/material';
+import resolveConfig from 'tailwindcss/resolveConfig'
+import tailwindConfig from 'tailwind.config.js'
 
-// Create a theme instance.
+const cfg = resolveConfig(tailwindConfig)
+
+// Create a theme instance applying the palette from tailwind.
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#810000',
-      contrastText: "#FCFCFC",
+      main: cfg.theme.colors['red-dark'],
+      contrastText: cfg.theme.colors.white,
     },
     secondary: {
-      main: '#FFD600',
-      contrastText: "#080402",
+      main: cfg.theme.colors.yellow,
+      contrastText: cfg.theme.colors.ebony,
     },
     error: {
       main: colors.red[900],
@@ -21,10 +25,8 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: [
-      '"Merriweather"',
-      'serif',
-      '"Raleway"',
-      'sans-serif',
+      ...cfg.theme.fontFamily.sans,
+      ...cfg.theme.fontFamily.serif,
     ].join(','),
   },
   spacing: 4,

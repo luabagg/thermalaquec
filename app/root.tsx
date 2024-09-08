@@ -20,6 +20,10 @@ import { Layout as Wrapper } from "./components/layout/Layout";
 // Styles
 import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
+import resolveConfig from 'tailwindcss/resolveConfig'
+import tailwindConfig from 'tailwind.config.js'
+
+const cfg = resolveConfig(tailwindConfig)
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: globalStyles },
@@ -46,6 +50,10 @@ export const meta: MetaFunction = () => [
   {
     name: "description",
     content: "Mantenha a sua casa e piscina aquecidas durante todo o ano com a Thermal Aquecimento. Oferecemos serviços profissionais de instalação e manutenção de sistemas de aquecimento residencial e para piscinas, para você conseguir desfrutar de conforto e lazer em todas as estações. Entre em contato conosco hoje mesmo e veja como podemos tornar sua casa e piscina mais acolhedoras e agradáveis."
+  },
+  {
+    name: "theme-color",
+    content: cfg.theme.colors['slate-dark-500']
   }
 ];
 
