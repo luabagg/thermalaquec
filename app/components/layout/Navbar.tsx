@@ -164,6 +164,7 @@ function useOpaque(): boolean {
 
   useEffect(() => {
     setWidth(window.outerWidth);
+    setOffset(window.scrollY);
 
     const onScroll = () => setOffset(window.scrollY);
     window.removeEventListener('scroll', onScroll);

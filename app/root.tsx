@@ -15,8 +15,6 @@ import { SpeedInsights } from "@vercel/speed-insights/remix"
 
 // Layout
 import { MuiDocument } from "./mui/MuiDocument";
-import { MuiMeta } from "./mui/MuiMeta";
-import { getMuiLinks } from "./mui/getMuiLinks";
 import { Layout as Wrapper } from "./components/layout/Layout";
 
 // Styles
@@ -31,7 +29,6 @@ export const links: LinksFunction = () => [
     href: "/favicon.ico",
     type: "image/x-icon",
   },
-  ...getMuiLinks()
 ];
 
 export const meta: MetaFunction = () => [
@@ -57,7 +54,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <html lang="pt-br">
       <head>
         <Meta />
-        <MuiMeta />
         <Links />
       </head>
       <body className="

@@ -21,16 +21,18 @@
     "@vercel/remix": "^2.11.2",
     "@vercel/speed-insights": "^1.0.12",
     "isbot": "^4.4.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "19.0.0-rc-a03254bc-20240905",
+    "react-dom": "19.0.0-rc-a03254bc-20240905"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.11.2",
-    "@types/react": "^18.3.0",
-    "@types/react-dom": "^18.3.0",
+    "@remix-run/eslint-config": "2.10.0",
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "autoprefixer": "^10.4.20",
+    "cssnano": "^7.0.6",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.28.1",
@@ -42,5 +44,12 @@
     "typescript": "^5.1.6",
     "vite": "^5.4.3",
     "vite-tsconfig-paths": "^5.0.1"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
