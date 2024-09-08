@@ -11,6 +11,7 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/remix"
 
 // Layout
 import { MuiDocument } from "./mui/MuiDocument";
@@ -70,6 +71,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ScrollRestoration />
         <Scripts />
         <Analytics />
+        <SpeedInsights />
         <LiveReload />
       </body>
     </html>
