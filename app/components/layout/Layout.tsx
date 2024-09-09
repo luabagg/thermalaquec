@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Navbar from './Navbar';
-import RouteChangeAnnouncement from './RouteChangeAnnouncement';
 import Footer from './Footer';
+import RouteChangeAnnouncement from './RouteChangeAnnouncement';
 import type { NavigationMap, SocialMap } from './types';
 
 interface LayoutProps {

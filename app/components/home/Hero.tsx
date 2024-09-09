@@ -1,17 +1,15 @@
 import * as React from 'react';
 import heroBg from "/images/hero-background.png";
 import { Box, Container, Typography } from '@mui/material';
-import { KeyboardArrowDown } from '@mui/icons-material';
 import { MobileStepper } from './MobileStepper';
-import LargeButton from '../utils/LargeButton';
 
 export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode, text: string }> }) {
   const maxSteps = steps.length;
   const [activeStep, setActiveStep] = React.useState(0);
 
-  const handleNext = () => {
+  const handleNext = React.useCallback(() => {
     setActiveStep((prevActiveStep) => (prevActiveStep + 1) % maxSteps)
-  };
+  }, [setActiveStep, maxSteps]);
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => {
@@ -63,7 +61,7 @@ export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode,
     }, 7000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [handleNext]);
 
   return (
     <section id="hero">
@@ -91,16 +89,6 @@ export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode,
             '/>
         </Container>
       </Box>
-
-      <Box className="
-        relative flex flex-col
-        lg:ml-.25 -mt-6
-        items-center
-      ">
-        <LargeButton href="/services">
-          Saiba mais <KeyboardArrowDown />
-        </LargeButton>
-      </Box>
     </section>
   );
 }
@@ -118,7 +106,7 @@ const HeroSection = function ({ title, text }: { title: React.ReactNode, text: s
       '>
         {title}
       </h1>
-      <Typography variant="body1" fontSize={20} className="
+      <Typography variant="subtitle1" className="
         text-gray-300 opacity-75
         animate-fadeInUp
       ">

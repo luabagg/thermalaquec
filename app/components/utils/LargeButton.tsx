@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Button } from "@mui/base";
 
-export default function LargeButton({ children, href }: { children: React.ReactNode, href: string }) {
+export function LargeButton({ children, href, onclick }: { children: React.ReactNode, href?: string, onclick?: React.MouseEventHandler }) {
     return (
-        <Button href={href} className="
+        <Button href={href} onClick={onclick} className="
             w-48 py-4
             rounded-sm shadow-inset-clean
             uppercase tracking-widest
