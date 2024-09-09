@@ -1,7 +1,13 @@
-import { Link } from "@remix-run/react";
+import React from "react";
 import type { MetaFunction } from "@vercel/remix";
+import { KeyboardArrowDown } from "@mui/icons-material";
+import { Box } from "@mui/material";
+import { Link } from "@remix-run/react";
+import { animateScroll } from "react-scroll";
 import Hero from "~/components/home/Hero";
+import { LargeButton } from "~/components/utils/LargeButton";
 import { Underline } from "~/components/utils/Underline";
+import About from "~/components/pages/about";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -26,9 +32,35 @@ const heroSteps: Array<{ title: React.ReactNode, text: string }> = [
 ]
 
 export default function Index() {
+  const baseContentRef = React.useRef<HTMLInputElement | null>(null);
+  const [contentH, setContentH] = React.useState(0);
+
+  React.useLayoutEffect(() => {
+    if (baseContentRef.current === null) return;
+    setContentH(baseContentRef.current.offsetTop - 100);
+  }, []);
+
   return (
     <>
       <Hero steps={heroSteps} />
+      <Box className="
+        relative flex flex-col
+        lg:ml-[25%] -mt-6
+        items-center
+      ">
+        <LargeButton onclick={() => animateScroll.scrollTo(contentH)}>
+          Saiba mais <KeyboardArrowDown />
+        </LargeButton>
+      </Box>
+      <Box ref={baseContentRef} className="w-full h-full">
+        <About />
+        <About />
+        <About />
+        <About />
+        <About />
+        <About />
+        <About />
+      </Box>
     </>
   );
 }

@@ -2,8 +2,6 @@ export default function About() {
   return (
     <section id="about">
       <div>
-        <h1>Quem somos<span>.</span></h1>
-        <hr />
         <p>
           Nós fornecemos soluções de aquecimento de alta qualidade e eficiência que estão entre as melhores do mercado. Com mais de 5 anos de experiência, nossa empresa tem orgulho de servir todo o Rio Grande do Sul com excelência e comprometimento. Confie em nós para manter você e sua casa aquecidos e confortáveis durante todo o ano.
         </p>

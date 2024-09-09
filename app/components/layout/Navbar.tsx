@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@remix-run/react";
+import { useLocation } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, IconButton, Toolbar } from "@mui/material";
@@ -7,6 +7,7 @@ import { NavLink } from "./NavLink";
 import { useHomepage } from "../utils/hooks/useHomepage";
 import { useClickOutside } from "../utils/hooks/clickedOutside";
 import type { NavigationMap, SocialMap } from "./types";
+import { animateScroll } from 'react-scroll';
 
 export default function Navbar({ navigationMap, socialMap }: { navigationMap: NavigationMap, socialMap: SocialMap }) {
   const isHomepage = useHomepage();
@@ -33,9 +34,7 @@ export default function Navbar({ navigationMap, socialMap }: { navigationMap: Na
       ${applyOpaque}
     `}>
       <Toolbar className="flex justify-center h-full">
-        <Link to="#" id="logo" className="cursor-default">
-          <img src={logo} alt="logo" className="w-40 min-w-32" />
-        </Link>
+        <img onClick={animateScroll.scrollToTop} src={logo} alt="logo" className="w-40 min-w-32" />
 
         <Box id="default-menu" className="hidden md:flex">
           <NavSection>

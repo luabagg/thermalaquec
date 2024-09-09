@@ -3,9 +3,6 @@ export default function Services() {
     <section id="services">
       <div>
         <div>
-          <h1>Nossos serviços<span>.</span></h1>
-          <hr />
-
           <p>
             Oferecemos serviços topo de linha para aquecimento de casas e de piscinas. De instalações de lareiras, até o sistema inteiro de aquecimento de sua moradia residencial ou comercial.
           </p>
