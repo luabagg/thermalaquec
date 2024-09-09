@@ -2,26 +2,13 @@ import { Link, useLocation } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
 import React, { useEffect, useRef, useState } from 'react';
 import { Box, IconButton, Toolbar } from "@mui/material";
-import { Menu, Instagram, Email, Facebook, } from "@mui/icons-material";
-import NavLink from "./NavLink";
+import { Menu } from "@mui/icons-material";
+import { NavLink } from "./NavLink";
 import { useHomepage } from "../utils/hooks/useHomepage";
 import { useClickOutside } from "../utils/hooks/clickedOutside";
+import type { NavigationMap, SocialMap } from "./types";
 
-const navigationMap = [
-  { name: "Home", href: "/" },
-  { name: "Produtos", href: "/products" },
-  { name: "Nosso trabalho", href: "/services" },
-  { name: "Sobre nós", href: "/about" },
-  { name: "Contato", href: "/contact" },
-]
-
-const socialMap = [
-  { icon: Instagram, href: "https://www.instagram.com/thermalaquec" },
-  { icon: Email, href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
-  { icon: Facebook, href: "https://www.facebook.com/thermalaquec" },
-]
-
-export default function Navbar() {
+export default function Navbar({ navigationMap, socialMap }: { navigationMap: NavigationMap, socialMap: SocialMap }) {
   const isHomepage = useHomepage();
   const display = isHomepage ? "fixed" : "sticky";
 

@@ -1,17 +1,9 @@
 import { Link } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
-import { Email, Facebook, Instagram, Twitter, WhatsApp } from "@mui/icons-material";
 import { Box, Container, ListItem, Stack, Typography } from "@mui/material";
+import type { SocialMap } from "./types";
 
-const socialMap = [
-  { icon: Twitter, href: "https://twitter.com/thermalaquec" },
-  { icon: Instagram, href: "https://www.instagram.com/thermalaquec" },
-  { icon: Email, href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
-  { icon: Facebook, href: "https://www.facebook.com/thermalaquec" },
-  { icon: WhatsApp, href: "https://wa.me/5554999161816/?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
-]
-
-export default function Footer() {
+export default function Footer({ socialMap }: { socialMap: SocialMap }) {
   return (
     <footer>
       <Container maxWidth="sm" className="

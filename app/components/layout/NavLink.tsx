@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { Link } from '@remix-run/react';
 import * as React from 'react';
 
-export default function NavLink({ children, href, active = false }: { children: React.ReactNode, href: string, active: boolean }) {
+export function NavLink({ children, href, active = false }: { children: React.ReactNode, href: string, active: boolean }) {
     return (
         <Box className={`
             flex h-full p-1 items-center
