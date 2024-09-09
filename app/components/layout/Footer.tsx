@@ -16,7 +16,7 @@ export default function Footer() {
     <footer>
       <Container maxWidth="sm" className="
         flex flex-col
-        my-12 items-center
+        py-12 items-center
         text-center
       ">
         <Box className="
