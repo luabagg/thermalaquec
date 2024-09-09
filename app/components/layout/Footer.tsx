@@ -14,16 +14,16 @@ const socialMap = [
 export default function Footer() {
   return (
     <footer>
-      <Container maxWidth="sm" sx={{ flexGrow: "1" }} className="
+      <Container maxWidth="sm" className="
         flex flex-col
         my-12 items-center
         text-center
       ">
         <Box className="
-        w-.75 pb-12
+        pb-12 sm:w-.75
         border-b-2 border-b-slate-dark-300
       ">
-          <Stack direction="row">
+          <Stack direction="row" spacing={0}>
             {
               socialMap.map((args, key) => {
                 return <FooterLink key={key} href={args.href}>
@@ -35,7 +35,8 @@ export default function Footer() {
         </Box>
 
         <Container className="
-          my-20 flex flex-col items-center
+          flex flex-col
+          my-20 items-center
         ">
           <img src={logo} alt="logo" className="w-80 min-w-40 opacity-40" />
           <Typography variant="body1" fontSize={18} className="opacity-80" >
@@ -44,7 +45,8 @@ export default function Footer() {
         </Container>
 
         <Box className="
-          flex space-x-8
+          flex flex-col
+          sm:flex-row sm:space-x-8
           opacity-40
         ">
           <Typography>&copy; Thermal Aquecimento LTDA.</Typography>
