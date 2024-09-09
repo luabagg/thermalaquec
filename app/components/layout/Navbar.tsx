@@ -32,6 +32,8 @@ export default function Navbar() {
   };
   useClickOutside(menuRef, () => setIsMenuVisible(false));
 
+  // Apply opaque if it's scrolled, not homepage
+  // or if the mobile menu is opened.
   const applyOpaque = (
     useOpaque() || !isHomepage || isMenuVisible
   ) ? "bg-ebony shadow-sm shadow-gray-dark-500" : "";
@@ -70,7 +72,7 @@ export default function Navbar() {
           }
         </NavSection>
 
-        <Box className="flex md:hidden">
+        <Box aria-label="Open mobile menu" className="flex md:hidden">
           <IconButton
             size="large"
             edge="end"

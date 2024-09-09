@@ -40,7 +40,7 @@ export default function Footer() {
         ">
           <img src={logo} alt="logo" className="w-80 min-w-40 opacity-40" />
           <Typography variant="body1" fontSize={18} className="opacity-80" >
-            Aqueça seu ambiente e desfrute do conforto que merece. Entre em contato para soluções personalizadas de aquecimento residencial e para piscinas.
+            Aqueça seu ambiente e desfrute do conforto que merece.
           </Typography>
         </Container>
 
