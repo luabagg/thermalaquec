@@ -62,8 +62,8 @@ export default function Navbar() {
 
         <NavSection>
           {
-            socialMap.map((args) => {
-              return <NavItem key={args.href} href={args.href}>
+            socialMap.map((args, key) => {
+              return <NavItem key={key} href={args.href}>
                 {<args.icon />}
               </NavItem>
             })

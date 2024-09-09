@@ -1,31 +1,71 @@
+import { Link } from "@remix-run/react";
+import logo from "/images/wide-logo-dark-transparent.svg";
+import { Email, Facebook, Instagram, Twitter, WhatsApp } from "@mui/icons-material";
+import { Box, Container, ListItem, Stack, Typography } from "@mui/material";
+
+const socialMap = [
+  { icon: Twitter, href: "https://twitter.com/thermalaquec" },
+  { icon: Instagram, href: "https://www.instagram.com/thermalaquec" },
+  { icon: Email, href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
+  { icon: Facebook, href: "https://www.facebook.com/thermalaquec" },
+  { icon: WhatsApp, href: "https://wa.me/5554999161816/?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
+]
+
 export default function Footer() {
   return (
     <footer>
-      <div>
-        <div>
-          <ul className="social-links">
-            <li><a href="https://twitter.com/thermalaquec"><i className="fab fa-twitter"></i></a></li>
-            <li><a href="https://www.instagram.com/thermalaquec"><i className="fab fa-instagram"></i></a></li>
-            <li><a href="mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento"><i className="fas fa-envelope"></i></a></li>
-            <li><a href="https://www.facebook.com/thermalaquec"><i className="fab fa-facebook-square"></i></a></li>
-            <li><a href="https://wa.me/5554999161816/?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento"><i className="fab fa-whatsapp"></i></a></li>
-          </ul>
+      <Container maxWidth="sm" sx={{ flexGrow: "1" }} className="
+        flex flex-col
+        my-12 items-center
+        text-center
+      ">
+        <Box className="
+        w-.75 pb-12
+        border-b-2 border-b-slate-dark-300
+      ">
+          <Stack direction="row">
+            {
+              socialMap.map((args, key) => {
+                return <FooterLink key={key} href={args.href}>
+                  {<args.icon style={{ fontSize: "34px" }} />}
+                </FooterLink>
+              })
+            }
+          </Stack>
+        </Box>
 
-          <hr />
+        <Container className="
+          my-20 flex flex-col items-center
+        ">
+          <img src={logo} alt="logo" className="w-80 min-w-40 opacity-40" />
+          <Typography variant="body1" fontSize={18} className="opacity-80" >
+            Aqueça seu ambiente e desfrute do conforto que merece. Entre em contato para soluções personalizadas de aquecimento residencial e para piscinas.
+          </Typography>
+        </Container>
 
-          <div>
-            <div className="footer-logo"></div>
-            <p>
-              Aqueça seu ambiente e desfrute do conforto que merece. Entre em contato para soluções personalizadas de aquecimento residencial e para piscinas.
-            </p>
-          </div>
-        </div>
-
-        <ul className="copyright">
-          <li>&copy; Thermal Aquecimento LTDA.</li>
-          <li>created by @luabagg</li>
-        </ul>
-      </div>
+        <Box className="
+          flex space-x-8
+          opacity-40
+        ">
+          <Typography>&copy; Thermal Aquecimento LTDA.</Typography>
+          <Typography>created by @luabagg</Typography>
+        </Box>
+      </Container>
     </footer>
   );
+}
+
+const FooterLink = ({ children, href }: { children: React.ReactNode, href: string }) => {
+  return (
+    <ListItem className={`
+        hover:text-yellow
+        opacity-80 hover:opacity-100
+        transition-all ease-out duration-250
+      `}>
+
+      <Link className='w-full' to={href} >
+        {children}
+      </Link>
+    </ListItem>
+  )
 }
