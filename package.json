@@ -22,13 +22,15 @@
     "@vercel/speed-insights": "^1.0.12",
     "isbot": "^4.4.0",
     "react": "19.0.0-rc-a03254bc-20240905",
-    "react-dom": "19.0.0-rc-a03254bc-20240905"
+    "react-dom": "19.0.0-rc-a03254bc-20240905",
+    "react-scroll": "^1.9.0"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.11.2",
     "@remix-run/eslint-config": "2.10.0",
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
+    "@types/react-scroll": "^1.8.10",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
     "@typescript-eslint/parser": "^6.7.4",
     "autoprefixer": "^10.4.20",

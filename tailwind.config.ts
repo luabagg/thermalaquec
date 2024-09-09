@@ -19,11 +19,6 @@ export default {
         'yellow': "#FFD600",
         'red-dark': '#810000'
       },
-      spacing: {
-        '.25': '25%',
-        '.50': '50%',
-        '.75': '75%',
-      },
       borderWidth: {
         '1': '1px',
       },
@@ -54,7 +49,7 @@ export default {
           from: {
             opacity: "0"
           },
-        }
+        },
       },
       animation: {
         'fadeIn': 'fadeIn 200ms ease-in',

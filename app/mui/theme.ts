@@ -24,6 +24,7 @@ const theme = createTheme({
     }
   },
   typography: {
+    fontSize: 16,
     fontFamily: [
       ...cfg.theme.fontFamily.sans,
       ...cfg.theme.fontFamily.serif,
@@ -32,17 +33,54 @@ const theme = createTheme({
   spacing: 4,
   transitions: {
     easing: {
-      // This is the most common easing curve.
       easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
-      // Objects enter the screen at full velocity from off-screen and
-      // slowly decelerate to a resting point.
       easeOut: 'cubic-bezier(0.0, 0, 0.2, 1)',
-      // Objects leave the screen at full velocity. They do not decelerate when off-screen.
       easeIn: 'cubic-bezier(0.4, 0, 1, 1)',
-      // The sharp curve is used by objects that may return to the screen at any time.
       sharp: 'cubic-bezier(0.4, 0, 0.6, 1)',
     },
   },
 });
+
+theme.typography.h1 = {
+  fontFamily: 'sans-serif',
+  fontSize: 16,
+  fontWeight: 700,
+  '@media (min-width:768px)': {
+    fontSize: 18,
+  },
+};
+
+theme.typography.h2 = {
+  fontFamily: 'sans-serif',
+  fontSize: 16,
+  fontWeight: 700,
+  '@media (min-width:768px)': {
+    fontSize: 18,
+  },
+  lineHeight: '1'
+};
+
+theme.typography.subtitle1 = {
+  fontFamily: 'serif',
+  fontSize: 16,
+  '@media (min-width:768px)': {
+    fontSize: 18,
+  },
+  lineHeight: '1.5',
+};
+
+theme.typography.caption = {
+  fontFamily: 'serif',
+  fontSize: 16,
+  '@media (min-width:768px)': {
+    fontSize: 20,
+  },
+  lineHeight: '1.5'
+};
+
+theme.typography.body1 = {
+  fontFamily: 'serif',
+  lineHeight: '1.5'
+};
 
 export default theme;
