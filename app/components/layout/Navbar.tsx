@@ -21,20 +21,20 @@ const socialMap = [
   { icon: Facebook, href: "https://www.facebook.com/thermalaquec" },
 ]
 
-const viewportMobile = 768;
-
 export default function Navbar() {
   const isHomepage = useHomepage();
   const display = isHomepage ? "fixed" : "sticky";
-  const applyOpaque = (useOpaque() || !isHomepage) ? "bg-ebony shadow-sm shadow-gray-dark-500" : "";
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const menuRef = useRef(null);
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
   };
-
   useClickOutside(menuRef, () => setIsMenuVisible(false));
+
+  const applyOpaque = (
+    useOpaque() || !isHomepage || isMenuVisible
+  ) ? "bg-ebony shadow-sm shadow-gray-dark-500" : "";
 
   return (
     <header id="navigation" aria-label="Global Navigation" className={`
@@ -91,7 +91,7 @@ export default function Navbar() {
         <MobileMenu>
           {
             navigationMap.map((args) => {
-              return <MobileMenuItem key={args.name} href={args.href}>
+              return <MobileMenuItem key={args.name} href={args.href} onClick={() => setIsMenuVisible(false)}>
                 {args.name}
               </MobileMenuItem>
             })
@@ -134,7 +134,7 @@ const MobileMenu = function ({ children }: { children: React.ReactNode }) {
   return (
     <nav className="
       fixed z-50 left-0 top-16
-      w-full h-auto p-6
+      w-full h-auto p-4
       rounded-b-md
       bg-slate-dark-300
       shadow-sm shadow-gray-dark-500
@@ -144,12 +144,12 @@ const MobileMenu = function ({ children }: { children: React.ReactNode }) {
   );
 }
 
-const MobileMenuItem = function ({ children, href }: { children: React.ReactNode, href: string }) {
+const MobileMenuItem = function ({ children, href, onClick }: { children: React.ReactNode, href: string, onClick?: React.MouseEventHandler }) {
   return (
     <Box className="
-      p-4 h-16
+      p-2 h-16
       border-b-1 border-dashed border-slate-dark-500
-    ">
+    "  onClick={onClick}>
       <NavLink href={href} active={useActive(href)} >
         {children}
       </NavLink>
@@ -159,10 +159,8 @@ const MobileMenuItem = function ({ children, href }: { children: React.ReactNode
 
 function useOpaque(): boolean {
   const [offset, setOffset] = useState(0);
-  const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    setWidth(window.outerWidth);
     setOffset(window.scrollY);
 
     const onScroll = () => setOffset(window.scrollY);
@@ -171,7 +169,7 @@ function useOpaque(): boolean {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  return offset > 30 || width <= viewportMobile
+  return offset > 30
 }
 
 function useActive(href: string): boolean {

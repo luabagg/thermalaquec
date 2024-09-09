@@ -3,8 +3,6 @@ import { Link } from '@remix-run/react';
 import * as React from 'react';
 
 export default function NavLink({ children, href, active = false }: { children: React.ReactNode, href: string, active: boolean }) {
-    const applyActive = active ? "text-yellow" : "";
-
     return (
         <Box className={`
             flex h-full p-1 items-center
@@ -13,10 +11,10 @@ export default function NavLink({ children, href, active = false }: { children: 
             font-sansbold font-extrabold
             hover:text-yellow
             transition-colors ease-out duration-250
-            ${applyActive}
+            ${active ? "text-yellow" : ""}
           `}>
 
-            <Link to={href} >
+            <Link className='w-full' to={href} >
                 {children}
             </Link>
         </Box>
