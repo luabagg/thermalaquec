@@ -1,29 +1,12 @@
 import * as React from 'react';
 import heroBg from "/images/hero-background.png";
-import { Link } from '@remix-run/react';
 import { Box, Container, Typography } from '@mui/material';
-import { Underline } from './Underline';
 import { KeyboardArrowDown } from '@mui/icons-material';
 import { MobileStepper } from './MobileStepper';
 import LargeButton from '../utils/LargeButton';
 
-const steps: Array<{ title: React.ReactNode, text: string }> = [
-  {
-    title: <>Conheça a <Underline>Thermal</Underline>. 🔥 Aquecimento de qualidade para seu lar.</>,
-    text: "Oferecemos as melhores soluções de aquecimento no mercado, atuando a mais de 5 anos em todo Rio Grande do Sul. Não espere mais para desfrutar do conforto que merece - entre em contato conosco hoje mesmo."
-  },
-  {
-    title: <>Somos uma empresa dedicada em oferecer as melhores soluções de aquecimento disponíveis no mercado.</>,
-    text: "Para nós, o cliente é prioridade. Conheça nossos projetos e solicite um orçamento personalizado."
-  },
-  {
-    title: <>Veja mais sobre nossos <Link to="/services" title="services" ><Underline>serviços</Underline></Link > ou solicite um < Link to="/contact" title="contact us" > <Underline>orçamento</Underline></Link >.</>,
-    text: "Explore as soluções de aquecimento que temos disponíveis para você. Estaremos prontos para ajudá-lo a encontrar a melhor solução para suas necessidades."
-  }
-]
-const maxSteps = steps.length;
-
-export default function Hero() {
+export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode, text: string }> }) {
+  const maxSteps = steps.length;
   const [activeStep, setActiveStep] = React.useState(0);
 
   const handleNext = () => {
