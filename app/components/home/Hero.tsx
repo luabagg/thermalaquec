@@ -51,8 +51,8 @@ export default function Hero() {
   const [currentX, setCurrentX] = React.useState(0);
 
   const [width, setWidth] = React.useState(0);
-  const moveLeft = startX < (width * 0.2)
-  const moveRight = startX > (width * 0.8)
+  const moveLeft = startX < (width * 0.25)
+  const moveRight = startX > (width * 0.75)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragging(true);
@@ -76,10 +76,10 @@ export default function Hero() {
       if (moveLeft) handleBack()
     } else {
       // Case 2 - user drags the section to left or right.
-      if (moveRight && (startX - currentX > 100)) {
+      if (moveRight && (startX - currentX > (width * 0.2))) {
         handleNext();
       }
-      if (moveLeft && currentX - startX > 100) {
+      if (moveLeft && currentX - startX > (width * 0.2)) {
         handleBack();
       }
     }
