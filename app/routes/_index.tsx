@@ -1,13 +1,15 @@
 import React from "react";
 import type { MetaFunction } from "@vercel/remix";
-import { KeyboardArrowDown } from "@mui/icons-material";
-import { Box } from "@mui/material";
 import { Link } from "@remix-run/react";
+import { Box } from "@mui/material";
+import { KeyboardArrowDown } from "@mui/icons-material";
 import { animateScroll } from "react-scroll";
-import Hero from "~/components/home/Hero";
 import { LargeButton } from "~/components/utils/LargeButton";
 import { Underline } from "~/components/utils/Underline";
+import { Swiper } from "~/components/home/Swiper";
 import About from "~/components/pages/about";
+import { Section } from "~/components/utils/Section";
+import heroBg from "/images/hero-background.png";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -37,29 +39,32 @@ export default function Index() {
 
   React.useLayoutEffect(() => {
     if (baseContentRef.current === null) return;
-    setContentH(baseContentRef.current.offsetTop - 100);
+    setContentH(baseContentRef.current.offsetTop - 40);
   }, []);
 
   return (
     <>
-      <Hero steps={heroSteps} />
-      <Box className="
-        relative flex flex-col
-        lg:ml-[25%] -mt-6
-        items-center
+      <Box id="hero" style={{ backgroundImage: `url(${heroBg})` }} className="
+        w-full h-auto pt-40
+        bg-cover bg-center
       ">
-        <LargeButton onclick={() => animateScroll.scrollTo(contentH)}>
-          Saiba mais <KeyboardArrowDown />
-        </LargeButton>
+        <Swiper steps={heroSteps} />
+        <Box className="
+          flex flex-col items-center
+          pt-20 -mb-6
+          lg:ml-[25%]
+        ">
+          <LargeButton onclick={() => animateScroll.scrollTo(contentH)}>
+            Saiba mais <KeyboardArrowDown />
+          </LargeButton>
+        </Box>
       </Box>
-      <Box ref={baseContentRef} className="w-full h-full">
-        <About />
-        <About />
-        <About />
-        <About />
-        <About />
-        <About />
-        <About />
+
+      <Box ref={baseContentRef} className="">
+        <Section>
+          <About />
+          <About />
+        </Section>
       </Box>
     </>
   );

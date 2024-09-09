@@ -9,7 +9,7 @@ import { useClickOutside } from "../utils/hooks/clickedOutside";
 import type { NavigationMap, SocialMap } from "./types";
 import { animateScroll } from 'react-scroll';
 
-export default function Navbar({ navigationMap, socialMap }: { navigationMap: NavigationMap, socialMap: SocialMap }) {
+export function Navbar({ navigationMap, socialMap }: { navigationMap: NavigationMap, socialMap: SocialMap }) {
   const isHomepage = useHomepage();
   const display = isHomepage ? "fixed" : "sticky";
 
@@ -52,7 +52,7 @@ export default function Navbar({ navigationMap, socialMap }: { navigationMap: Na
           {
             socialMap.map((args, key) => {
               return <NavItem key={key} href={args.href}>
-                {<args.icon />}
+                {<args.icon fontSize="small" />}
               </NavItem>
             })
           }
@@ -60,7 +60,7 @@ export default function Navbar({ navigationMap, socialMap }: { navigationMap: Na
 
         <Box aria-label="Open mobile menu" className="flex md:hidden">
           <IconButton
-            size="large"
+            size="medium"
             edge="end"
             color="inherit"
             aria-label="menu"
@@ -93,8 +93,8 @@ export default function Navbar({ navigationMap, socialMap }: { navigationMap: Na
 const NavSection = function ({ children }: { children: React.ReactNode }) {
   return (
     <nav className="
-      flex items-center
-      mx-4 sm:mx-14
+      flex
+      mx-4 lg:mx-12
       sm:space-x-2
     ">
       {children}

@@ -1,6 +1,6 @@
 import * as React from 'react';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import { Navbar } from './Navbar';
+import { Footer } from './Footer';
 import RouteChangeAnnouncement from './RouteChangeAnnouncement';
 import type { NavigationMap, SocialMap } from './types';
 

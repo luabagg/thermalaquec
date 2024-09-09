@@ -7,7 +7,7 @@ import { KeyboardArrowUp } from "@mui/icons-material";
 import { animateScroll } from 'react-scroll';
 import React from "react";
 
-export default function Footer({ socialMap }: { socialMap: SocialMap }) {
+export function Footer({ socialMap }: { socialMap: SocialMap }) {
   const [visibleButton, setVisibleButton] = React.useState(false);
   const location = useLocation();
 
@@ -20,7 +20,7 @@ export default function Footer({ socialMap }: { socialMap: SocialMap }) {
   return (
     <footer>
       <Box className={`
-        relative flex flex-col
+        flex flex-col
         lg:ml-[25%] -mt-6
         items-center
         ${visibleButton ? "relative" : "hidden"}
@@ -61,7 +61,7 @@ export default function Footer({ socialMap }: { socialMap: SocialMap }) {
 
         <Box className="
           flex flex-col
-          sm:flex-row
+          md:flex-row
           opacity-40
         ">
           <Typography variant={"body1"} className="sm:pr-4">&copy; Thermal Aquecimento LTDA.</Typography>

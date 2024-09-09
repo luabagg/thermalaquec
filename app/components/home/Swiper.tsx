@@ -1,9 +1,8 @@
 import * as React from 'react';
-import heroBg from "/images/hero-background.png";
 import { Box, Container, Typography } from '@mui/material';
 import { MobileStepper } from './MobileStepper';
 
-export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode, text: string }> }) {
+export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode, text: string }> }) {
   const maxSteps = steps.length;
   const [activeStep, setActiveStep] = React.useState(0);
 
@@ -20,7 +19,7 @@ export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode,
     });
   };
 
-  // Hero swipping effect, for mobile users.
+  // Swiping effect for mobile users.
   const [dragging, setDragging] = React.useState(false);
   const [startX, setStartX] = React.useState(0);
   const [currentX, setCurrentX] = React.useState(0);
@@ -64,36 +63,27 @@ export default function Hero({ steps }: { steps: Array<{ title: React.ReactNode,
   }, [handleNext]);
 
   return (
-    <section id="hero">
-      <Box className="
-        w-full h-auto py-40
-        bg-cover bg-center
-      "
-        style={{ backgroundImage: `url(${heroBg})` }}
-      >
-        <Container
-          maxWidth="md"
-          className='text-center lg:text-left'
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <HeroSection key={activeStep} {...steps[activeStep]} />
-          <MobileStepper
-            steps={maxSteps}
-            activeStep={activeStep}
-            onStepClick={(step: number) => setActiveStep(step)}
-            className='
-              flex mt-20
-              justify-center lg:justify-start
-            '/>
-        </Container>
-      </Box>
-    </section>
+    <Container
+      maxWidth="md"
+      className='text-center lg:text-left'
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      <SwiperSection key={activeStep} {...steps[activeStep]} />
+      <MobileStepper
+        steps={maxSteps}
+        activeStep={activeStep}
+        onStepClick={(step: number) => setActiveStep(step)}
+        className='
+          flex justify-center
+          mt-20 lg:justify-start
+      '/>
+    </Container>
   );
 }
 
-const HeroSection = function ({ title, text }: { title: React.ReactNode, text: string }) {
+const SwiperSection = function ({ title, text }: { title: React.ReactNode, text: string }) {
   return (
     <Box className="
       w-full lg:w-[65%]
