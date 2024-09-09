@@ -45,9 +45,14 @@ export default function Hero() {
     });
   };
 
+  // Hero dragging states, for mobile users.
   const [dragging, setDragging] = React.useState(false);
   const [startX, setStartX] = React.useState(0);
   const [currentX, setCurrentX] = React.useState(0);
+
+  const [width, setWidth] = React.useState(0);
+  const moveLeft = startX < (width * 0.2)
+  const moveRight = startX > (width * 0.8)
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragging(true);
@@ -56,16 +61,34 @@ export default function Hero() {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (dragging) setCurrentX(e.touches[0].clientX);
+    setDragging(true);
   };
 
+  // Verifies states to move section according to user drag.
   const handleTouchEnd = () => {
-    if (dragging) {
-      setDragging(false);
-      currentX > startX ? handleBack() : handleNext();
+    console.log(width, moveLeft, moveRight, currentX, startX)
+    if (!dragging) {
+      return
     }
+    if (currentX == 0) {
+      // Case 1 - user click on the right or left side.
+      if (moveRight) handleNext()
+      if (moveLeft) handleBack()
+    } else {
+      // Case 2 - user drags the section to left or right.
+      if (moveRight && (startX - currentX > 100)) {
+        handleNext();
+      }
+      if (moveLeft && currentX - startX > 100) {
+        handleBack();
+      }
+    }
+    setDragging(false);
+    setCurrentX(0);
   };
 
   React.useEffect(() => {
+    setWidth(window.outerWidth)
     const interval = setInterval(() => {
       handleNext();
     }, 7000);
