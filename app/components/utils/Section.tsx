@@ -5,7 +5,7 @@ export const Section = function ({ children }: { children: React.ReactNode}) {
   return (
     <Box className="
             w-full min-h-[75vh]
-            p-20
+            py-20
             bg-gray-dark-900
         ">
       <Container maxWidth="md" className="section-container">
@@ -23,7 +23,7 @@ export const SectionTitle: React.FC<{ title: string }> = function ({ title }) {
       onMouseEnter={() => setBorderStyle('partial-b-yellow')}
       onMouseLeave={() => setBorderStyle('partial-b-opacity')}
     >
-      <Box className='flex p-8 w-auto'>
+      <Box className='flex w-auto p-2 lg:p-6'>
         <Typography variant='h1' className={`
           uppercase tracking-tight
           ${borderStyle}

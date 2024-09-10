@@ -20,7 +20,7 @@ const theme = createTheme({
       main: colors.red[900],
     },
     warning: {
-      main: colors.orange[500],
+      main: colors.orange[900],
     }
   },
   typography: {
@@ -51,27 +51,16 @@ theme.typography.h1 = {
 };
 
 theme.typography.h2 = {
-  fontFamily: 'sans-serif',
-  fontSize: 16,
-  fontWeight: 700,
-  '@media (min-width:768px)': {
-    fontSize: 18,
+  ...theme.typography.h1,
+  ...{
+    lineHeight: '1',
+    color: cfg.theme.colors.yellow,
   },
-  lineHeight: '1'
 };
 
 theme.typography.subtitle1 = {
   fontFamily: 'serif',
-  fontSize: 16,
-  '@media (min-width:768px)': {
-    fontSize: 18,
-  },
-  lineHeight: '1.5',
-};
-
-theme.typography.caption = {
-  fontFamily: 'serif',
-  fontSize: 16,
+  fontSize: 18,
   '@media (min-width:768px)': {
     fontSize: 20,
   },
@@ -80,7 +69,23 @@ theme.typography.caption = {
 
 theme.typography.body1 = {
   fontFamily: 'serif',
+  fontSize: 22,
+  color: cfg.theme.colors['gray-dark-300'],
   lineHeight: '1.5'
 };
+
+theme.typography.body2 = {
+  fontFamily: 'serif',
+  fontSize: 20,
+  color: cfg.theme.colors['gray-dark-300'],
+  lineHeight: '1'
+};
+
+theme.typography.caption = {
+  fontFamily: 'sans-serif',
+  fontSize: 16,
+  lineHeight: '1'
+};
+
 
 export default theme;
