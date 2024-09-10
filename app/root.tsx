@@ -59,7 +59,7 @@ export const meta: MetaFunction = () => [
 
 const navigationMap = [
   { name: "Home", href: "/" },
-  { name: "Produtos", href: "/products" },
+  // { name: "Produtos", href: "/products" },
   { name: "Nosso trabalho", href: "/about" },
   { name: "Contato", href: "/contact" },
 ]

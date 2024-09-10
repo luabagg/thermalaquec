@@ -7,9 +7,10 @@ import { animateScroll } from "react-scroll";
 import { LargeButton } from "~/components/utils/LargeButton";
 import { Underline } from "~/components/utils/Underline";
 import { Swiper } from "~/components/home/Swiper";
-import About from "~/components/pages/about";
 import { Section } from "~/components/utils/Section";
 import heroBg from "/images/hero-background.png";
+import AboutPage from "./about";
+import ContactPage from "./contact";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -39,7 +40,7 @@ export default function Index() {
 
   React.useLayoutEffect(() => {
     if (baseContentRef.current === null) return;
-    setContentH(baseContentRef.current.offsetTop - 40);
+    setContentH(baseContentRef.current.offsetTop);
   }, []);
 
   return (
@@ -62,7 +63,8 @@ export default function Index() {
 
       <Box ref={baseContentRef} className="">
         <Section>
-          <About />
+          <AboutPage />
+          <ContactPage />
         </Section>
       </Box>
     </>

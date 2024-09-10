@@ -1,3 +1,7 @@
+# Thermal Aquecimento
+
+Solar energy and home heating company portfolio website. It aims to attract potential clients, increase sales and expand the customer base.
+
 # Remix
 
 This directory is a brief example of a [Remix](https://remix.run/docs) site that can be deployed to Vercel with zero configuration.
