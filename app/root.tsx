@@ -12,7 +12,6 @@ import {
 } from "@remix-run/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/remix"
-import * as Icons from "@mui/icons-material";
 
 // Layout
 import { MuiDocument } from "./mui/MuiDocument";
@@ -23,6 +22,7 @@ import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from 'tailwind.config.js'
+import { Email, Facebook, Instagram, Twitter, WhatsApp } from "@mui/icons-material";
 
 const cfg = resolveConfig(tailwindConfig)
 
@@ -66,15 +66,15 @@ const navigationMap = [
 ]
 
 const socialMapNavbar = [
-  { icon: Icons.Instagram, href: "https://www.instagram.com/thermalaquec" },
-  { icon: Icons.Email, href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
-  { icon: Icons.Facebook, href: "https://www.facebook.com/thermalaquec" },
+  { icon: Instagram, href: "https://www.instagram.com/thermalaquec" },
+  { icon: Email, href: "mailto:comercial@thermalaquecimento.com.br?subject=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
+  { icon: Facebook, href: "https://www.facebook.com/thermalaquec" },
 ]
 
 const socialMapFooter = [
-  { icon: Icons.Twitter, href: "https://twitter.com/thermalaquec" },
+  { icon: Twitter, href: "https://twitter.com/thermalaquec" },
   ...socialMapNavbar,
-  { icon: Icons.WhatsApp, href: "https://wa.me/5554999161816/?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
+  { icon: WhatsApp, href: "https://wa.me/5554999161816/?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {

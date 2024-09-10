@@ -54,7 +54,7 @@ export function Footer({ socialMap }: { socialMap: SocialMap }) {
           my-20 items-center
         ">
           <img src={logo} alt="logo" className="w-80 min-w-40 opacity-40" />
-          <Typography variant="caption" className="opacity-80" >
+          <Typography variant="subtitle1" className="opacity-80" >
             Aqueça seu ambiente e desfrute do conforto que merece.
           </Typography>
         </Container>
@@ -64,8 +64,8 @@ export function Footer({ socialMap }: { socialMap: SocialMap }) {
           md:flex-row
           opacity-40
         ">
-          <Typography variant={"body1"} className="sm:pr-4">&copy; Thermal Aquecimento LTDA.</Typography>
-          <Typography variant={"body1"}>created by @luabagg</Typography>
+          <Typography variant={"caption"} className="sm:pr-4">&copy; Thermal Aquecimento LTDA.</Typography>
+          <Typography variant={"caption"}>created by @luabagg</Typography>
         </Box>
       </Container>
     </footer>
