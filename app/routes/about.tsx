@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import type { MetaFunction } from "@remix-run/react";
 import { ContentGrid } from "~/components/utils/ContentGrid";
 import { Section, SectionContent, SectionTitle } from "~/components/utils/Section";
@@ -55,18 +54,14 @@ export default function AboutPage() {
       <SectionContent description={
         "Oferecemos serviços topo de linha para aquecimento de casas e de piscinas. De instalações de lareiras, até o sistema inteiro de aquecimento de sua moradia residencial ou comercial."
       }>
-        <Box className="p-6">
-          <ContentGrid items={services} />
-        </Box>
+        <ContentGrid items={services} />
       </SectionContent>
 
       <SectionTitle title="Quem somos" />
       <SectionContent description={
         "Nós fornecemos soluções de aquecimento de alta qualidade e eficiência que estão entre as melhores do mercado. Com mais de 5 anos de experiência, nossa empresa tem orgulho de servir todo o Rio Grande do Sul com excelência e comprometimento. Confie em nós para manter você e sua casa aquecidos e confortáveis durante todo o ano."
       }>
-        <Box className="p-6">
-          <ContentGrid items={about} maxCols={2} />
-        </Box>
+        <ContentGrid items={about} maxCols={2} />
       </SectionContent>
 
     </Section >
