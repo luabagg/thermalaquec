@@ -53,7 +53,7 @@ export function Footer({ socialMap }: { socialMap: SocialMap }) {
           flex flex-col
           my-20 items-center
         ">
-          <img src={logo} alt="logo" className="w-80 min-w-40 opacity-40" />
+          <img src={logo} alt="logo" className="w-80 min-w-40 opacity-60" />
           <Typography variant="subtitle1" className="opacity-80" >
             Aqueça seu ambiente e desfrute do conforto que merece.
           </Typography>
@@ -62,7 +62,7 @@ export function Footer({ socialMap }: { socialMap: SocialMap }) {
         <Box className="
           flex flex-col
           md:flex-row
-          opacity-40
+          opacity-60
         ">
           <Typography variant={"caption"} className="sm:pr-4">&copy; Thermal Aquecimento LTDA.</Typography>
           <Typography variant={"caption"}>created by @luabagg</Typography>

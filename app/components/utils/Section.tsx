@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Box, Container, Typography } from "@mui/material"
 
-export const Section = function ({ children }: { children: React.ReactNode}) {
+export const Section = function ({ children }: { children: React.ReactNode }) {
   return (
     <Box className="
-            w-full min-h-[75vh]
-            py-20
-            bg-gray-dark-900
-        ">
-      <Container maxWidth="md" className="section-container">
+      w-full min-h-[75vh] py-20
+      bg-gray-dark-900
+    ">
+      <Container maxWidth="md" className="
+        section-container
+        text-justify break-words
+      ">
         {children}
       </Container>
     </Box>

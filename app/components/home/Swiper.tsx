@@ -97,7 +97,7 @@ const SwiperSection = function ({ title, text }: { title: React.ReactNode, text:
         {title}
       </h1>
       <Typography variant="subtitle1" className="
-        text-gray-300 opacity-80
+        text-gray-300 opacity-90
         animate-fadeInUp
       ">
         {text}
