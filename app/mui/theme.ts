@@ -84,7 +84,7 @@ theme.typography.body2 = {
     fontSize: 20,
   },
   color: cfg.theme.colors['gray-dark-300'],
-  lineHeight: '1'
+  lineHeight: '1.3'
 };
 
 theme.typography.caption = {
