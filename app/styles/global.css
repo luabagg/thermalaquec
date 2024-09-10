@@ -28,8 +28,7 @@
     content: '';
     display: block;
     width: 5em;
-    margin-top: 40px;
-    margin-bottom: 40px;
+    margin-top: 30px;
     transition: width 0.5s linear;
 }
 
@@ -38,7 +37,6 @@
     content: '';
     display: block;
     width: 6em;
-    margin-top: 40px;
-    margin-bottom: 40px;
+    margin-top: 30px;
     transition: width 0.5s linear;
 }

@@ -7,9 +7,9 @@ export const Section = function ({ children }: { children: React.ReactNode }) {
       w-full min-h-[75vh] py-20
       bg-gray-dark-900
     ">
-      <Container maxWidth="md" className="
+      <Container maxWidth="lg" className="
         section-container
-        text-justify break-words
+        break-words
       ">
         {children}
       </Container>

@@ -2,7 +2,16 @@
 
 Solar energy and home heating company portfolio website. It aims to attract potential clients, increase sales and expand the customer base.
 
-# Remix
+Este repositório contém o código-fonte e os recursos relacionados ao website da empresa Thermal Aquecimento.
+Aqui você encontrará os arquivos necessários para o desenvolvimento, design e implantação do site.
+
+## A empresa
+
+Somos uma empresa especializada em soluções de aquecimento.
+Nossa atuação abrange a instalação de sistemas de aquecimento solar, placas para piscinas, lareiras e geradoras de calor.
+Priorizamos o uso de tecnologias limpas e eficientes para promover um futuro mais sustentável.
+
+## Remix
 
 This directory is a brief example of a [Remix](https://remix.run/docs) site that can be deployed to Vercel with zero configuration.
 

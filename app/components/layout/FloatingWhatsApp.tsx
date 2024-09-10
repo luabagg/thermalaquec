@@ -24,12 +24,13 @@ export function FloatingWhatsApp() {
             <Component {...{
                 phoneNumber: '+5554999161816',
                 accountName: 'Thermal Aquecimento',
-                darkMode: true,
                 chatMessage: 'Olá, como posso ajudar?',
-                messageDelay: .75,
+                placeholder: "Mensagem",
                 statusMessage: "",
-                allowEsc: true,
                 avatar: whatsappIcon,
+                messageDelay: .75,
+                darkMode: true,
+                allowEsc: true,
             }} />
         </Box>
     )

@@ -69,14 +69,20 @@ theme.typography.subtitle1 = {
 
 theme.typography.body1 = {
   fontFamily: 'serif',
-  fontSize: 22,
+  fontSize: 18,
+  '@media (min-width:768px)': {
+    fontSize: 22,
+  },
   color: cfg.theme.colors['gray-dark-300'],
   lineHeight: '1.5'
 };
 
 theme.typography.body2 = {
   fontFamily: 'serif',
-  fontSize: 20,
+  fontSize: 16,
+  '@media (min-width:768px)': {
+    fontSize: 20,
+  },
   color: cfg.theme.colors['gray-dark-300'],
   lineHeight: '1'
 };

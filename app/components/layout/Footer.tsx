@@ -42,7 +42,7 @@ export function Footer({ socialMap }: { socialMap: SocialMap }) {
             {
               socialMap.map((args, key) => {
                 return <FooterLink key={key} href={args.href}>
-                  {<args.icon style={{ fontSize: "34px" }} />}
+                  {<args.icon sx={{ fontSize: { xs: "30px", sm: "34px" } }} />}
                 </FooterLink>
               })
             }
