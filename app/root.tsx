@@ -22,7 +22,7 @@ import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from 'tailwind.config.js'
-import { Email, Facebook, Instagram, Twitter, WhatsApp } from "@mui/icons-material";
+import { Email, Facebook, Instagram, LinkedIn, Twitter, WhatsApp } from "@mui/icons-material";
 
 const cfg = resolveConfig(tailwindConfig)
 
@@ -72,9 +72,9 @@ const socialMapNavbar = [
 ]
 
 const socialMapFooter = [
-  { icon: Twitter, href: "https://twitter.com/thermalaquec" },
-  ...socialMapNavbar,
   { icon: WhatsApp, href: "https://wa.me/5554999161816/?text=Ol%C3%A1%2C%20gostaria%20de%20solicitar%20um%20or%C3%A7amento" },
+  ...socialMapNavbar,
+  { icon: LinkedIn, href: "https://www.linkedin.com/company/thermalaquec" },
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
