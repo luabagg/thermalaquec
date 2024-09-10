@@ -63,7 +63,6 @@ export default function AboutPage() {
       }>
         <ContentGrid items={about} maxCols={2} />
       </SectionContent>
-
     </Section >
   );
 }

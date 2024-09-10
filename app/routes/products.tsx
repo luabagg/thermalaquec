@@ -7,7 +7,7 @@ export const meta: MetaFunction = ({ matches }) => {
   return [...parentMeta, { title: "Produtos - Thermal Aquecimento" }];
 };
 
-export default function AboutPage() {
+export default function ProductPage() {
   return (
     <></>
   );

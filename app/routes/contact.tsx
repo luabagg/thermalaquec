@@ -19,14 +19,16 @@ export default function ContactPage() {
   return (
     <Section>
       <SectionTitle title="Fale conosco" />
-
       <SectionContent description={
         "Ligue para nós agora mesmo - estamos prontos para encontrar a solução ideal para o aquecimento de sua casa ou piscina."
       }>
         <Typography variant={"h2"} className="py-8">contato:</Typography>
         {contactOpts.map((opt, i) => (
-          <Box key={i} className="md:flex p-2">
-            <opt.icon className="mr-4 text-gray-dark-300" fontSize="small" />
+          <Box key={i} className="flex p-2">
+            <opt.icon
+              className="mr-2 md:mr-4 text-gray-dark-300"
+              sx={{ fontSize: { xs: "18px", sm: "22px" } }}
+            />
             <Typography variant="body2">{opt.text}</Typography>
           </Box>
         ))}
