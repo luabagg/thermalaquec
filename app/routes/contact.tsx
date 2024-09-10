@@ -1,7 +1,7 @@
 import { Email, WhatsApp } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import type { MetaFunction } from "@remix-run/react";
-import { Section, SectionTitle } from "~/components/utils/Section";
+import { Section, SectionContent, SectionTitle } from "~/components/utils/Section";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -20,11 +20,9 @@ export default function ContactPage() {
     <Section>
       <SectionTitle title="Fale conosco" />
 
-      <Box className='pl-4 sm:pl-14'>
-        <Typography variant={"body1"} fontFamily={"serif"}>
-          Ligue para nós agora mesmo - estamos prontos para encontrar a solução ideal para o aquecimento de sua casa ou piscina.
-        </Typography>
-
+      <SectionContent description={
+        "Ligue para nós agora mesmo - estamos prontos para encontrar a solução ideal para o aquecimento de sua casa ou piscina."
+      }>
         <Typography variant={"h2"} className="py-8">contato:</Typography>
         {contactOpts.map((opt, i) => (
           <Box key={i} className="md:flex p-2">
@@ -32,7 +30,7 @@ export default function ContactPage() {
             <Typography variant="body2">{opt.text}</Typography>
           </Box>
         ))}
-      </Box>
+      </SectionContent>
     </Section>
   );
 }

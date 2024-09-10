@@ -36,3 +36,14 @@ export const SectionTitle: React.FC<{ title: string }> = function ({ title }) {
     </Box >
   )
 }
+
+export const SectionContent: React.FC<{ description: React.ReactNode, children: React.ReactNode }> = function ({ description, children }) {
+  return (
+    <Box className='pl-4 sm:pl-10'>
+      <Typography variant={"body1"}>
+        {description}
+      </Typography>
+      {children}
+    </Box>
+  )
+}

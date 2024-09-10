@@ -1,5 +1,4 @@
 import type { MetaFunction } from "@remix-run/react";
-import About from "~/components/pages/about";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -10,6 +9,6 @@ export const meta: MetaFunction = ({ matches }) => {
 
 export default function AboutPage() {
   return (
-    <About />
+    <></>
   );
 }
