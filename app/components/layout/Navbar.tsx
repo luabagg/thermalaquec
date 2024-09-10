@@ -14,7 +14,7 @@ export function Navbar({ navigationMap, socialMap }: { navigationMap: Navigation
   const display = isHomepage ? "fixed" : "sticky";
 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLInputElement | null>(null);
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
   };

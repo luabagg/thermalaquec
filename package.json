@@ -23,6 +23,7 @@
     "isbot": "^4.4.0",
     "react": "19.0.0-rc-a03254bc-20240905",
     "react-dom": "19.0.0-rc-a03254bc-20240905",
+    "react-floating-whatsapp": "^5.0.8",
     "react-scroll": "^1.9.0"
   },
   "devDependencies": {

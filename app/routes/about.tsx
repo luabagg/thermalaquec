@@ -15,9 +15,6 @@ export default function AboutPage() {
     <Section>
       <SectionTitle title="Nossos serviços" />
       <Services />
-      <Services />
-      <Services />
-      <Services />
       <SectionTitle title="Quem somos" />
       <About />
     </Section>

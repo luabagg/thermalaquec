@@ -3,6 +3,7 @@ import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import RouteChangeAnnouncement from './RouteChangeAnnouncement';
 import type { NavigationMap, SocialMap } from './types';
+import { FloatingWhatsApp } from './FloatingWhatsApp';
 
 interface LayoutProps {
     navigationMap: NavigationMap;
@@ -17,6 +18,7 @@ export function Layout({ children, props }: { children: React.ReactNode, props: 
             {children}
             <Footer socialMap={props.socialMapFooter} />
             <RouteChangeAnnouncement />
+            <FloatingWhatsApp />
         </React.Fragment>
     );
 }

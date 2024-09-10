@@ -3,7 +3,6 @@ import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   isRouteErrorResponse,
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -22,7 +21,7 @@ import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
 import resolveConfig from 'tailwindcss/resolveConfig'
 import tailwindConfig from 'tailwind.config.js'
-import { Email, Facebook, Instagram, LinkedIn, Twitter, WhatsApp } from "@mui/icons-material";
+import { Email, Facebook, Instagram, LinkedIn, WhatsApp } from "@mui/icons-material";
 
 const cfg = resolveConfig(tailwindConfig)
 
@@ -100,7 +99,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Scripts />
         <Analytics />
         <SpeedInsights />
-        <LiveReload />
       </body>
     </html>
   );

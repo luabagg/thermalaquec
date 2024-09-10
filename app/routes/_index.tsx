@@ -63,7 +63,6 @@ export default function Index() {
       <Box ref={baseContentRef} className="">
         <Section>
           <About />
-          <About />
         </Section>
       </Box>
     </>
