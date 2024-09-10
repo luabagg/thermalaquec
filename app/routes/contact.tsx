@@ -24,9 +24,9 @@ export default function ContactPage() {
       }>
         <Typography variant={"h2"} className="py-8">contato:</Typography>
         {contactOpts.map((opt, i) => (
-          <Box key={i} className="flex p-2">
+          <Box key={i} className="flex sm:p-2 mb-2">
             <opt.icon
-              className="mr-2 md:mr-4 text-gray-dark-300"
+              className="mr-1 sm:mr-4 text-gray-dark-300"
               sx={{ fontSize: { xs: "18px", sm: "22px" } }}
             />
             <Typography variant="body2">{opt.text}</Typography>
