@@ -2,39 +2,16 @@
 
 Solar energy and home heating company portfolio website. It aims to attract potential clients, increase sales and expand the customer base.
 
-Este repositório contém o código-fonte e os recursos relacionados ao website da empresa Thermal Aquecimento.
-Aqui você encontrará os arquivos necessários para o desenvolvimento, design e implantação do site.
+This repository contains the source code and resources related to the website of the company Thermal Aquecimento.
+Here you will find the necessary files for the development, design, and implementation of the site.
 
-## A empresa
+## The company
 
-Somos uma empresa especializada em soluções de aquecimento.
-Nossa atuação abrange a instalação de sistemas de aquecimento solar, placas para piscinas, lareiras e geradoras de calor.
-Priorizamos o uso de tecnologias limpas e eficientes para promover um futuro mais sustentável.
+We are a company specialized in heating solutions.
+Our work includes the installation of solar heating systems, pool panels, fireplaces, and heat generators.
+We prioritize the use of clean and efficient technologies to promote a more sustainable future.
 
 ## Remix
-
-This directory is a brief example of a [Remix](https://remix.run/docs) site that can be deployed to Vercel with zero configuration.
-
-To get started, run the Remix cli with this template
-
-```sh
-npx create-remix@latest --template vercel/vercel/examples/remix
-```
-
-## Deploy Your Own
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/vercel/tree/main/examples/remix&template=remix)
-
-_Live Example: https://remix-run-template.vercel.app_
-
-You can also deploy using the [Vercel CLI](https://vercel.com/docs/cli):
-
-```sh
-npm i -g vercel
-vercel
-```
-
-## Development
 
 To run your Remix app locally, make sure your project's local dependencies are installed:
 
