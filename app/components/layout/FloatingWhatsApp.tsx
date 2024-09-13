@@ -23,7 +23,7 @@ export function FloatingWhatsApp() {
         <Box className={visible ? 'block' : 'hidden'}>
             <Component {...{
                 phoneNumber: '+5554999161816',
-                accountName: 'Thermal Aquecimento',
+                accountName: 'Lucas - Thermal',
                 chatMessage: 'Olá, como posso ajudar?',
                 placeholder: "Mensagem",
                 statusMessage: "",
