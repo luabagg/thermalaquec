@@ -17,7 +17,7 @@ datasource db {
 model Category {
   id          Int        @id @default(autoincrement())
   created_at  DateTime   @default(now())
-  name        String     @unique
+  name        String     @unique @db.VarChar(100)
   description String?
   parent      Category?  @relation("ParentCategory", references: [id], fields: [parentId])
   parentId    Int?
@@ -30,29 +30,29 @@ model Category {
 model Brand {
   id         Int       @id @default(autoincrement())
   created_at DateTime  @default(now())
-  name       String    @unique
+  name       String    @unique @db.VarChar(100)
   Product    Product[]
 
   @@index([name])
 }
 
 model Product {
-  id               Int                @id @default(autoincrement())
-  created_at       DateTime           @default(now())
-  name             String
-  model            String?
-  shortDescription String?
-  description      String?
-  visible          Boolean            @default(true)
-  viewCount        Int                @default(0)
-  Brand            Brand?             @relation(fields: [brandId], references: [id])
+  id               Int               @id @default(autoincrement())
+  created_at       DateTime          @default(now())
+  name             String            @db.VarChar(100)
+  model            String?           @db.VarChar(100)
+  shortDescription String?           @db.VarChar(250)
+  description      String?           @db.Text()
+  visible          Boolean           @default(true)
+  viewCount        Int               @default(0)
+  Brand            Brand?            @relation(fields: [brandId], references: [id])
   brandId          Int?
-  Category         Category?          @relation(fields: [categoryId], references: [id])
+  Category         Category?         @relation(fields: [categoryId], references: [id])
   categoryId       Int?
-  Image            Image?             @relation(fields: [imageId], references: [id])
+  Image            Image?            @relation(fields: [imageId], references: [id])
   imageId          Int?
   ProductSpec      ProductSpec[]
-  ShowcaseProduct ShowcaseProduct[]
+  ShowcaseProduct  ShowcaseProduct[]
 
   @@index([name, visible])
   @@index([viewCount])
@@ -61,15 +61,15 @@ model Product {
 model ProductSpec {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
-  name       String
-  value      String
+  name       String   @db.VarChar(100)
+  value      String   @db.VarChar(100)
   product    Product  @relation(references: [id], fields: [product_id])
   product_id Int
 }
 
 model Image {
   id       Int        @id @default(autoincrement())
-  location String
+  location String     @unique @db.VarChar(250)
   Product  Product[]
   Showcase Showcase[]
 }
@@ -83,14 +83,14 @@ model ShowcaseProduct {
 }
 
 model Showcase {
-  id               Int                @id @default(autoincrement())
-  created_at       DateTime           @default(now())
-  name             String             @unique
-  description      String?
-  visible          Boolean            @default(true)
-  viewCount        Int                @default(0)
-  Image            Image?             @relation(fields: [imageId], references: [id])
-  imageId          Int?
+  id              Int               @id @default(autoincrement())
+  created_at      DateTime          @default(now())
+  name            String            @unique @db.VarChar(100)
+  description     String?
+  visible         Boolean           @default(true)
+  viewCount       Int               @default(0)
+  Image           Image?            @relation(fields: [imageId], references: [id])
+  imageId         Int?
   ShowcaseProduct ShowcaseProduct[]
 
   @@index([name, visible])
