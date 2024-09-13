@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  created_at  DateTime   @default(now())
+  name        String     @unique
+  description String?
+  parent      Category?  @relation("ParentCategory", references: [id], fields: [parentId])
+  parentId    Int?
+  children    Category[] @relation("ParentCategory")
+  product     Product[]
+
+  @@index([name])
+}
+
+model Brand {
+  id         Int       @id @default(autoincrement())
+  created_at DateTime  @default(now())
+  name       String    @unique
+  Product    Product[]
+
+  @@index([name])
+}
+
+model Product {
+  id               Int                @id @default(autoincrement())
+  created_at       DateTime           @default(now())
+  name             String
+  model            String?
+  shortDescription String?
+  description      String?
+  visible          Boolean            @default(true)
+  viewCount        Int                @default(0)
+  Brand            Brand?             @relation(fields: [brandId], references: [id])
+  brandId          Int?
+  Category         Category?          @relation(fields: [categoryId], references: [id])
+  categoryId       Int?
+  Image            Image?             @relation(fields: [imageId], references: [id])
+  imageId          Int?
+  ProductSpec      ProductSpec[]
+  ShowcaseProduct ShowcaseProduct[]
+
+  @@index([name, visible])
+  @@index([viewCount])
+}
+
+model ProductSpec {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  name       String
+  value      String
+  product    Product  @relation(references: [id], fields: [product_id])
+  product_id Int
+}
+
+model Image {
+  id       Int        @id @default(autoincrement())
+  location String
+  Product  Product[]
+  Showcase Showcase[]
+}
+
+model ShowcaseProduct {
+  id         Int      @id @default(autoincrement())
+  showcase   Showcase @relation(fields: [showcaseId], references: [id])
+  showcaseId Int
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+}
+
+model Showcase {
+  id               Int                @id @default(autoincrement())
+  created_at       DateTime           @default(now())
+  name             String             @unique
+  description      String?
+  visible          Boolean            @default(true)
+  viewCount        Int                @default(0)
+  Image            Image?             @relation(fields: [imageId], references: [id])
+  imageId          Int?
+  ShowcaseProduct ShowcaseProduct[]
+
+  @@index([name, visible])
+  @@index([viewCount])
+}
