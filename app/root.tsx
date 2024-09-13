@@ -53,7 +53,7 @@ export const meta: MetaFunction = () => [
   },
   {
     name: "theme-color",
-    content: cfg.theme.colors['slate-dark-500']
+    content: cfg.theme.colors['slate-dark'][500]
   }
 ];
 

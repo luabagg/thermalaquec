@@ -54,7 +54,7 @@ export function Footer({ socialMap }: { socialMap: SocialMap }) {
           my-20 items-center
         ">
           <img src={logo} alt="logo" className="w-80 min-w-40 opacity-60" />
-          <Typography variant="subtitle1" className="opacity-80" >
+          <Typography variant="subtitle1" component={"span"} className="opacity-80" >
             Aqueça seu ambiente e desfrute do conforto que merece.
           </Typography>
         </Container>

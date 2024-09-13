@@ -12,11 +12,14 @@ export default {
       colors: {
         'white': "#FCFCFC",
         'ebony': '#080402',
-        'gray-dark-300': '#676869',
-        'gray-dark-500': '#1F2225',
-        'gray-dark-900': '#0F1215',
-        'slate-dark-300': '#1C212A',
-        'slate-dark-500': "#12151B",
+        'gray-dark': {
+          500: '#1F2225',
+          900: '#0F1215'
+        },
+        'slate-dark': {
+          300: '#1C212A',
+          500: "#12151B",
+        },
         'yellow': "#FFD600",
         'red-dark': '#810000'
       },

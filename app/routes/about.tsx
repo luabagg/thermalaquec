@@ -12,15 +12,15 @@ export const meta: MetaFunction = ({ matches }) => {
 const services = [
   {
     title: "Aquecimento de Casas",
-    text: "Trabalhamos com aquecimento de casas, disponibilizando a venda de instalações e lareiras de alta qualidade. Também trabalhamos com a rede de aquecimento de sua casa, seja com um boiler ou até mesmo com placas solares. Tudo é customizável, de acordo com suas necessidades."
+    text: "Planejamos toda rede de aquecimento de sua casa, seja com placas solares ou lareiras de alta qualidade. Tudo é customizável, de acordo com suas necessidades."
   },
   {
     title: "Aquecimento de Piscinas",
-    text: "Fazemos instalação de aquecimento para piscinas com placas de piscina ou boilers de aquecimento. Nossos produtos são de alta qualidade e alta duração, comprovados pelo mercado."
+    text: "Cuidamos do aquecimento de sua piscina, com boilers, geradoras e placas de piscina. Nossos produtos são de alta qualidade e duração, comprovados pelo mercado."
   },
   {
-    title: "Piso Aquecido",
-    text: "Para mais conforto nos dias frios, disponibilizamos piso aquecido para sua residência. Contate-nos para fazermos uma avaliação."
+    title: "Piso Aquecido Elétrico",
+    text: "Para mais conforto nos dias frios, disponibilizamos piso aquecido elétrico para sua residência. Contate-nos para fazermos uma avaliação."
   },
   {
     title: "Vendas e Instalações",
@@ -39,7 +39,7 @@ const services = [
 const about = [
   {
     title: "Nosso Processo",
-    text: "Iniciamos com uma avaliação das necessidades do cliente, então projetamos uma solução personalizada e utilizamos as melhores tecnologias para garantir eficiência e sustentabilidade. Realizamos a instalação do sistema com padrões de qualidade e segurança e oferecemos serviços de manutenção e reparação em caso de qualquer problema."
+    text: "Avaliamos as necessidades do cliente, projetamos uma solução personalizada e utilizamos as melhores tecnologias para garantir eficiência e sustentabilidade. Realizamos a instalação do sistema com padrões de qualidade e segurança e oferecemos serviços de manutenção e reparação à longo prazo."
   },
   {
     title: "Nossa Missão",

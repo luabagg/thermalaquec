@@ -26,7 +26,7 @@ export default function ContactPage() {
         {contactOpts.map((opt, i) => (
           <Box key={i} className="flex sm:p-2 mb-2">
             <opt.icon
-              className="mr-1 sm:mr-4 text-gray-dark-300"
+              className="mr-1 sm:mr-4"
               sx={{ fontSize: { xs: "18px", sm: "22px" } }}
             />
             <Typography variant="body2">{opt.text}</Typography>

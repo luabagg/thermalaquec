@@ -12,7 +12,7 @@ type ContentGridProps = {
 const cfg = resolveConfig(tailwindConfig);
 
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: cfg.theme.colors['slate-dark-500'],
+  backgroundColor: cfg.theme.colors['slate-dark'][500],
 }));
 
 export const ContentGrid: React.FC<ContentGridProps> = ({ items, maxCols = 3 }) => {
