@@ -14,7 +14,7 @@ export function NavLink({ children, href, active = false }: { children: React.Re
             ${active ? "text-yellow" : ""}
           `}>
 
-            <Link className='w-full' to={href} >
+            <Link className='w-full' to={href} aria-label='Navigation link'>
                 {children}
             </Link>
         </Box>

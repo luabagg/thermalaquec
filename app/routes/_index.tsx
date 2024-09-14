@@ -33,7 +33,7 @@ const heroSteps: Array<{ title: React.ReactNode, text: string }> = [
     text: "Para nós, o cliente é prioridade. Conheça nossos projetos e solicite um orçamento personalizado."
   },
   {
-    title: <>Veja mais sobre nossos <Link to="/services" title="services" ><Underline>serviços</Underline></Link > ou solicite um < Link to="/contact" title="contact us" > <Underline>orçamento</Underline></Link >.</>,
+    title: <>Veja mais sobre nossos <Link to="/about" aria-label="About page"><Underline>serviços</Underline></Link> ou solicite um < Link to="/contact" aria-label="Contact page"> <Underline>orçamento</Underline></Link>.</>,
     text: "Explore as soluções de aquecimento que temos disponíveis para você. Estaremos prontos para ajudá-lo a encontrar a melhor solução para suas necessidades."
   }
 ]

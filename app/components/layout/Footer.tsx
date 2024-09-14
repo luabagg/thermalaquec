@@ -80,7 +80,7 @@ const FooterLink = ({ children, href }: { children: React.ReactNode, href: strin
         transition-all ease-out duration-250
       `}>
 
-      <Link className='w-full' to={href} >
+      <Link className='w-full' to={href} aria-label="Social link" >
         {children}
       </Link>
     </ListItem>
