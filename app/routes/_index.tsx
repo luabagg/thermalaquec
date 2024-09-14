@@ -1,16 +1,20 @@
 import React from "react";
-import type { MetaFunction } from "@vercel/remix";
-import { Link } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { Box } from "@mui/material";
 import { KeyboardArrowDown } from "@mui/icons-material";
 import { animateScroll } from "react-scroll";
 import { LargeButton } from "~/components/utils/LargeButton";
 import { Underline } from "~/components/utils/Underline";
 import { Swiper } from "~/components/home/Swiper";
+import { getProducts } from "~/models/product.server";
+import { ContentGrid } from "~/components/utils/ContentGrid";
 import { Section } from "~/components/utils/Section";
-import heroBg from "/images/hero-background.png";
-import AboutPage from "./about";
-import ContactPage from "./contact";
+import heroBgDesktop from "/images/hero-background.png";
+import heroBgMobile from "/images/hero-background-mobile.png";
+
+import type { LoaderFunction, MetaFunction } from "@vercel/remix";
+import type { Product } from "@prisma/client";
+import { useViewport } from "~/components/utils/hooks/viewport";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
@@ -34,39 +38,52 @@ const heroSteps: Array<{ title: React.ReactNode, text: string }> = [
   }
 ]
 
-export default function Index() {
-  const baseContentRef = React.useRef<HTMLInputElement | null>(null);
-  const [contentH, setContentH] = React.useState(0);
+export const loader: LoaderFunction = async () => {
+  return getProducts();
+};
 
+export default function Index() {
+  const [contentH, setContentH] = React.useState(0);
+  const baseContentRef = React.useRef<HTMLInputElement | null>(null);
   React.useLayoutEffect(() => {
     if (baseContentRef.current === null) return;
     setContentH(baseContentRef.current.offsetTop);
   }, []);
 
+  const products = useLoaderData<typeof loader>();
+  const productsGrid = products.map((product: Product) => { return { title: product.name, text: product.shortDescription } });
+
   return (
     <>
-      <Box id="hero" style={{ backgroundImage: `url(${heroBg})` }} className="
-        w-full h-auto pt-40
-        bg-cover bg-center
-      ">
-        <Swiper steps={heroSteps} />
-        <Box className="
-          flex flex-col items-center
-          pt-20 -mb-6
-          lg:ml-[25%]
-        ">
-          <LargeButton onclick={() => animateScroll.scrollTo(contentH)}>
-            Saiba mais <KeyboardArrowDown />
-          </LargeButton>
-        </Box>
-      </Box>
+      <HeroSection buttonScrollTo={contentH} />
 
       <Box ref={baseContentRef} className="">
         <Section>
-          <AboutPage />
-          <ContactPage />
-        </Section>
-      </Box>
+          <ContentGrid items={productsGrid} />
+        </Section >
+      </Box >
     </>
   );
+}
+
+const HeroSection = ({ buttonScrollTo }: { buttonScrollTo: number }) => {
+  const heroBackground = useViewport() < 768 ? heroBgMobile : heroBgDesktop;
+
+  return (
+    <Box id="hero" style={{ backgroundImage: `url(${heroBackground})` }} className="
+    w-full h-auto pt-40
+    bg-cover bg-center
+  ">
+      <Swiper steps={heroSteps} />
+      <Box className="
+      flex flex-col items-center
+      pt-20 -mb-6
+      lg:ml-[25%]
+    ">
+        <LargeButton onclick={() => animateScroll.scrollTo(buttonScrollTo)}>
+          Saiba mais <KeyboardArrowDown />
+        </LargeButton>
+      </Box>
+    </Box>
+  )
 }

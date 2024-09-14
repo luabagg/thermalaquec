@@ -1,8 +1,8 @@
 import React from 'react';
 import { FloatingWhatsApp as Component } from 'react-floating-whatsapp';
-import whatsappIcon from "/images/whatsapp-icon.jpg";
 import { useHomepage } from '../utils/hooks/useHomepage';
 import { Box } from '@mui/material';
+import whatsappIcon from "/images/whatsapp-icon.jpg";
 
 export function FloatingWhatsApp() {
     const [visible, setVisible] = React.useState(false);

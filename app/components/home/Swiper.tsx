@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Container, Typography } from '@mui/material';
 import { MobileStepper } from './MobileStepper';
+import { useViewport } from '../utils/hooks/viewport';
 
 export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode, text: string }> }) {
   const maxSteps = steps.length;
@@ -24,7 +25,7 @@ export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode, text:
   const [startX, setStartX] = React.useState(0);
   const [currentX, setCurrentX] = React.useState(0);
 
-  const [width, setWidth] = React.useState(0);
+  const width = useViewport();
   const moveLeft = startX < (width * 0.3)
   const moveRight = startX > (width * 0.7)
 
@@ -54,7 +55,6 @@ export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode, text:
   };
 
   React.useEffect(() => {
-    setWidth(window.outerWidth)
     const interval = setInterval(() => {
       handleNext();
     }, 7000);

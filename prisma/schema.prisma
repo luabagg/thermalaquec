@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,8 +13,8 @@ model Category {
   created_at  DateTime   @default(now())
   name        String     @unique @db.VarChar(100)
   description String?
-  parent      Category?  @relation("ParentCategory", references: [id], fields: [parentId])
   parentId    Int?
+  parent      Category?  @relation("ParentCategory", fields: [parentId], references: [id])
   children    Category[] @relation("ParentCategory")
   product     Product[]
 
@@ -42,15 +36,15 @@ model Product {
   name             String            @db.VarChar(100)
   model            String?           @db.VarChar(100)
   shortDescription String?           @db.VarChar(250)
-  description      String?           @db.Text()
+  description      String?
   visible          Boolean           @default(true)
   viewCount        Int               @default(0)
-  Brand            Brand?            @relation(fields: [brandId], references: [id])
   brandId          Int?
-  Category         Category?         @relation(fields: [categoryId], references: [id])
   categoryId       Int?
-  Image            Image?            @relation(fields: [imageId], references: [id])
   imageId          Int?
+  Brand            Brand?            @relation(fields: [brandId], references: [id])
+  Category         Category?         @relation(fields: [categoryId], references: [id])
+  Image            Image?            @relation(fields: [imageId], references: [id])
   ProductSpec      ProductSpec[]
   ShowcaseProduct  ShowcaseProduct[]
 
@@ -63,8 +57,8 @@ model ProductSpec {
   created_at DateTime @default(now())
   name       String   @db.VarChar(100)
   value      String   @db.VarChar(100)
-  product    Product  @relation(references: [id], fields: [product_id])
   product_id Int
+  product    Product  @relation(fields: [product_id], references: [id])
 }
 
 model Image {
@@ -76,10 +70,10 @@ model Image {
 
 model ShowcaseProduct {
   id         Int      @id @default(autoincrement())
-  showcase   Showcase @relation(fields: [showcaseId], references: [id])
   showcaseId Int
-  product    Product  @relation(fields: [productId], references: [id])
   productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  showcase   Showcase @relation(fields: [showcaseId], references: [id])
 }
 
 model Showcase {
@@ -89,8 +83,8 @@ model Showcase {
   description     String?
   visible         Boolean           @default(true)
   viewCount       Int               @default(0)
-  Image           Image?            @relation(fields: [imageId], references: [id])
   imageId         Int?
+  Image           Image?            @relation(fields: [imageId], references: [id])
   ShowcaseProduct ShowcaseProduct[]
 
   @@index([name, visible])

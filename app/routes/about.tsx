@@ -1,6 +1,7 @@
-import type { MetaFunction } from "@remix-run/react";
 import { ContentGrid } from "~/components/utils/ContentGrid";
 import { Section, SectionContent, SectionTitle } from "~/components/utils/Section";
+
+import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(

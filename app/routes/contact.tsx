@@ -1,7 +1,8 @@
 import { Email, WhatsApp } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
-import type { MetaFunction } from "@remix-run/react";
 import { Section, SectionContent, SectionTitle } from "~/components/utils/Section";
+
+import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap(
