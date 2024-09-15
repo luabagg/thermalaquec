@@ -1,6 +1,6 @@
 import { json, redirect } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
-import { createSupabaseServerClient } from '~/libs/supabase/client.server'
+import { createClient } from '~/libs/supabase/client.server'
 import type { ActionFunctionArgs } from '@remix-run/node'
 import { getUser } from '~/utils/auth'
 import { Section, SectionContent, SectionTitle } from '~/components/utils/Section'
@@ -16,7 +16,7 @@ type ActionResponse = {
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabaseClient } = createSupabaseServerClient(request)
+  const { supabaseClient, headers } = createClient(request)
 
   if (await getUser(supabaseClient) != null) {
     return redirect('/admin')
@@ -28,7 +28,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       {
         success: false,
         error: "Problema ao confirmar origem do domínio"
-      }
+      },
+      { headers }
     )
   }
 
@@ -41,15 +42,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   })
 
   if (error) {
+    console.log(error)
     return json<ActionResponse>(
       {
         success: false,
         error: "Erro ao efetuar login"
-      }
+      },
+      { headers }
     )
   }
 
-  return json<ActionResponse>({ success: true })
+  return json<ActionResponse>({ success: true }, { headers })
 }
 
 const FormGrid = styled(Paper)(({ theme }) => ({
