@@ -8,7 +8,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     const { supabaseClient } = createSupabaseServerClient(request)
 
     if (await getUser(supabaseClient) == null) {
-      return redirect('/admin')
+      return redirect('/admin/login')
     }
 
     return new Response(null)
