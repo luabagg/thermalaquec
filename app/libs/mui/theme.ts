@@ -1,20 +1,17 @@
 import { createTheme, colors } from '@mui/material';
-import resolveConfig from 'tailwindcss/resolveConfig'
-import tailwindConfig from 'tailwind.config.js'
-
-const cfg = resolveConfig(tailwindConfig)
+import config from '../tailwind/config';
 
 // Create a theme instance applying the palette from tailwind.
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: cfg.theme.colors['red-dark'],
-      contrastText: cfg.theme.colors.white,
+      main: config.theme.colors['red-dark'],
+      contrastText: config.theme.colors.white,
     },
     secondary: {
-      main: cfg.theme.colors.yellow,
-      contrastText: cfg.theme.colors.ebony,
+      main: config.theme.colors.yellow,
+      contrastText: config.theme.colors.ebony,
     },
     error: {
       main: colors.red[900],
@@ -26,8 +23,8 @@ const theme = createTheme({
   typography: {
     fontSize: 16,
     fontFamily: [
-      ...cfg.theme.fontFamily.sans,
-      ...cfg.theme.fontFamily.serif,
+      ...config.theme.fontFamily.sans,
+      ...config.theme.fontFamily.serif,
     ].join(','),
   },
   spacing: 4,
@@ -45,7 +42,7 @@ theme.typography.h1 = {
 theme.typography.h2 = {
   ...theme.typography.h1,
   ...{
-    color: cfg.theme.colors.yellow,
+    color: config.theme.colors.yellow,
     lineHeight: '1',
   },
 };
@@ -65,7 +62,7 @@ theme.typography.body1 = {
   '@media (min-width:768px)': {
     fontSize: 20,
   },
-  color: cfg.theme.colors['gray']['300'],
+  color: config.theme.colors['gray']['300'],
   lineHeight: '1.5'
 };
 
@@ -75,7 +72,7 @@ theme.typography.body2 = {
   '@media (min-width:768px)': {
     fontSize: 20,
   },
-  color: cfg.theme.colors['gray']['400'],
+  color: config.theme.colors['gray']['400'],
   lineHeight: '1.3'
 };
 

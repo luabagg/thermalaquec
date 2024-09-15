@@ -11,7 +11,7 @@ import { createReadableStreamFromReadable } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
-import { MuiProvider } from "~/mui/MuiProvider";
+import { MuiProvider } from "~/libs/mui/MuiProvider";
 
 const ABORT_DELAY = 5_000;
 

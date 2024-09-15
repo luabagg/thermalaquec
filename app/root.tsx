@@ -13,17 +13,15 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/remix"
 
 // Layout
-import { MuiDocument } from "./mui/MuiDocument";
+import { MuiDocument } from "./libs/mui/MuiDocument";
 import { Layout as Wrapper } from "./components/layout/Layout";
+import { ErrorPage } from "./components/layout/ErrorPage";
 
 // Styles
 import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
-import resolveConfig from 'tailwindcss/resolveConfig'
-import tailwindConfig from 'tailwind.config.js'
 import { Email, Facebook, Instagram, LinkedIn, WhatsApp } from "@mui/icons-material";
-
-const cfg = resolveConfig(tailwindConfig)
+import config from "./libs/tailwind/config";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: globalStyles },
@@ -53,7 +51,7 @@ export const meta: MetaFunction = () => [
   },
   {
     name: "theme-color",
-    content: cfg.theme.colors['slate-dark'][500]
+    content: config.theme.colors['slate-dark'][500]
   }
 ];
 
@@ -116,7 +114,7 @@ export function ErrorBoundary() {
   const error = useRouteError();
 
   if (isRouteErrorResponse(error)) {
-    switch (error.status) { }
+    return ErrorPage(error.status)
   }
 
   return

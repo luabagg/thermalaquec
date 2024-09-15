@@ -1,18 +1,15 @@
 import * as React from 'react';
 import styled from '@emotion/styled';
 import { Box, Grid2, Paper, Typography } from '@mui/material';
-import tailwindConfig from 'tailwind.config';
-import resolveConfig from 'tailwindcss/resolveConfig';
+import config from '~/libs/tailwind/config';
 
 type ContentGridProps = {
   items: Array<{ title: string, text: string }>,
   maxCols?: number,
 };
 
-const cfg = resolveConfig(tailwindConfig);
-
 const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: cfg.theme.colors['slate-dark'][500],
+  backgroundColor: config.theme.colors['slate-dark'][500],
 }));
 
 export const ContentGrid: React.FC<ContentGridProps> = ({ items, maxCols = 3 }) => {

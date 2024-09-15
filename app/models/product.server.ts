@@ -1,4 +1,4 @@
-import prisma from "~/db.server";
+import prisma from "~/libs/prisma/client.server";
 import type { Product } from "@prisma/client";
 
 export function getProduct({ id }: Pick<Product, "id">) {
