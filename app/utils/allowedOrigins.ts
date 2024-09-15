@@ -2,7 +2,6 @@ export const allowedOrigins = ['https://thermalaquecimento.com.br', 'https://www
 
 export function allowedOrigin(origin: string) {
     const url = new URL(origin);
-    console.log(url.origin);
 
     return allowedOrigins.includes(url.origin);
 }

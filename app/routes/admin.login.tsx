@@ -1,7 +1,7 @@
 import { json, redirect } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
 import { createClient } from '~/libs/supabase/client.server'
-import type { ActionFunctionArgs } from '@remix-run/node'
+import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { getUser } from '~/utils/auth'
 import { Section, SectionContent, SectionTitle } from '~/components/utils/Section'
 import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
@@ -10,6 +10,17 @@ import config from '~/libs/tailwind/config'
 import { useEffect, useState } from 'react'
 import { allowedOrigin } from '~/utils/allowedOrigins'
 
+
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { supabaseClient } = createClient(request)
+
+  if (await getUser(supabaseClient) != null) {
+    return redirect('/admin')
+  }
+
+  return new Response(null)
+}
+
 type ActionResponse = {
   success: boolean
   error?: string
@@ -17,10 +28,6 @@ type ActionResponse = {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient, headers } = createClient(request)
-
-  if (await getUser(supabaseClient) != null) {
-    return redirect('/admin')
-  }
 
   const origin = request.headers.get('origin')!
   if (process.env.NODE_ENV === 'production' && allowedOrigin(origin)) {
@@ -42,7 +49,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   })
 
   if (error) {
-    console.log(error)
     return json<ActionResponse>(
       {
         success: false,
