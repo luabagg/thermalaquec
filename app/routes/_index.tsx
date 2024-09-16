@@ -39,7 +39,7 @@ const heroSteps: Array<{ title: React.ReactNode, text: string }> = [
 ]
 
 export const loader: LoaderFunction = async () => {
-  return getProducts();
+  // return getProducts();
 };
 
 export default function Index() {
@@ -50,8 +50,8 @@ export default function Index() {
     setContentH(baseContentRef.current.offsetTop);
   }, []);
 
-  const products = useLoaderData<typeof loader>();
-  const productsGrid = products.map((product: Product) => { return { title: product.name, text: product.shortDescription } });
+  // const products = useLoaderData<typeof loader>();
+  // const productsGrid = products.map((product: Product) => { return { title: product.name, text: product.shortDescription } });
 
   return (
     <>
@@ -59,7 +59,8 @@ export default function Index() {
 
       <Box ref={baseContentRef} className="">
         <Section>
-          <ContentGrid items={productsGrid} />
+          {/* <ContentGrid items={{productsGrid}} /> */}
+          <span></span>
         </Section >
       </Box >
     </>
