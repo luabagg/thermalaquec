@@ -1,8 +1,8 @@
 import prisma from "~/libs/prisma/client.server";
 import type { Product } from "@prisma/client";
 
-export function getProduct({ id }: Pick<Product, "id">) {
-    return prisma.product.findFirst({
+export async function getProduct({ id }: Pick<Product, "id">) {
+    return await prisma.product.findFirst({
         select: {
             id: true,
             name: true,
@@ -16,8 +16,8 @@ export function getProduct({ id }: Pick<Product, "id">) {
     });
 }
 
-export function getProducts() {
-    return prisma.product.findMany({
+export async function getProducts() {
+    return await prisma.product.findMany({
         select: {
             id: true,
             name: true,
