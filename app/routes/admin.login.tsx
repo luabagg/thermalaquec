@@ -94,37 +94,34 @@ export default function LoginPage() {
 
   return (
     <Section>
-      <FormGrid elevation={3} className="p-8 pb-14 flex flex-col md:w-[60%] m-auto">
+      <FormGrid elevation={1} className="px-4 pt-14 pb-24 flex flex-col w-[90%] md:w-[40%] m-auto">
         <SectionTitle title="Acesso admin" />
         <SectionContent description="">
           {!actionResponse?.success ? (
             <>
-              <Box className="sm:mx-10">
-                <Typography variant={"h2"} className="pt-2 pb-12">Faça o login abaixo</Typography>
+              <Typography variant={"h2"} className="pt-8 pb-14">Faça o login abaixo</Typography>
 
-                <Form method="post" onSubmit={handleSubmit}>
-                  <Stack spacing={12} direction="column">
-                    <TextField
-                      type="email"
-                      name="email"
-                      color="secondary"
-                      variant="outlined"
-                      className='w-full'
-                      placeholder="Seu e-mail"
-                      required
-                      disabled={isDisabled}
-                    />
-                    <Button type="submit" variant="contained" className='w-full' disabled={isDisabled}>
-                      {isDisabled ? `Obter código (${timer}s)` : 'Obter código'}
-                    </Button>
-                    {
-                      actionResponse?.error != undefined ? (
-                        <Alert severity="error">{actionResponse?.error}</Alert>
-                      ) : null
-                    }
-                  </Stack>
-                </Form>
-              </Box>
+              <Form method="post" onSubmit={handleSubmit}>
+                <Stack spacing={6} direction="column">
+                  <TextField
+                    type="email"
+                    name="email"
+                    color="secondary"
+                    variant="standard"
+                    placeholder="Seu e-mail"
+                    required
+                    disabled={isDisabled}
+                  />
+                  <Button type="submit" variant="contained" sx={{fontWeight:600, height: 54}} disabled={isDisabled}>
+                    {isDisabled ? `Obter código (${timer}s)` : 'Obter código'}
+                  </Button>
+                  {
+                    actionResponse?.error != undefined ? (
+                      <Alert severity="error">{actionResponse?.error}</Alert>
+                    ) : null
+                  }
+                </Stack>
+              </Form>
             </>
           ) : (
             <Typography variant={"h2"} className="py-8 ">Por favor, verifique seu e-mail</Typography>
