@@ -91,7 +91,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           socialMapNavbar: socialMapNavbar,
           socialMapFooter: socialMapFooter
         }}>
-          <p className="text-center p-96">Hello World</p>
           {children}
         </Wrapper>
         <ScrollRestoration />
