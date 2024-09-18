@@ -46,7 +46,7 @@ function useIcon(): boolean {
         window.removeEventListener('scroll', onScroll);
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
-    }, []);
+    }, [setOffset]);
 
     return offset > 150;
 }

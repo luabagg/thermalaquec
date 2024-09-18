@@ -5,7 +5,7 @@ export const useViewport = (): number => {
 
     useEffect(() => {
         setWidth(window.outerWidth)
-    }, [width]);
+    }, [setWidth]);
 
     return width
 }
