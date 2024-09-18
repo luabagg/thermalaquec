@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Link, useLocation } from "@remix-run/react";
 import logo from "/images/wide-logo-dark-transparent.svg";
 import { Box, Container, ListItem, Stack, Typography } from "@mui/material";
 import type { SocialMap } from "./types";
@@ -9,12 +9,14 @@ import React from "react";
 
 export function Footer({ socialMap }: { socialMap: SocialMap }) {
   const [visibleButton, setVisibleButton] = React.useState(false);
+  const location = useLocation();
 
   React.useEffect(() => {
     setVisibleButton(
-      document.documentElement.scrollHeight > 2000
+      document.documentElement.scrollHeight > 2500
     )
-  }, []);
+    console.log(document.documentElement.scrollHeight)
+  }, [location]);
 
   return (
     <footer>
