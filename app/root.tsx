@@ -86,7 +86,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         text-white
         font-serif leading-3
       ">
-        <Wrapper props={{
+        <p className="text-center p-96">Hello World</p>
+        {/* <Wrapper props={{
           navigationMap: navigationMap,
           socialMapNavbar: socialMapNavbar,
           socialMapFooter: socialMapFooter
@@ -96,7 +97,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ScrollRestoration />
         <Scripts />
         <Analytics />
-        <SpeedInsights />
+        <SpeedInsights /> */}
       </body>
     </html>
   );
