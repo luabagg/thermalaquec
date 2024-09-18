@@ -93,11 +93,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           socialMapFooter: socialMapFooter
         }}>
           {children}
-        </Wrapper>
+        </Wrapper> */}
         <ScrollRestoration />
         <Scripts />
         <Analytics />
-        <SpeedInsights /> */}
+        <SpeedInsights />
       </body>
     </html>
   );
