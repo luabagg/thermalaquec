@@ -4,7 +4,7 @@ import { createClient } from '~/libs/supabase/client.server'
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { getUser } from '~/utils/auth'
 import { Section, SectionContent, SectionTitle } from '~/components/utils/Section'
-import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import styled from '@emotion/styled'
 import config from '~/libs/tailwind/config'
 import { useEffect, useState } from 'react'
@@ -109,10 +109,11 @@ export default function LoginPage() {
                     color="secondary"
                     variant="standard"
                     placeholder="Seu e-mail"
+                    className='md:w-[90%]'
                     required
                     disabled={isDisabled}
                   />
-                  <Button type="submit" variant="contained" sx={{fontWeight:600, height: 54}} disabled={isDisabled}>
+                  <Button type="submit" variant="contained" sx={{fontWeight:600, height: 54}} className='md:w-[90%]' disabled={isDisabled}>
                     {isDisabled ? `Obter código (${timer}s)` : 'Obter código'}
                   </Button>
                   {

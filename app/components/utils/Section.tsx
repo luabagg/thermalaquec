@@ -39,7 +39,7 @@ export const SectionTitle: React.FC<{ title: string }> = function ({ title }) {
 
 export const SectionContent: React.FC<{ description: React.ReactNode, children: React.ReactNode }> = function ({ description, children }) {
   return (
-    <Box className='px-2 sm:pl-10'>
+    <Box className='px-2 sm:pl-8'>
       <Typography variant={"body1"}>
         {description}
       </Typography>
