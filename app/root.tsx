@@ -13,15 +13,15 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/remix"
 
 // Layout
-import { MuiDocument } from "./libs/mui/MuiDocument";
-import { Layout as Wrapper } from "./components/layout/Layout";
-import { ErrorPage } from "./components/layout/ErrorPage";
+import { MuiDocument } from "~/libs/mui/MuiDocument";
+import { Layout as Wrapper } from "~/components/layout/Layout";
+import { ErrorPage } from "~/components/layout/ErrorPage";
 
 // Styles
 import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
 import { Email, Facebook, Instagram, LinkedIn, WhatsApp } from "@mui/icons-material";
-import config from "./libs/tailwind/config";
+import config from "~/libs/tailwind/config";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: globalStyles },
@@ -86,14 +86,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         text-white
         font-serif leading-3
       ">
-        <p className="text-center p-96">Hello World</p>
-        {/* <Wrapper props={{
+        <Wrapper props={{
           navigationMap: navigationMap,
           socialMapNavbar: socialMapNavbar,
           socialMapFooter: socialMapFooter
         }}>
-          {children}
-        </Wrapper> */}
+          <p className="text-center p-96">Hello World</p>
+          {/* {children} */}
+        </Wrapper>
         <ScrollRestoration />
         <Scripts />
         <Analytics />
