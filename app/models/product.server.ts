@@ -1,6 +1,8 @@
 import prisma from "~/libs/prisma/client.server";
 import type { Product } from "@prisma/client";
 
+type ProductEditable = Omit<Product, 'id' | 'created_at'>
+
 export async function getProduct({ id }: Pick<Product, "id">) {
     return await prisma.product.findFirst({
         select: {
@@ -16,6 +18,12 @@ export async function getProduct({ id }: Pick<Product, "id">) {
     });
 }
 
+export async function createProduct(productData: ProductEditable) {
+    return await prisma.product.create({
+        data: productData,
+    });
+}
+
 export async function getProducts() {
     return await prisma.product.findMany({
         select: {
@@ -26,5 +34,18 @@ export async function getProducts() {
             shortDescription: true
         },
         where: { visible: true },
+    });
+}
+
+export async function updateProduct(id: number, productData: Partial<ProductEditable>) {
+    return await prisma.product.update({
+        where: { id },
+        data: productData,
+    });
+}
+
+export async function deleteProduct(id: number) {
+    return await prisma.product.delete({
+        where: { id },
     });
 }
