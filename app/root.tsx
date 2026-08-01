@@ -12,7 +12,8 @@ import { Toaster } from "~/components/ui/toaster";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { buildHomeJsonLd, buildSeoMeta } from "~/lib/seo";
 import { GTM_ID, SITE_DESCRIPTION, SITE_NAME } from "~/lib/site";
-import floatingWhatsappStyles from "~/styles/floating-whatsapp.css?url";
+import ann0nipWhatsappStyles from "react-whatsapp-widget/dist/index.css?url";
+import whatsappWidgetOverrides from "~/styles/whatsapp-widget.css?url";
 import fontStyles from "~/styles/fonts.css?url";
 import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
@@ -22,7 +23,8 @@ export const links: LinksFunction = () => [
   { rel: "stylesheet", href: fontStyles },
   { rel: "stylesheet", href: globalStyles },
   { rel: "stylesheet", href: tailwindStyles },
-  { rel: "stylesheet", href: floatingWhatsappStyles },
+  { rel: "stylesheet", href: ann0nipWhatsappStyles },
+  { rel: "stylesheet", href: whatsappWidgetOverrides },
   { rel: "icon", href: "/favicon.ico", sizes: "any" },
   {
     rel: "icon",

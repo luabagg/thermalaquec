@@ -1,0 +1,167 @@
+/**
+ * Overrides for `react-whatsapp-widget` (ann0nip).
+ * Package classes are CSS-modules hashes — keep in sync with dist/index.css.
+ */
+
+/* Panel */
+._1yCVn {
+  width: min(360px, calc(100vw - 2rem));
+  border-radius: 16px;
+  box-shadow: 0 18px 48px -12px rgba(20, 20, 20, 0.35);
+  overflow: hidden;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+@media (max-width: 480px) {
+  ._1yCVn {
+    width: min(300px, calc(100vw - 1.5rem));
+  }
+}
+
+/* Header */
+._2uc4w {
+  position: relative;
+  background-color: #075e54;
+  padding: 10px 12px 10px 8px;
+}
+
+._lI8mw {
+  color: rgba(255, 255, 255, 0.7);
+  top: 14px;
+  right: 12px;
+}
+
+._lI8mw:hover {
+  color: #fff;
+}
+
+._3jDIS {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin: 4px 8px;
+  padding: 0;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-sizing: border-box;
+}
+
+._3jDIS img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+._3trGj {
+  margin-right: 28px;
+  min-width: 0;
+}
+
+._3XZUa {
+  font-family: "Outfit", system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+._Muogh {
+  opacity: 0.85;
+  font-size: 12px;
+}
+
+/* Chat body */
+._39IQj {
+  padding: 16px;
+  min-height: 160px;
+  max-height: 280px;
+}
+
+._1mXIm {
+  max-width: calc(100% - 48px);
+  border-radius: 0 10px 10px 10px;
+}
+
+/* Footer — fix off-center Enviar (package used margin: 0 20px) */
+._3XP0H {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  background-color: #fff;
+  border-top: 1px solid #ececec;
+  box-sizing: border-box;
+}
+
+._siqLL {
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1px solid #e4e4e7;
+  background-color: #f4f4f5;
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #141414;
+  outline: none;
+}
+
+._siqLL:focus {
+  border-color: rgba(37, 211, 102, 0.55);
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.15);
+}
+
+._siqLL::placeholder {
+  color: #71717a;
+}
+
+._3twZq {
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: #25d366;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color 0.15s ease;
+}
+
+._3twZq:hover {
+  background: #1ebe57;
+}
+
+/* FAB */
+._2qp0Z {
+  width: 56px;
+  height: 56px;
+  bottom: 20px;
+  right: 20px;
+  background-color: #25d366;
+  color: #fff;
+  box-shadow: 0 10px 28px -6px rgba(37, 211, 102, 0.55);
+}
+
+._2qp0Z:hover {
+  background-color: #1ebe57;
+  transform: scale(1.04);
+}
+
+._2qp0Z svg {
+  fill: #fff;
+}
+
+@media (max-width: 480px) {
+  ._2qp0Z {
+    width: 52px;
+    height: 52px;
+  }
+}

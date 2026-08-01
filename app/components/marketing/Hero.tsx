@@ -17,7 +17,6 @@ export const Hero = () => {
         src="/hero-background.webp"
         alt="Painéis solares com o sol ao fundo"
         className="absolute inset-0 h-full w-full object-cover"
-        fetchPriority="high"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-ink/85 via-ink/65 to-ink/50 md:bg-gradient-to-r md:from-ink/90 md:via-ink/70 md:to-ink/35" />
       <div className="relative z-10 container mx-auto w-full max-w-screen-xl px-4 md:px-6">
