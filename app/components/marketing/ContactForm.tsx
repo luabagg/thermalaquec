@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { FORMSPREE, whatsappHref } from "~/lib/site";
 import { toast } from "sonner";
 
 interface ContactFormProps {
-  onFormSubmit?: () => void; // Callback para ser chamado após o envio bem-sucedido
+  onFormSubmit?: () => void;
 }
 
 export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
@@ -18,10 +17,6 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
     cidade: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const whatsappRedirectUrl = whatsappHref(
-    "Olá! Acabei de enviar o formulário de contato no site da Thermal e gostaria de continuar a conversa por aqui.",
-  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -36,43 +31,39 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(FORMSPREE.contact, {
-        method: 'POST',
+      const response = await fetch("/api/forms/contact", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
-      if (response.ok) {
-        // Dispara evento GTM de sucesso do formulário
+      const result = (await response.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; retryAfterSec?: number }
+        | null;
+
+      if (response.ok && result?.ok) {
         if (window.dataLayer) {
           window.dataLayer.push({
-            event: 'form_submission',
-            form_name: 'contact_form',
+            event: "form_submission",
+            form_name: "contact_form",
             consumo_economizar: formData.consumo,
             cidade_usuario: formData.cidade,
           });
         }
 
-        toast.success("Sua solicitação foi enviada com sucesso! Redirecionando para o WhatsApp...");
+        toast.success("Sua solicitação foi enviada com sucesso!");
         setFormData({
-          consumo: '',
-          nomeCompleto: '',
-          email: '',
-          telefone: '',
-          cidade: '',
+          consumo: "",
+          nomeCompleto: "",
+          email: "",
+          telefone: "",
+          cidade: "",
         });
-        if (onFormSubmit) {
-          onFormSubmit(); // Chama o callback para fechar o dialog, se houver
-        }
-        // Redireciona para o WhatsApp após um pequeno atraso para o toast ser visível
-        setTimeout(() => {
-          window.open(whatsappRedirectUrl, "_blank");
-        }, 1500); 
+        onFormSubmit?.();
       } else {
-        const errorData = await response.json();
-        toast.error(`Erro ao enviar a solicitação: ${errorData.error || 'Tente novamente.'}`);
+        toast.error(result?.error || "Erro ao enviar a solicitação. Tente novamente.");
       }
     } catch (error) {
       console.error("Erro ao enviar o formulário:", error);
@@ -91,7 +82,7 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
             id="consumo"
             type="number"
             min="0"
-            step="10"
+            step="1"
             placeholder="Consumo"
             value={formData.consumo}
             onChange={handleChange}
