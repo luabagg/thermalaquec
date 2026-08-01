@@ -1,3 +1,5 @@
+import { FORMSPREE_ENDPOINTS, type FormKind } from "~/lib/formspree";
+
 export type FormSubmitResult =
   | { ok: true }
   | { ok: false; error: string; code?: string; retryAfterSec?: number };
@@ -16,32 +18,55 @@ function rateLimitMessage(retryAfterSec?: number): string {
   return "Muitas tentativas. Aguarde um momento e tente novamente.";
 }
 
-function looksLikeRateLimitError(message: string | undefined): boolean {
-  if (!message) return false;
-  const normalized = message.toLowerCase();
-  return (
-    normalized.includes("too many") ||
-    normalized.includes("rate limit") ||
-    normalized.includes("muitas tentativas") ||
-    normalized.includes("aguarde")
-  );
-}
-
-function isRateLimited(status: number, body: FormApiBody | null): boolean {
-  if (status === 429) return true;
-  if (body?.code === "rate_limited") return true;
-  return looksLikeRateLimitError(body?.error);
+async function postGate(
+  kind: FormKind,
+  intent: "claim" | "confirm",
+): Promise<{ response: Response; body: FormApiBody | null }> {
+  const response = await fetch(`/api/forms/${kind}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ intent }),
+  });
+  const body = (await response.json().catch(() => null)) as FormApiBody | null;
+  return { response, body };
 }
 
 /**
- * POST JSON to `/api/forms/:kind` and normalize success / rate-limit / errors
- * for toast + inline alerts.
+ * 1) Server claim (rate-limit gate)
+ * 2) Browser → Formspree (keeps page Referer for Formspree domain checks)
+ * 3) Server confirm (start cooldown only after Formspree accepts)
  */
 export async function submitMarketingForm(
-  kind: "contact" | "calculator",
+  kind: FormKind,
   payload: Record<string, unknown>,
 ): Promise<FormSubmitResult> {
-  const response = await fetch(`/api/forms/${kind}`, {
+  const claim = await postGate(kind, "claim");
+
+  if (claim.response.status === 429 || claim.body?.code === "rate_limited") {
+    const retryHeader = Number(claim.response.headers.get("Retry-After") || NaN);
+    const retryAfterSec =
+      claim.body?.retryAfterSec ??
+      (Number.isFinite(retryHeader) ? retryHeader : undefined);
+    return {
+      ok: false,
+      code: "rate_limited",
+      retryAfterSec,
+      error: claim.body?.error?.trim() || rateLimitMessage(retryAfterSec),
+    };
+  }
+
+  if (!claim.response.ok || !claim.body?.ok) {
+    return {
+      ok: false,
+      code: claim.body?.code,
+      error: claim.body?.error?.trim() || "Não foi possível enviar. Tente novamente.",
+    };
+  }
+
+  const formspreeResponse = await fetch(FORMSPREE_ENDPOINTS[kind], {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -50,34 +75,29 @@ export async function submitMarketingForm(
     body: JSON.stringify(payload),
   });
 
-  const body = (await response.json().catch(() => null)) as FormApiBody | null;
+  if (!formspreeResponse.ok) {
+    let error = "Não foi possível enviar. Tente novamente.";
+    try {
+      const data = (await formspreeResponse.json()) as { error?: string };
+      if (data.error?.trim()) error = data.error.trim();
+    } catch {
+      // ignore non-JSON error bodies
+    }
 
-  if (response.ok && body?.ok) {
-    return { ok: true };
+    if (formspreeResponse.status === 429) {
+      return {
+        ok: false,
+        code: "upstream_rate_limited",
+        error: "O serviço de envio está ocupado. Tente novamente em instantes.",
+        retryAfterSec: 60,
+      };
+    }
+
+    return { ok: false, code: "upstream_error", error };
   }
 
-  if (isRateLimited(response.status, body)) {
-    const retryHeader = Number(response.headers.get("Retry-After") || NaN);
-    const retryAfterSec =
-      body?.retryAfterSec ?? (Number.isFinite(retryHeader) ? retryHeader : undefined);
+  // Best-effort: Formspree already accepted; cooldown still matters for UX.
+  await postGate(kind, "confirm").catch(() => null);
 
-    const fromApi = body?.error?.trim();
-    const error =
-      fromApi && !/too many|rate limit/i.test(fromApi)
-        ? fromApi
-        : rateLimitMessage(retryAfterSec);
-
-    return {
-      ok: false,
-      code: "rate_limited",
-      retryAfterSec,
-      error,
-    };
-  }
-
-  return {
-    ok: false,
-    code: body?.code,
-    error: body?.error?.trim() || "Não foi possível enviar. Tente novamente.",
-  };
+  return { ok: true };
 }
