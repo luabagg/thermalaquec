@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { WhatsAppWidget } from "react-whatsapp-widget";
+import { useEffect, useState, type ComponentType } from "react";
 import { useIsHomepage } from "~/hooks/isHomepage";
 import { CONTACT, SITE_SHORT_NAME } from "~/lib/site";
+import type { WhatsAppWidgetProps } from "react-whatsapp-widget";
 
 /** CSS-module hashes from `react-whatsapp-widget/dist/index.css` */
 const WA = {
@@ -11,18 +11,31 @@ const WA = {
   closeBtn: "._lI8mw",
 } as const;
 
+type WhatsAppWidgetComponent = ComponentType<WhatsAppWidgetProps>;
+
 /**
  * Homepage WhatsApp chat via `react-whatsapp-widget` (ann0nip).
  * Visual fixes: `app/styles/whatsapp-widget.css`
+ *
+ * Loaded only on the client — the package pulls in `react-icons`, which crashes
+ * Node ESM SSR (`ERR_UNSUPPORTED_DIR_IMPORT`) and takes down the Vercel function.
  */
 export function FloatingWhatsApp() {
-  const [mounted, setMounted] = useState(false);
+  const [Widget, setWidget] = useState<WhatsAppWidgetComponent | null>(null);
   const homepage = useIsHomepage();
   const scrolled = useScrolledPast({ showAt: 150, hideAt: 80 });
-  const visible = mounted && homepage && scrolled;
+  const visible = Widget != null && homepage && scrolled;
 
   useEffect(() => {
-    setMounted(true);
+    let cancelled = false;
+
+    void import("react-whatsapp-widget").then((mod) => {
+      if (!cancelled) setWidget(() => mod.WhatsAppWidget);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Close chat on outside click / Escape (package has no allowClickAway).
@@ -76,11 +89,11 @@ export function FloatingWhatsApp() {
   };
 
   // Unmount when hidden — avoids ugly partial paint from `invisible` + fixed layers.
-  if (!visible) return null;
+  if (!visible || Widget == null) return null;
 
   return (
     <div onClickCapture={pushGtm}>
-      <WhatsAppWidget
+      <Widget
         phoneNumber={CONTACT.phoneE164}
         companyName={SITE_SHORT_NAME}
         replyTimeText="Responde em horário comercial"
