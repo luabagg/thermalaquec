@@ -1,68 +1,87 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
-
 import React from "react";
-import { HeroUIProvider } from "@heroui/react";
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "@remix-run/react";
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useRouteError,
+} from "@remix-run/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/remix";
-import config from "~/libs/tailwind/config";
+import { Toaster as Sonner } from "~/components/ui/sonner";
+import { Toaster } from "~/components/ui/toaster";
+import { TooltipProvider } from "~/components/ui/tooltip";
+import { Footer } from "~/components/marketing/Footer";
+import { Header } from "~/components/marketing/Header";
+import { WhatsappFloatingButton } from "~/components/marketing/WhatsappFloatingButton";
+import { GTM_ID, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "~/lib/site";
 import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
-import { Provider } from "jotai";
-import { FaFacebook, FaInstagram, FaLinkedin, FaWhatsapp } from "react-icons/fa";
-import { MdMail } from "react-icons/md";
-import { FloatingWhatsApp } from "./components/FloatingWhatsapp/FloatingWhatsApp";
-import Footer, { SocialMap as FooterSocialMap } from "./components/Footer/Footer";
-import Navbar, { LinksMap, SocialMap as NavSocialMap } from "./components/Navbar/Navbar";
-import RouteChangeAnnouncement from "./components/RouteChangeAnnouncement/RouteChangeAnnouncement";
 import { ErrorPage } from "./pages/ErrorPage/ErrorPage";
 
 export const links: LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
   { rel: "stylesheet", href: globalStyles },
   { rel: "stylesheet", href: tailwindStyles },
   {
     rel: "icon",
-    href: "/favicon.ico",
-    type: "image/x-icon",
+    href: "/favicon-thermal.webp",
+    type: "image/webp",
   },
 ];
 
 export const meta: MetaFunction = () => [
+  { title: `${SITE_NAME} | Energia Solar e Aquecimento Industrial` },
+  { name: "description", content: SITE_DESCRIPTION },
+  { name: "theme-color", content: "hsl(25 95% 53%)" },
+  { property: "og:type", content: "website" },
+  { property: "og:url", content: `${SITE_URL}/` },
   {
-    name: "author",
-    content: "luabagg",
+    property: "og:title",
+    content: `${SITE_NAME} | Energia Solar e Aquecimento Industrial`,
   },
+  { property: "og:description", content: SITE_DESCRIPTION },
+  { property: "og:image", content: `${SITE_URL}/solar-farm.webp` },
+  { name: "twitter:card", content: "summary_large_image" },
+  { name: "twitter:url", content: `${SITE_URL}/` },
   {
-    name: "description",
-    content:
-      "Mantenha a sua casa e piscina aquecidas durante todo o ano com a Thermal Aquecimento. Oferecemos serviços profissionais de instalação e manutenção de sistemas de aquecimento residencial e para piscinas, para você conseguir desfrutar de conforto e lazer em todas as estações. Entre em contato conosco hoje mesmo e veja como podemos tornar sua casa e piscina mais acolhedoras e agradáveis.",
+    name: "twitter:title",
+    content: `${SITE_NAME} | Energia Solar e Aquecimento Industrial`,
   },
-  {
-    name: "theme-color",
-    content: config.theme.colors["slate-dark"][500],
-  },
+  { name: "twitter:description", content: SITE_DESCRIPTION },
+  { name: "twitter:image", content: `${SITE_URL}/solar-farm.webp` },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-br">
+    <html lang="pt-BR">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`,
+          }}
+        />
       </head>
       <body>
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+            title="Google Tag Manager"
+          />
+        </noscript>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -73,44 +92,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-const inquiryMsg = encodeURIComponent("Olá, gostaria de solicitar um orçamento");
-
-const navLinks: LinksMap = [
-  { name: "Home", href: "/" },
-  // { name: "Produtos", href: "/products" },
-  { name: "Nosso trabalho", href: "/about" },
-  { name: "Contato", href: "/contact" },
-];
-
-const navSocial: NavSocialMap = [
-  { icon: FaInstagram, href: "https://www.instagram.com/thermalaquec" },
-  {
-    icon: MdMail,
-    href: `mailto:comercial@thermalaquecimento.com.br?subject=${inquiryMsg}`,
-  },
-  { icon: FaFacebook, href: "https://www.facebook.com/thermalaquec" },
-];
-
-const footerSocial: FooterSocialMap = [
-  {
-    icon: FaWhatsapp,
-    href: `https://wa.me/5554999161816/?text=${inquiryMsg}`,
-  },
-  ...navSocial,
-  { icon: FaLinkedin, href: "https://www.linkedin.com/company/thermalaquec" },
-];
-
 export default function App() {
   return (
-    <Provider>
-      <HeroUIProvider>
-        <Navbar linksMap={navLinks} socialMap={navSocial} />
+    <TooltipProvider>
+      <div className="flex min-h-screen flex-col bg-white">
+        <Header />
         <Outlet />
-        <Footer socialMap={footerSocial} />
-        <RouteChangeAnnouncement />
-        <FloatingWhatsApp />
-      </HeroUIProvider>
-    </Provider>
+        <Footer />
+        <WhatsappFloatingButton />
+        <Toaster />
+        <Sonner />
+      </div>
+    </TooltipProvider>
   );
 }
 
@@ -121,5 +114,5 @@ export function ErrorBoundary() {
     return ErrorPage(error.status);
   }
 
-  return;
+  return ErrorPage(500);
 }

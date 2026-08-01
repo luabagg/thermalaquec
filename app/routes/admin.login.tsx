@@ -1,13 +1,13 @@
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Button, Input } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { Section, SectionContent, SectionTitle } from "~/components/ui/Section";
-import Typography from "~/components/ui/Typography";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { createClient } from "~/libs/supabase/client.server";
-import { getUser } from "~/utils/auth";
 import { allowedOrigin } from "~/utils/allowedOrigins";
+import { getUser } from "~/utils/auth";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createClient(request);
@@ -27,8 +27,11 @@ type ActionResponse = {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient, headers } = createClient(request);
 
-  const origin = request.headers.get("origin")!;
-  if (process.env.NODE_ENV === "production" && allowedOrigin(origin)) {
+  const origin = request.headers.get("origin");
+  if (
+    process.env.NODE_ENV === "production" &&
+    (!origin || !allowedOrigin(origin))
+  ) {
     return json<ActionResponse>(
       {
         success: false,
@@ -42,7 +45,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const { error } = await supabaseClient.auth.signInWithOtp({
     email: formData.get("email") as string,
     options: {
-      emailRedirectTo: origin + "/admin/login/callback",
+      emailRedirectTo: `${origin}/admin/login/callback`,
     },
   });
 
@@ -87,53 +90,43 @@ export default function LoginPage() {
   };
 
   return (
-    <Section>
-      <div className="px-4 pt-14 pb-24 flex flex-col w-[90%] md:w-[40%] m-auto rounded-md bg-slate-dark-500 shadow-inset-clean">
-        <SectionTitle title="Acesso admin" />
-        <SectionContent description="">
-          {!actionResponse?.success ? (
-            <>
-              <Typography variant="h2" className="pt-8 pb-14">
-                Faça o login abaixo
-              </Typography>
-
-              <Form method="post" onSubmit={handleSubmit}>
-                <div className="flex flex-col gap-6">
-                  <Input
-                    type="email"
-                    name="email"
-                    variant="underlined"
-                    placeholder="Seu e-mail"
-                    className="md:w-[90%]"
-                    isRequired
-                    isDisabled={isDisabled}
-                  />
-                  <Button
-                    type="submit"
-                    color="primary"
-                    className="md:w-[90%] font-semibold h-[54px]"
-                    isDisabled={isDisabled}
-                  >
-                    {isDisabled ? `Obter código (${timer}s)` : "Obter código"}
-                  </Button>
-                  {actionResponse?.error != undefined ? (
-                    <div
-                      role="alert"
-                      className="rounded-md border border-red-dark bg-red-dark/20 px-4 py-2 text-sm text-white"
-                    >
-                      {actionResponse.error}
-                    </div>
-                  ) : null}
+    <main className="flex flex-grow items-center justify-center bg-secondary px-4 py-16">
+      <div className="w-full max-w-md rounded-lg border bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-bold tracking-tight">Acesso admin</h1>
+        {!actionResponse?.success ? (
+          <>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Faça o login com seu e-mail. Enviaremos um link de acesso.
+            </p>
+            <Form method="post" onSubmit={handleSubmit} className="mt-8 space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  placeholder="Seu e-mail"
+                  required
+                  disabled={isDisabled}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={isDisabled}>
+                {isDisabled ? `Obter código (${timer}s)` : "Obter código"}
+              </Button>
+              {actionResponse?.error != undefined ? (
+                <div
+                  role="alert"
+                  className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive"
+                >
+                  {actionResponse.error}
                 </div>
-              </Form>
-            </>
-          ) : (
-            <Typography variant="h2" className="py-8">
-              Por favor, verifique seu e-mail
-            </Typography>
-          )}
-        </SectionContent>
+              ) : null}
+            </Form>
+          </>
+        ) : (
+          <p className="mt-6 text-lg font-medium">Por favor, verifique seu e-mail</p>
+        )}
       </div>
-    </Section>
+    </main>
   );
 }

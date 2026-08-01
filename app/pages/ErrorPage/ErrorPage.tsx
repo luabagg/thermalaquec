@@ -1,28 +1,20 @@
-import Typography from "~/components/ui/Typography";
-import { Section, SectionContent, SectionTitle } from "~/components/ui/Section";
-import errorImage from "~/assets/error-image.png";
+import { Link } from "@remix-run/react";
+import { Button } from "~/components/ui/button";
 
 export function ErrorPage(status: number) {
-  let message = "";
-
-  switch (status) {
-    case 404:
-      message = "A página que você está procurando não foi encontrada.";
-      break;
-    default:
-      message = "Não foi possível acessar a página.";
-      break;
-  }
+  const message =
+    status === 404
+      ? "A página que você está procurando não foi encontrada."
+      : "Não foi possível acessar a página.";
 
   return (
-    <Section>
-      <SectionTitle title="Erro ao navegar" />
-      <SectionContent description={message}>
-        <Typography variant={"h2"} className="py-8">
-          :(
-        </Typography>
-        <img src={errorImage} alt="Erro" className="w-400" />
-      </SectionContent>
-    </Section>
+    <main className="flex flex-grow flex-col items-center justify-center px-4 py-24 text-center">
+      <p className="text-sm font-medium text-muted-foreground">Erro {status}</p>
+      <h1 className="mt-2 text-3xl font-bold tracking-tight">Erro ao navegar</h1>
+      <p className="mt-4 max-w-md text-muted-foreground">{message}</p>
+      <Button asChild className="mt-8">
+        <Link to="/">Voltar ao início</Link>
+      </Button>
+    </main>
   );
 }
