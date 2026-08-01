@@ -1,89 +1,74 @@
 import type { Config } from "tailwindcss";
-
-import { heroui } from "@heroui/react";
+import animate from "tailwindcss-animate";
 
 export default {
-  content: ["./app/**/*.{js,ts,jsx,tsx}", "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}"],
+  darkMode: ["class"],
+  content: ["./app/**/*.{js,ts,jsx,tsx}"],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
-      fontFamily: {
-        sans: ["Raleway", "sans-serif"],
-        sansbold: ["Raleway-heavy", "sans-serif"],
-        serif: ["Merriweather", "serif"],
-      },
       colors: {
-        white: "#FFFFFF",
-        ebony: "#0B0C10",
-        "gray-dark": {
-          500: "#1F2225",
-          900: "#0F1215",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
-        "slate-dark": {
-          300: "#1C212A",
-          500: "#12151B",
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
         },
-        yellow: "#FFD700",
-        "red-dark": "#8B0000",
-        "blue-light": "#ADD8E6",
-        "green-light": "#90EE90",
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
       },
-      borderWidth: {
-        "1": "1px",
-      },
-      boxShadow: {
-        "inset-clean": "inset 0 1px 0 rgba(255,255,255,0.2)",
-        "xs-clean": "0 1px 0 rgba(255,255,255,0.2)",
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
-        fadeInUp: {
-          from: {
-            transform: "translate3d(0,20px,0)",
-            opacity: "0",
-          },
-          to: {
-            transform: "translate3d(0,0,0)",
-          },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        fadeInDown: {
-          from: {
-            transform: "translate3d(0,-20px,0)",
-            opacity: "0",
-          },
-          to: {
-            transform: "translate3d(0,0,0)",
-          },
-        },
-        fadeIn: {
-          from: {
-            opacity: "0",
-          },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
-        fadeIn: "fadeIn 200ms ease-in",
-        fadeInUp: "fadeInUp 500ms ease-in",
-        fadeInDown: "fadeInDown 500ms ease-in",
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [
-    heroui({
-      prefix: "heroui", // prefix for themes variables
-      addCommonColors: false, // override common colors (e.g. "blue", "green", "pink").
-      defaultTheme: "dark", // default theme from the themes object
-      defaultExtendTheme: "dark", // default theme to extend on custom themes
-      layout: {}, // common layout tokens (applied to all themes)
-      themes: {
-        light: {
-          layout: {}, // light theme layout tokens
-          colors: {}, // light theme colors
-        },
-        dark: {
-          layout: {}, // dark theme layout tokens
-          colors: {}, // dark theme colors
-        },
-        // ... custom themes
-      },
-    }),
-  ],
+  plugins: [animate],
 } satisfies Config;
