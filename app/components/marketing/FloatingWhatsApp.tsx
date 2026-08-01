@@ -11,6 +11,8 @@ const WA = {
   closeBtn: "._lI8mw",
 } as const;
 
+const FADE_MS = 250;
+
 type WhatsAppWidgetComponent = ComponentType<WhatsAppWidgetProps>;
 
 /**
@@ -23,8 +25,11 @@ type WhatsAppWidgetComponent = ComponentType<WhatsAppWidgetProps>;
 export function FloatingWhatsApp() {
   const [Widget, setWidget] = useState<WhatsAppWidgetComponent | null>(null);
   const homepage = useIsHomepage();
-  const scrolled = useScrolledPast({ showAt: 150, hideAt: 80 });
-  const visible = Widget != null && homepage && scrolled;
+  const unlocked = useUnlockedAfterScroll(150);
+  const shouldShow = Widget != null && homepage && unlocked;
+
+  const [rendered, setRendered] = useState(false);
+  const [opaque, setOpaque] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,9 +43,24 @@ export function FloatingWhatsApp() {
     };
   }, []);
 
+  // Mount once unlocked; fade in. Fade out then unmount when leaving homepage.
+  useEffect(() => {
+    if (shouldShow) {
+      setRendered(true);
+      const frame = window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => setOpaque(true));
+      });
+      return () => window.cancelAnimationFrame(frame);
+    }
+
+    setOpaque(false);
+    const timer = window.setTimeout(() => setRendered(false), FADE_MS);
+    return () => window.clearTimeout(timer);
+  }, [shouldShow]);
+
   // Close chat on outside click / Escape (package has no allowClickAway).
   useEffect(() => {
-    if (!visible) return;
+    if (!rendered) return;
 
     const isChatOpen = () => {
       const panel = document.querySelector(WA.panel);
@@ -77,7 +97,7 @@ export function FloatingWhatsApp() {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [visible]);
+  }, [rendered]);
 
   const pushGtm = () => {
     if (window.dataLayer) {
@@ -88,11 +108,16 @@ export function FloatingWhatsApp() {
     }
   };
 
-  // Unmount when hidden — avoids ugly partial paint from `invisible` + fixed layers.
-  if (!visible || Widget == null) return null;
+  if (!rendered || Widget == null) return null;
 
   return (
-    <div onClickCapture={pushGtm}>
+    <div
+      onClickCapture={pushGtm}
+      className={`transition-opacity ease-thermal ${
+        opaque ? "opacity-100" : "pointer-events-none opacity-0"
+      }`}
+      style={{ transitionDuration: `${FADE_MS}ms` }}
+    >
       <Widget
         phoneNumber={CONTACT.phoneE164}
         companyName={SITE_SHORT_NAME}
@@ -123,28 +148,21 @@ function ThermalAvatar() {
   );
 }
 
-/** Hysteresis so fast scroll near the threshold does not flicker. */
-function useScrolledPast({
-  showAt,
-  hideAt,
-}: {
-  showAt: number;
-  hideAt: number;
-}): boolean {
-  const [past, setPast] = useState(false);
+/** Show once past threshold; stay unlocked for the rest of the session. */
+function useUnlockedAfterScroll(threshold: number): boolean {
+  const [unlocked, setUnlocked] = useState(false);
 
   useEffect(() => {
+    if (unlocked) return;
+
     const onScroll = () => {
-      const y = window.scrollY;
-      setPast((wasPast) => {
-        if (wasPast) return y > hideAt;
-        return y > showAt;
-      });
+      if (window.scrollY > threshold) setUnlocked(true);
     };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [showAt, hideAt]);
+  }, [threshold, unlocked]);
 
-  return past;
+  return unlocked;
 }
