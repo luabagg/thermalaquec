@@ -9,8 +9,8 @@ export function ErrorPage(status: number) {
 
   return (
     <main className="flex flex-grow flex-col items-center justify-center px-4 py-24 text-center">
-      <p className="text-sm font-medium text-muted-foreground">Erro {status}</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">Erro ao navegar</h1>
+      <p className="font-mono text-sm font-medium text-muted-foreground">Erro {status}</p>
+      <h1 className="font-display mt-2 text-3xl font-bold tracking-tight">Erro ao navegar</h1>
       <p className="mt-4 max-w-md text-muted-foreground">{message}</p>
       <Button asChild className="mt-8">
         <Link to="/">Voltar ao início</Link>

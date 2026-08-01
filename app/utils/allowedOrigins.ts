@@ -1,7 +1,7 @@
 export const allowedOrigins = [
-    'https://thermalaquecimento.com.br',
-    'https://www.thermalaquecimento.com.br',
-    'https://dev.thermalaquecimento.com.br'
+    'https://thermalaquec.com.br',
+    'https://www.thermalaquec.com.br',
+    'https://dev.thermalaquec.com.br'
 ];
 
 export function allowedOrigin(origin: string) {

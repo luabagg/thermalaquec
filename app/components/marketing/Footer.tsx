@@ -1,127 +1,92 @@
-import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "@remix-run/react";
+import { CONTACT, SITE_NAME, SOCIAL } from "~/lib/site";
+import { Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { WhatsappIcon } from "./WhatsappIcon";
-import { CONTACT, SOCIAL } from "~/lib/site";
 
 export const Footer = () => {
-  const mapsQuery = encodeURIComponent(
-    `${CONTACT.addressLine}, ${CONTACT.cityLine}`,
-  );
+  const mapsQuery = encodeURIComponent(`${CONTACT.addressLine}, ${CONTACT.cityLine}`);
 
   return (
-    <footer className="bg-[#1f1f1f] text-white">
-      <div className="container mx-auto grid max-w-screen-xl grid-cols-1 gap-8 px-4 py-12 md:grid-cols-4 md:px-6">
-        <div className="flex flex-col items-start gap-4">
+    <footer className="bg-ink text-white">
+      <div className="container mx-auto grid max-w-screen-xl grid-cols-1 gap-10 px-4 py-14 md:grid-cols-3 md:gap-12 md:px-6">
+        <div className="flex flex-col items-start gap-5">
           <div className="flex items-center gap-4">
             <Link to="/">
-              <img src="/logo-thermal-novo.webp" alt="Thermal Logo" className="h-16 w-auto" />
+              <img src="/logo.webp" alt={SITE_NAME} className="h-14 w-auto" />
             </Link>
-            <img
-              src="/certificacao-absolar.webp"
-              alt="Certificação Absolar"
-              className="h-16 w-auto"
-              loading="lazy"
-            />
+            <img src="/certificacao-absolar.webp" alt="Certificação Absolar" className="h-14 w-auto" loading="lazy" />
           </div>
-          <div className="mt-2 flex gap-4">
-            <a
-              href={SOCIAL.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="text-gray-400 hover:text-white"
-            >
-              <Facebook className="h-5 w-5" />
-            </a>
+          <div className="flex gap-3">
             <a
               href={SOCIAL.instagram}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="text-gray-400 hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-md border border-white/15 text-zinc-300 transition-colors hover:border-white/40 hover:text-white"
             >
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a
-              href={SOCIAL.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              className="text-gray-400 hover:text-white"
-            >
-              <Linkedin className="h-5 w-5" />
+              <Instagram className="h-5 w-5" strokeWidth={1.75} />
             </a>
             <a
               href={CONTACT.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
-              className="text-gray-400 hover:text-white"
+              className="flex h-10 w-10 items-center justify-center rounded-md border border-white/15 text-zinc-300 transition-colors hover:border-white/40 hover:text-white"
             >
-              <WhatsappIcon className="h-6 w-6" />
+              <WhatsappIcon size={20} />
             </a>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <h3 className="font-semibold text-white">Páginas Importantes</h3>
-          <Link to="/" className="text-sm text-gray-400 hover:underline">
+
+        <div className="flex flex-col gap-3">
+          <h3 className="font-display text-sm font-semibold tracking-wide text-white">Navegação</h3>
+          <Link to="/" className="text-sm text-zinc-400 transition-colors hover:text-white">
             Home
           </Link>
-          <Link to="/sobre" className="text-sm text-gray-400 hover:underline">
+          <Link to="/sobre" className="text-sm text-zinc-400 transition-colors hover:text-white">
             Empresa
           </Link>
-          <Link to="/produtos" className="text-sm text-gray-400 hover:underline">
+          <Link to="/produtos" className="text-sm text-zinc-400 transition-colors hover:text-white">
             Produtos
           </Link>
-          <Link to="/contato" className="text-sm text-gray-400 hover:underline">
+          <Link to="/calculadora-solar" className="text-sm text-zinc-400 transition-colors hover:text-white">
+            Calculadora
+          </Link>
+          <Link to="/contato" className="text-sm text-zinc-400 transition-colors hover:text-white">
             Contato
           </Link>
         </div>
-        <div className="flex flex-col gap-2">
-          <h3 className="font-semibold text-white">Técnico Responsável</h3>
-          <p className="text-sm text-gray-400">Carlos Gustavo Brochetto</p>
-          <p className="text-sm text-gray-400">CRT/RS 77602935004</p>
-        </div>
-        <div className="flex flex-col gap-2">
-          <h3 className="font-semibold text-white">Contato</h3>
+
+        <div className="flex flex-col gap-3">
+          <h3 className="font-display text-sm font-semibold tracking-wide text-white">Contato</h3>
           <a
             href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-white"
+            className="flex items-start gap-2 text-sm text-zinc-400 transition-colors hover:text-white"
           >
-            <MapPin className="h-4 w-4 flex-shrink-0" />
+            <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <span>
               {CONTACT.addressLine}, {CONTACT.cityLine}
             </span>
           </a>
-          <a
-            href={`mailto:${CONTACT.email}`}
-            className="flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-white"
-          >
-            <Mail className="h-4 w-4" />
+          <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-2 text-sm text-zinc-400 transition-colors hover:text-white">
+            <Mail className="h-4 w-4 flex-shrink-0" />
             <span>{CONTACT.email}</span>
           </a>
           <a
             href={`tel:+${CONTACT.phoneE164}`}
-            className="flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-white"
+            className="flex items-center gap-2 font-mono text-sm text-zinc-400 transition-colors hover:text-white"
           >
-            <Phone className="h-4 w-4" />
+            <Phone className="h-4 w-4 flex-shrink-0" />
             <span>{CONTACT.phoneDisplay}</span>
           </a>
         </div>
       </div>
-      <div className="bg-[#1f1f1f]">
-        <div className="container mx-auto flex max-w-screen-xl flex-col items-center justify-between px-4 py-4 text-center text-xs text-white md:flex-row md:px-6">
-          <span>© {new Date().getFullYear()} Thermal. Todos os direitos reservados.</span>
-          <a
-            href="https://4zion.com.br?utm_source=thermal"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
-            <span>Feito com ❤️ por 4ZION Agência Criativa</span>
-          </a>
+
+      <div className="border-t border-white/10">
+        <div className="container mx-auto max-w-screen-xl px-4 py-4 text-center text-xs text-zinc-500 md:px-6 md:text-left">
+          © {new Date().getFullYear()} {SITE_NAME}. Todos os direitos reservados.
         </div>
       </div>
     </footer>

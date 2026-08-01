@@ -6007,6 +6007,11 @@ react-dom@^18.2.0:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
 
+react-floating-whatsapp@^5.0.8:
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/react-floating-whatsapp/-/react-floating-whatsapp-5.0.8.tgz#6bdda35ef29b18bbd130d60d387be8bac7a92781"
+  integrity sha512-4X485d04u7MoWpn61OpWPO/mL94P3gaFq1L932ztH7bo9eClAFcg5ufIxNKbJo9/1h0xpjWZKEW0KBB0apWzZw==
+
 react-input-mask@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/react-input-mask/-/react-input-mask-2.0.4.tgz#9ade5cf8196f4a856dbf010820fe75a795f3eb14"

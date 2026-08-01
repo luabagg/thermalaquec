@@ -85,8 +85,8 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <Label htmlFor="consumo" className="block text-left mb-2">Quanto você quer economizar em Kw/h por mês?</Label>
+        <div className="flex h-full flex-col">
+          <Label htmlFor="consumo" className="mb-2 block text-left">Quanto você quer economizar em Kw/h por mês?</Label>
           <Input
             id="consumo"
             type="number"
@@ -97,10 +97,11 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
             onChange={handleChange}
             required
             disabled={isSubmitting}
+            className="mt-auto"
           />
         </div>
-        <div>
-          <Label htmlFor="nomeCompleto" className="block text-left mb-2">Seu nome Completo:</Label>
+        <div className="flex h-full flex-col">
+          <Label htmlFor="nomeCompleto" className="mb-2 block text-left">Seu nome Completo:</Label>
           <Input
             id="nomeCompleto"
             type="text"
@@ -109,10 +110,11 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
             onChange={handleChange}
             required
             disabled={isSubmitting}
+            className="mt-auto"
           />
         </div>
-        <div>
-          <Label htmlFor="email" className="block text-left mb-2">Seu melhor e-mail:</Label>
+        <div className="flex h-full flex-col">
+          <Label htmlFor="email" className="mb-2 block text-left">Seu melhor e-mail:</Label>
           <Input
             id="email"
             type="email"
@@ -121,10 +123,11 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
             onChange={handleChange}
             required
             disabled={isSubmitting}
+            className="mt-auto"
           />
         </div>
-        <div>
-          <Label htmlFor="telefone" className="block text-left mb-2">Seu telefone:</Label>
+        <div className="flex h-full flex-col">
+          <Label htmlFor="telefone" className="mb-2 block text-left">Seu telefone:</Label>
           <Input
             id="telefone"
             type="tel"
@@ -133,10 +136,11 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
             onChange={handleChange}
             required
             disabled={isSubmitting}
+            className="mt-auto"
           />
         </div>
         <div className="md:col-span-2">
-          <Label htmlFor="cidade" className="block text-left mb-2">Sua Cidade:</Label>
+          <Label htmlFor="cidade" className="mb-2 block text-left">Sua Cidade:</Label>
           <Input
             id="cidade"
             type="text"
@@ -148,7 +152,7 @@ export const ContactForm = ({ onFormSubmit }: ContactFormProps) => {
           />
         </div>
         <div className="md:col-span-2 flex justify-center mt-4">
-          <Button type="submit" size="lg" className="bg-primary hover:bg-primary/90 text-white w-full md:w-auto px-12" disabled={isSubmitting}>
+          <Button type="submit" size="lg" className="w-full px-12 md:w-auto" disabled={isSubmitting}>
             {isSubmitting ? "Enviando..." : "Enviar"}
           </Button>
         </div>

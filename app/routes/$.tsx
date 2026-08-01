@@ -1,8 +1,15 @@
 import type { MetaFunction } from "@remix-run/node";
+
 import { Link } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
+import { buildNoIndexMeta } from "~/lib/seo";
+import { SITE_NAME } from "~/lib/site";
 
-export const meta: MetaFunction = () => [{ title: "Página não encontrada | Thermal" }];
+export const meta: MetaFunction = () => buildNoIndexMeta(`Página não encontrada | ${SITE_NAME}`, "A página solicitada não existe.");
+
+export function loader() {
+  return new Response(null, { status: 404 });
+}
 
 export default function NotFoundPage() {
   return (

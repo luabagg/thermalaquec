@@ -1,69 +1,42 @@
-import { Send, BarChart, Check, UserCheck } from "lucide-react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "~/components/ui/carousel";
-import { useIsMobile } from "~/hooks/use-mobile";
-
 const items = [
   {
-    icon: <Send className="h-10 w-10 text-primary" />,
     title: "Missão",
-    description: "Fornecer soluções em energias renováveis para todo o estado.",
+    description: "Levar soluções em energias renováveis a todo o estado.",
   },
   {
-    icon: <BarChart className="h-10 w-10 text-primary" />,
     title: "Visão",
-    description: "Ser referência no mercado nacional.",
+    description: "Ser referência no mercado nacional de aquecimento e solar.",
   },
   {
-    icon: <Check className="h-10 w-10 text-primary" />,
     title: "Valores",
-    description: "Seriedade, dinamismo e liderança.",
+    description: "Seriedade, dinamismo e liderança em cada entrega.",
   },
   {
-    icon: <UserCheck className="h-10 w-10 text-primary" />,
     title: "Conduta",
-    description: "Primar pela ética em nossas relações com clientes, colaboradores e fornecedores.",
+    description:
+      "Ética nas relações com clientes, colaboradores e fornecedores.",
   },
 ];
 
-const MissionVisionItem = ({ item }: { item: typeof items[0] }) => (
-  <div className="flex flex-col items-center text-center gap-4 p-6 h-full">
-    {item.icon}
-    <h3 className="text-2xl font-bold">{item.title}</h3>
-    <p className="text-muted-foreground">{item.description}</p>
-  </div>
-);
-
 export const MissionVision = () => {
-  const isMobile = useIsMobile();
-
   return (
-    <section className="py-12 md:py-24 bg-secondary">
-      <div className="container mx-auto text-center max-w-screen-xl px-4 md:px-6">
-        {isMobile ? (
-          <Carousel className="w-full max-w-sm mx-auto">
-            <CarouselContent>
-              {items.map((item, index) => (
-                <CarouselItem key={index}>
-                  <MissionVisionItem item={item} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="absolute left-4" />
-            <CarouselNext className="absolute right-4" />
-          </Carousel>
-        ) : (
-          <div className="grid grid-cols-4 gap-4">
-            {items.map((item) => (
-              <MissionVisionItem key={item.title} item={item} />
-            ))}
-          </div>
-        )}
+    <section className="bg-background py-16 md:py-24">
+      <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
+        <div className="grid gap-0 border-y border-border md:grid-cols-4">
+          {items.map((item) => (
+            <div
+              key={item.title}
+              className="border-b border-border px-0 py-8 last:border-b-0 md:border-b-0 md:border-r md:px-6 md:py-10 md:last:border-r-0"
+            >
+              <h3 className="font-display text-xl font-semibold tracking-tight md:text-2xl">
+                {item.title}
+              </h3>
+              <p className="mt-3 text-muted-foreground leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

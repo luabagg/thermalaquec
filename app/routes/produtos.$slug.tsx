@@ -1,6 +1,9 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+
 import { useLoaderData } from "@remix-run/react";
 import { productsData } from "~/data/products";
+import { buildNoIndexMeta, buildProductJsonLd, buildSeoMeta } from "~/lib/seo";
+import { SITE_NAME } from "~/lib/site";
 import { ProductDetailTemplate } from "~/pages/ProductDetailTemplate";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
@@ -13,12 +16,18 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   if (!data?.product) {
-    return [{ title: "Produto não encontrado | Thermal" }];
+    return buildNoIndexMeta(`Produto não encontrado | ${SITE_NAME}`);
   }
-  return [
-    { title: `${data.product.name} | Thermal` },
-    { name: "description", content: data.product.shortDescription },
-  ];
+
+  return buildSeoMeta({
+    title: `${data.product.name} | ${SITE_NAME}`,
+    description: data.product.shortDescription,
+    path: `/produtos/${data.product.slug}`,
+    image: data.product.mainImage,
+    imageAlt: `${data.product.name} — ${SITE_NAME}`,
+    type: "product",
+    jsonLd: buildProductJsonLd(data.product),
+  });
 };
 
 export default function ProdutoDetailPage() {

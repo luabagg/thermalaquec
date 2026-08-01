@@ -1,40 +1,43 @@
-import { Check } from "lucide-react";
 import { FadeInOnScroll } from "./FadeInOnScroll";
 
 export const SpecializedTeamSection = () => {
   return (
-    <section className="relative w-full py-16 md:py-24 bg-gray-800 text-white overflow-hidden">
+    <section className="relative w-full overflow-hidden bg-ink py-16 text-white md:py-24">
       <img
-        src="/energia-solar.webp" // Usando a mesma imagem de fundo do Hero para consistência
-        alt="Interior de escritório com vista para a natureza"
-        className="absolute inset-0 w-full h-full object-cover opacity-30"
+        src="/energia-solar.webp"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover opacity-25"
       />
-      <div className="relative z-10 container mx-auto px-4 md:px-6 max-w-screen-xl">
+      <div className="absolute inset-0 bg-ink/75" />
+      <div className="relative z-10 container mx-auto max-w-screen-xl px-4 md:px-6">
         <FadeInOnScroll>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Equipe Especializada</h2>
-          <p className="text-lg md:text-xl text-gray-200 mb-8 max-w-3xl">
-            Nossa empresa tem foco principal na área de sustentabilidade e experiência
-            comprovada, equipe técnica especializada e treinada dentro das normas:
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 max-w-xs md:max-w-md">
-            <div className="flex items-center gap-2 text-lg">
-              <Check className="h-6 w-6 text-primary" /> NR 10
+          <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr] md:gap-16">
+            <div>
+              <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+                Equipe técnica em campo e no projeto
+              </h2>
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-zinc-200">
+                Foco em sustentabilidade com experiência comprovada. Nossa
+                equipe é treinada nas normas NR 10, NR 18, NR 20 e NR 35.
+              </p>
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-zinc-200">
+                Desde março de 2020 mantemos departamento de engenharia próprio,
+                com engenheiro mestre em sustentabilidade e mais de 20 anos de
+                atuação.
+              </p>
             </div>
-            <div className="flex items-center gap-2 text-lg">
-              <Check className="h-6 w-6 text-primary" /> NR 18
-            </div>
-            <div className="flex items-center gap-2 text-lg">
-              <Check className="h-6 w-6 text-primary" /> NR 20
-            </div>
-            <div className="flex items-center gap-2 text-lg">
-              <Check className="h-6 w-6 text-primary" /> NR 35
-            </div>
+            <ul className="grid grid-cols-2 gap-3 self-start font-mono text-sm md:text-base">
+              {["NR 10", "NR 18", "NR 20", "NR 35"].map((nr) => (
+                <li
+                  key={nr}
+                  className="border border-white/15 bg-white/5 px-4 py-3 text-center font-medium tracking-wide"
+                >
+                  {nr}
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="text-lg md:text-xl text-gray-200 max-w-3xl">
-            Em meados de Março de 2020 a Thermal criou departamento de engenharia
-            próprio com a integração de Engenheiro, com Mestrado em Sustentabilidade e
-            mais de 20 anos de experiência.
-          </p>
         </FadeInOnScroll>
       </div>
     </section>

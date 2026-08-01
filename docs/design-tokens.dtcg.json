@@ -1,0 +1,365 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Industrial solar and central heating brand for Southern Brazil. Charcoal structure, heat-orange signal, technical sans typography. Trust-first B2B marketing, not consumer lifestyle or AI-startup aesthetics.\n",
+  "color": {
+    "$type": "color",
+    "primary": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.761,
+          0.255,
+          0.047
+        ],
+        "hex": "#c2410c"
+      }
+    },
+    "ink": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.078,
+          0.078,
+          0.078
+        ],
+        "hex": "#141414"
+      }
+    },
+    "ink-soft": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.122,
+          0.122,
+          0.122
+        ],
+        "hex": "#1f1f1f"
+      }
+    },
+    "chalk": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.957,
+          0.957,
+          0.961
+        ],
+        "hex": "#f4f4f5"
+      }
+    },
+    "paper": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.98,
+          0.98,
+          0.98
+        ],
+        "hex": "#fafafa"
+      }
+    },
+    "white": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          1,
+          1,
+          1
+        ],
+        "hex": "#ffffff"
+      }
+    },
+    "steel": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.443,
+          0.443,
+          0.478
+        ],
+        "hex": "#71717a"
+      }
+    },
+    "steel-dark": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.247,
+          0.247,
+          0.275
+        ],
+        "hex": "#3f3f46"
+      }
+    },
+    "heat": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.91,
+          0.435,
+          0
+        ],
+        "hex": "#e86f00"
+      }
+    },
+    "heat-deep": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.761,
+          0.255,
+          0.047
+        ],
+        "hex": "#c2410c"
+      }
+    },
+    "heat-soft": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          1,
+          0.969,
+          0.929
+        ],
+        "hex": "#fff7ed"
+      }
+    },
+    "line": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.894,
+          0.894,
+          0.906
+        ],
+        "hex": "#e4e4e7"
+      }
+    },
+    "danger": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.863,
+          0.149,
+          0.149
+        ],
+        "hex": "#dc2626"
+      }
+    }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "xs": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "sm": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      }
+    },
+    "xl": {
+      "$value": {
+        "value": 40,
+        "unit": "px"
+      }
+    },
+    "2xl": {
+      "$value": {
+        "value": 64,
+        "unit": "px"
+      }
+    },
+    "3xl": {
+      "$value": {
+        "value": 96,
+        "unit": "px"
+      }
+    },
+    "section": {
+      "$value": {
+        "value": 96,
+        "unit": "px"
+      }
+    }
+  },
+  "rounded": {
+    "$type": "dimension",
+    "none": {
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      }
+    },
+    "sm": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      }
+    },
+    "lg": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    }
+  },
+  "typography": {
+    "display": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "Outfit",
+        "fontSize": {
+          "value": 3.5,
+          "unit": "rem"
+        },
+        "fontWeight": 700,
+        "letterSpacing": {
+          "value": -0.03,
+          "unit": "em"
+        }
+      }
+    },
+    "h1": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "Outfit",
+        "fontSize": {
+          "value": 3,
+          "unit": "rem"
+        },
+        "fontWeight": 700,
+        "letterSpacing": {
+          "value": -0.025,
+          "unit": "em"
+        }
+      }
+    },
+    "h2": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "Outfit",
+        "fontSize": {
+          "value": 2.25,
+          "unit": "rem"
+        },
+        "fontWeight": 650,
+        "letterSpacing": {
+          "value": -0.02,
+          "unit": "em"
+        }
+      }
+    },
+    "h3": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "Outfit",
+        "fontSize": {
+          "value": 1.5,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "letterSpacing": {
+          "value": -0.015,
+          "unit": "em"
+        }
+      }
+    },
+    "body-lg": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "IBM Plex Sans",
+        "fontSize": {
+          "value": 1.125,
+          "unit": "rem"
+        },
+        "fontWeight": 400,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "em"
+        }
+      }
+    },
+    "body-md": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "IBM Plex Sans",
+        "fontSize": {
+          "value": 1,
+          "unit": "rem"
+        },
+        "fontWeight": 400,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "em"
+        }
+      }
+    },
+    "body-sm": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "IBM Plex Sans",
+        "fontSize": {
+          "value": 0.875,
+          "unit": "rem"
+        },
+        "fontWeight": 400,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "em"
+        }
+      }
+    },
+    "label": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "IBM Plex Sans",
+        "fontSize": {
+          "value": 0.8125,
+          "unit": "rem"
+        },
+        "fontWeight": 500,
+        "letterSpacing": {
+          "value": 0.04,
+          "unit": "em"
+        }
+      }
+    },
+    "mono": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "IBM Plex Mono",
+        "fontSize": {
+          "value": 0.875,
+          "unit": "rem"
+        },
+        "fontWeight": 500,
+        "letterSpacing": {
+          "value": 0,
+          "unit": "em"
+        }
+      }
+    }
+  }
+}

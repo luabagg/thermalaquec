@@ -1,39 +1,47 @@
-import { Award, Users, Cog } from "lucide-react";
-
 const features = [
   {
-    icon: <Award className="h-10 w-10 text-primary" />,
-    title: "Qualidade Superior",
-    description: "Produtos fabricados com matéria-prima de alta qualidade e tecnologia de ponta.",
+    title: "Materiais e instalação de alto padrão",
+    description:
+      "Componentes selecionados e execução cuidadosa para desempenho estável ao longo dos anos.",
   },
   {
-    icon: <Users className="h-10 w-10 text-primary" />,
-    title: "Atendimento Especializado",
-    description: "Equipe técnica para oferecer a melhor solução sustentável para sua necessidade.",
+    title: "Atendimento técnico direto",
+    description:
+      "Orientação clara do dimensionamento à pós-venda, sem intermediário genérico.",
   },
   {
-    icon: <Cog className="h-10 w-10 text-primary" />,
-    title: "Engenharia Própria",
-    description: "Departamento de engenharia dedicado para desenvolver soluções inovadoras e eficientes.",
+    title: "Projeto com engenharia interna",
+    description:
+      "Cada sistema nasce no nosso departamento de engenharia, alinhado à demanda do cliente.",
   },
 ];
 
 export const Features = () => {
   return (
-    <section className="py-12 md:py-24 bg-secondary">
-      <div className="container mx-auto text-center max-w-screen-xl px-4 md:px-6">
-        <h2 className="text-3xl font-bold mb-2">Por que escolher a Thermal?</h2>
-        <p className="text-muted-foreground mb-12">
-          Nossos diferenciais garantem a sua satisfação.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feature) => (
-            <div key={feature.title} className="flex flex-col items-center gap-4 p-6">
-              {feature.icon}
-              <h3 className="text-xl font-semibold">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </div>
-          ))}
+    <section className="bg-background py-16 md:py-24">
+      <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
+        <div className="grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:gap-16">
+          <div>
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+              Por que a Thermal
+            </h2>
+            <p className="mt-4 max-w-[40ch] text-lg text-muted-foreground leading-relaxed">
+              Diferenciais práticos que aparecem no resultado do projeto, não em
+              discurso de marketing.
+            </p>
+          </div>
+          <ul className="divide-y divide-border border-t border-border">
+            {features.map((feature) => (
+              <li key={feature.title} className="grid gap-2 py-6 md:grid-cols-[1fr_1.4fr] md:gap-8">
+                <h3 className="font-display text-lg font-semibold tracking-tight md:text-xl">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

@@ -1,0 +1,131 @@
+{
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#c2410c",
+        "ink": "#141414",
+        "ink-soft": "#1f1f1f",
+        "chalk": "#f4f4f5",
+        "paper": "#fafafa",
+        "white": "#ffffff",
+        "steel": "#71717a",
+        "steel-dark": "#3f3f46",
+        "heat": "#e86f00",
+        "heat-deep": "#c2410c",
+        "heat-soft": "#fff7ed",
+        "line": "#e4e4e7",
+        "danger": "#dc2626"
+      },
+      "fontFamily": {
+        "display": [
+          "Outfit"
+        ],
+        "h1": [
+          "Outfit"
+        ],
+        "h2": [
+          "Outfit"
+        ],
+        "h3": [
+          "Outfit"
+        ],
+        "body-lg": [
+          "IBM Plex Sans"
+        ],
+        "body-md": [
+          "IBM Plex Sans"
+        ],
+        "body-sm": [
+          "IBM Plex Sans"
+        ],
+        "label": [
+          "IBM Plex Sans"
+        ],
+        "mono": [
+          "IBM Plex Mono"
+        ]
+      },
+      "fontSize": {
+        "display": [
+          "3.5rem",
+          {
+            "letterSpacing": "-0.03em",
+            "fontWeight": "700"
+          }
+        ],
+        "h1": [
+          "3rem",
+          {
+            "letterSpacing": "-0.025em",
+            "fontWeight": "700"
+          }
+        ],
+        "h2": [
+          "2.25rem",
+          {
+            "letterSpacing": "-0.02em",
+            "fontWeight": "650"
+          }
+        ],
+        "h3": [
+          "1.5rem",
+          {
+            "letterSpacing": "-0.015em",
+            "fontWeight": "600"
+          }
+        ],
+        "body-lg": [
+          "1.125rem",
+          {
+            "letterSpacing": "0em",
+            "fontWeight": "400"
+          }
+        ],
+        "body-md": [
+          "1rem",
+          {
+            "letterSpacing": "0em",
+            "fontWeight": "400"
+          }
+        ],
+        "body-sm": [
+          "0.875rem",
+          {
+            "letterSpacing": "0em",
+            "fontWeight": "400"
+          }
+        ],
+        "label": [
+          "0.8125rem",
+          {
+            "letterSpacing": "0.04em",
+            "fontWeight": "500"
+          }
+        ],
+        "mono": [
+          "0.875rem",
+          {
+            "letterSpacing": "0em",
+            "fontWeight": "500"
+          }
+        ]
+      },
+      "borderRadius": {
+        "none": "0px",
+        "sm": "4px",
+        "md": "8px",
+        "lg": "12px"
+      },
+      "spacing": {
+        "xs": "4px",
+        "sm": "8px",
+        "md": "16px",
+        "lg": "24px",
+        "xl": "40px",
+        "2xl": "64px",
+        "3xl": "96px",
+        "section": "96px"
+      }
+    }
+  }
+}

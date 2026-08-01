@@ -1,92 +1,61 @@
 import type { MetaFunction } from "@remix-run/node";
+
 import { CustomBreadcrumb } from "~/components/marketing/CustomBreadcrumb";
 import { FadeInOnScroll } from "~/components/marketing/FadeInOnScroll";
+import { PageHero } from "~/components/marketing/PageHero";
+import { buildSeoMeta } from "~/lib/seo";
+import { SITE_NAME } from "~/lib/site";
 
-export const meta: MetaFunction = () => [
-  { title: "Panorama Energético | Thermal" },
-  {
-    name: "description",
-    content:
-      "Entenda a evolução do consumo de energia e a importância das fontes renováveis.",
-  },
-];
+export const meta: MetaFunction = () =>
+  buildSeoMeta({
+    title: `Panorama Energético | ${SITE_NAME}`,
+    description: "Entenda o consumo de energia, os limites dos combustíveis fósseis e o papel das fontes renováveis.",
+    path: "/panorama-energetico",
+    type: "article",
+  });
 
 export default function PanoramaEnergeticoPage() {
-  const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Panorama Energético" },
-  ];
+  const breadcrumbItems = [{ label: "Home", href: "/" }, { label: "Panorama Energético" }];
 
   return (
     <main className="flex-grow">
-      <section className="relative flex w-full items-center justify-center bg-gray-800 py-24 text-white md:py-32">
-        <img
-          src="/energia-solar.webp"
-          alt="Painéis solares"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-black opacity-70" />
-        <div className="relative z-10 container mx-auto px-4 text-center md:px-6">
-          <FadeInOnScroll>
-            <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
-              Panorama Energético
-            </h1>
-            <p className="mx-auto mt-4 max-w-3xl text-lg text-gray-200 md:text-xl">
-              Entenda a evolução do consumo de energia e a importância das fontes renováveis.
-            </p>
-          </FadeInOnScroll>
-        </div>
-      </section>
+      <PageHero title="Panorama energético" description="Por que a transição para fontes renováveis deixou de ser opcional." />
 
-      <div className="w-full bg-secondary py-4 md:py-6">
+      <div className="w-full border-b border-border bg-secondary py-4 md:py-5">
         <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
           <CustomBreadcrumb items={breadcrumbItems} />
         </div>
       </div>
 
-      <section className="bg-secondary py-12 md:py-24">
+      <section className="bg-background py-16 md:py-24">
         <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
           <FadeInOnScroll>
-            <h2 className="mb-8 text-center text-3xl font-bold text-gray-800">
-              A Importância da Energia Renovável
-            </h2>
-            <div className="prose prose-lg mx-auto mb-12 max-w-3xl text-gray-800">
-              <p className="mb-4">
-                O Sol, nossa principal fonte de energia, atua como uma gigantesca fornalha —
-                aproximadamente um milhão de vezes maior que a Terra — situada a 150 milhões de
-                quilômetros de distância. A intensidade de sua radiação sempre desempenhou um papel
-                fundamental no aquecimento do planeta. Foi essa energia que possibilitou a formação
-                da atmosfera, o surgimento da vida e a geração das reservas de combustíveis
-                fósseis, como gás natural, petróleo e carvão, amplamente utilizadas pela sociedade
-                moderna.
-              </p>
-              <p className="mb-4">
-                Os combustíveis fósseis são formados a partir da decomposição orgânica de
-                organismos vivos ao longo de extensos períodos geológicos. Estima-se que a
-                quantidade de combustível fóssil consumida atualmente em um único ano tenha levado
-                cerca de um milhão de anos para se formar. O ritmo de consumo energético observado
-                nas últimas décadas supera significativamente a capacidade natural de renovação dos
-                recursos disponíveis no ecossistema terrestre, que envolve a interação entre a
-                atmosfera e os recursos naturais. Nas próximas quatro a cinco décadas, projeta-se
-                uma redução expressiva na disponibilidade desses recursos, enquanto a população
-                global continuará em crescimento.
+            <h2 className="mb-8 max-w-2xl font-display text-3xl font-bold tracking-tight text-ink">A pressão sobre as fontes fósseis</h2>
+            <div className="mx-auto mb-12 max-w-3xl space-y-5 text-lg leading-relaxed text-muted-foreground">
+              <p>
+                O Sol é a principal fonte de energia do planeta: uma fornalha cerca de um milhão de vezes maior que a Terra, a 150 milhões
+                de quilômetros. Sua radiação aquece o planeta, formou a atmosfera, sustentou a vida e originou as reservas de combustíveis
+                fósseis (gás natural, petróleo e carvão) que a sociedade moderna ainda consome em larga escala.
               </p>
               <p>
-                Diversas projeções de longo prazo para o mercado energético convergem para um mesmo
-                cenário: dentro de um horizonte de 15 a 25 anos, a demanda mundial deverá ultrapassar
-                a capacidade de oferta. O consumo energético acompanha diretamente a tendência de
-                crescimento populacional. Nos últimos 40 anos, esse crescimento tem registrado uma
-                média anual de aproximadamente 80 milhões de habitantes.
+                Combustíveis fósseis nascem da decomposição orgânica ao longo de períodos geológicos. Estima-se que o volume queimado em um
+                único ano hoje tenha levado cerca de um milhão de anos para se formar. O ritmo das últimas décadas ultrapassa a capacidade
+                natural de renovação. Nas próximas quatro a cinco décadas, projeta-se queda forte na disponibilidade desses recursos,
+                enquanto a população global segue crescendo.
+              </p>
+              <p>
+                Projeções de longo prazo convergem: em 15 a 25 anos, a demanda mundial tende a superar a oferta. O consumo acompanha o
+                crescimento populacional, com média anual próxima de 80 milhões de novos habitantes nas últimas quatro décadas.
               </p>
             </div>
           </FadeInOnScroll>
 
-          <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2">
+          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
             <FadeInOnScroll>
               <img
                 src="/panoramaa_06.webp"
-                alt="Gráfico de Consumo de Combustíveis Fósseis e População"
-                className="h-auto w-full rounded-lg object-cover shadow-lg"
+                alt="Gráfico de consumo de combustíveis fósseis e população"
+                className="h-auto w-full rounded-lg border border-border object-cover"
                 width={600}
                 height={400}
                 loading="lazy"
@@ -95,8 +64,8 @@ export default function PanoramaEnergeticoPage() {
             <FadeInOnScroll>
               <img
                 src="/panoramaa_03.webp"
-                alt="Gráfico de Consumo de Combustíveis Fósseis"
-                className="h-auto w-full rounded-lg object-cover shadow-lg"
+                alt="Gráfico de consumo de combustíveis fósseis"
+                className="h-auto w-full rounded-lg border border-border object-cover"
                 width={600}
                 height={400}
                 loading="lazy"

@@ -1,21 +1,26 @@
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { Button } from "~/components/ui/button";
 import { FadeInOnScroll } from "./FadeInOnScroll";
 
 export const CalculatorCtaSection = () => {
   return (
     <FadeInOnScroll>
-      <section className="py-12 md:py-24 bg-gray-800 text-center text-white">
-        <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
-          <h2 className="text-3xl font-bold mb-4">Calcule sua Economia Solar!</h2>
-          <p className="text-gray-200 mb-8 max-w-2xl mx-auto">
-            Use nossa calculadora para estimar o potencial de economia e o investimento necessário para ter energia solar em sua propriedade.
-          </p>
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white">
+      <section className="bg-ink py-16 text-white md:py-20">
+        <div className="container mx-auto grid max-w-screen-xl items-center gap-8 px-4 md:grid-cols-[1.4fr_auto] md:px-6">
+          <div className="text-left">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+              Quanto você pode economizar com solar?
+            </h2>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-zinc-300 md:text-lg">
+              Informe o consumo da conta de luz e veja uma estimativa de
+              investimento e retorno para o seu imóvel.
+            </p>
+          </div>
+          <Button asChild size="lg" className="w-full md:w-auto">
             <Link to="/calculadora-solar">
-              Acessar Calculadora
-              <ArrowRight className="ml-2 h-5 w-5" />
+              Abrir calculadora
+              <ArrowRight className="h-5 w-5" />
             </Link>
           </Button>
         </div>

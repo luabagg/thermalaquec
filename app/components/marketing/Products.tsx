@@ -1,31 +1,36 @@
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { ProductCard } from "./ProductCard";
+import { Button } from "~/components/ui/button";
 import { productsData } from "~/data/products";
+import { ProductCard } from "./ProductCard";
 
 const productsToShowOnHomepage = productsData.slice(0, 3);
 
 export const Products = () => {
   return (
-    <section className="py-12 md:py-24">
-      <div className="container mx-auto text-center max-w-screen-xl px-4 md:px-6">
-        <h2 className="text-3xl font-bold mb-2">Nossos Produtos em Destaque</h2>
-        <p className="text-muted-foreground mb-8">
-          Conheça algumas de nossas principais soluções.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section className="bg-secondary py-16 md:py-24">
+      <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
+        <div className="mb-10 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-xl text-left">
+            <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+              Soluções em destaque
+            </h2>
+            <p className="mt-3 text-muted-foreground leading-relaxed">
+              Aquecimento e geração solar dimensionados para o uso real do seu
+              imóvel.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="self-start md:self-auto">
+            <Link to="/produtos">
+              Ver catálogo
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {productsToShowOnHomepage.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}
-        </div>
-        <div className="mt-12">
-          <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-white">
-            <Link to="/produtos">
-              Ver Todos os Produtos
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-          </Button>
         </div>
       </div>
     </section>

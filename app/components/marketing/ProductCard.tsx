@@ -1,9 +1,8 @@
 import { Link } from "@remix-run/react";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { FadeInOnScroll } from "./FadeInOnScroll";
+import { Button } from "~/components/ui/button";
 import { ProductData } from "~/data/products";
+import { FadeInOnScroll } from "./FadeInOnScroll";
 
 interface ProductCardProps {
   product: ProductData;
@@ -24,34 +23,34 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <FadeInOnScroll className="h-full">
-      <Card className="overflow-hidden rounded-lg shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-2 flex flex-col h-full">
-        <CardHeader className="p-0 relative">
+      <article className="group flex h-full flex-col overflow-hidden rounded-lg bg-card transition-transform duration-300 ease-thermal hover:-translate-y-1">
+        <div className="relative overflow-hidden">
           <img
             src={product.mainImage}
             alt={product.name}
-            className="w-full h-56 object-cover"
+            className="h-52 w-full object-cover transition-transform duration-500 ease-thermal group-hover:scale-[1.03]"
             width="400"
-            height="224"
+            height="208"
             loading="lazy"
           />
-        </CardHeader>
-        <CardContent className="p-6 flex flex-col flex-grow">
-          <CardTitle className="mb-2 text-xl font-semibold text-gray-800">
+        </div>
+        <div className="flex flex-grow flex-col p-6">
+          <h3 className="font-display mb-2 text-xl font-semibold tracking-tight text-ink">
             {product.name}
-          </CardTitle>
+          </h3>
           {product.shortDescription && (
-            <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-4">
+            <p className="mb-6 line-clamp-3 flex-grow text-sm leading-relaxed text-muted-foreground">
               {product.shortDescription}
             </p>
           )}
-          <Button asChild className="mt-auto bg-primary hover:bg-primary/90 text-white">
+          <Button asChild variant="outline" className="mt-auto self-start">
             <Link to={productDetailPageLink} onClick={handleProductCardClick}>
-              Saiba Mais
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Ver produto
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </article>
     </FadeInOnScroll>
   );
 };

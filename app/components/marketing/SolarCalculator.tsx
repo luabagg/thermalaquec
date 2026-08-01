@@ -239,17 +239,22 @@ export const SolarCalculator = () => {
   };
 
   return (
-    <FadeInOnScroll>
-      <section className="w-full h-full flex items-center justify-center bg-transparent py-0">
-        <div className="container mx-auto text-center">
-          <Card className={cn(
-            "p-6 shadow-lg transition-all duration-300 ease-in-out rounded-lg",
-            "w-full md:max-w-[450px] h-auto"
-          )}>
-            <h2 className="text-2xl font-bold mb-4 text-gray-800">Calculadora Solar</h2>
-            <p className="text-muted-foreground text-sm mb-6">Simule seu gerador de Energia Solar</p>
+    <FadeInOnScroll className="w-full">
+      <section className="flex h-full w-full items-center justify-center bg-transparent py-0">
+        <div className="w-full text-center md:mx-auto md:max-w-[450px]">
+          <Card
+            className={cn(
+              "h-auto w-full rounded-lg p-4 shadow-lg transition-all duration-300 ease-in-out sm:p-6",
+            )}
+          >
+            <h2 className="font-display mb-4 text-2xl font-bold tracking-tight text-ink">
+              Calculadora solar
+            </h2>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Simule o gerador a partir do seu consumo
+            </p>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-gray-200 rounded-md p-1">
+              <TabsList className="grid w-full grid-cols-2 bg-secondary rounded-md p-1">
                 <TabsTrigger
                   value="simulacao"
                   className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:font-semibold"
@@ -378,8 +383,8 @@ export const SolarCalculator = () => {
                   </div>
                   {/* Botão de Simular */}
                   <div className="md:col-span-2">
-                    <Button type="submit" className="w-full mt-4 bg-primary hover:bg-primary/90 text-white" disabled={isSubmitting || cepLoading}>
-                      {isSubmitting ? "Simulando..." : "Simule Grátis!"}
+                    <Button type="submit" className="mt-4 w-full" disabled={isSubmitting || cepLoading}>
+                      {isSubmitting ? "Simulando..." : "Simular"}
                     </Button>
                   </div>
                 </form>
@@ -389,31 +394,31 @@ export const SolarCalculator = () => {
                   <div id="results-section" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
                     <Card className="p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Geração mensal estimada</p>
-                      <p className="text-xl font-bold text-gray-800">{formatNumber(results.generation || 0)} kWh/mês</p>
+                      <p className="text-xl font-bold text-ink">{formatNumber(results.generation || 0)} kWh/mês</p>
                     </Card>
                     <Card className="p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Potência do sistema</p>
-                      <p className="text-xl font-bold text-gray-800">{formatNumber(results.systemPower || 0, 2)} kWp</p>
+                      <p className="text-xl font-bold text-ink">{formatNumber(results.systemPower || 0, 2)} kWp</p>
                     </Card>
                     <Card className="p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Economia anual</p>
-                      <p className="text-xl font-bold text-gray-800">R$ {formatBrazilianCurrency(results.annualSaving || 0)}</p>
+                      <p className="text-xl font-bold text-ink">R$ {formatBrazilianCurrency(results.annualSaving || 0)}</p>
                     </Card>
                     <Card className="p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Payback estimado</p>
-                      <p className="text-xl font-bold text-gray-800">{results.payback ? `${formatNumber(results.payback)} meses` : '—'}</p>
+                      <p className="text-xl font-bold text-ink">{results.payback ? `${formatNumber(results.payback)} meses` : '—'}</p>
                     </Card>
                     <Card className="p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Qtd. de módulos</p>
-                      <p className="text-xl font-bold text-gray-800">{formatNumber(results.modulesCount || 0)}</p>
+                      <p className="text-xl font-bold text-ink">{formatNumber(results.modulesCount || 0)}</p>
                     </Card>
                     <Card className="p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Área necessária</p>
-                      <p className="text-xl font-bold text-gray-800">{formatNumber(results.areaNeeded || 0)} m²</p>
+                      <p className="text-xl font-bold text-ink">{formatNumber(results.areaNeeded || 0)} m²</p>
                     </Card>
                     <Card className="p-4 shadow-sm lg:col-span-3">
                       <p className="text-sm text-gray-600">Investimento estimado</p>
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 text-base font-semibold text-gray-800">
+                      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 text-base font-semibold text-ink">
                         <div>
                           <span className="text-gray-500">Menor:</span> R$ {formatBrazilianCurrency(results.investmentMin || 0)}
                         </div>

@@ -1,13 +1,18 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+
+import { useEffect, useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
-import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { buildNoIndexMeta } from "~/lib/seo";
+import { SITE_NAME } from "~/lib/site";
 import { createClient } from "~/libs/supabase/client.server";
 import { allowedOrigin } from "~/utils/allowedOrigins";
 import { getUser } from "~/utils/auth";
+
+export const meta: MetaFunction = () => buildNoIndexMeta(`Acesso administrativo | ${SITE_NAME}`);
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { supabaseClient } = createClient(request);
@@ -28,16 +33,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const { supabaseClient, headers } = createClient(request);
 
   const origin = request.headers.get("origin");
-  if (
-    process.env.NODE_ENV === "production" &&
-    (!origin || !allowedOrigin(origin))
-  ) {
+  if (process.env.NODE_ENV === "production" && (!origin || !allowedOrigin(origin))) {
     return json<ActionResponse>(
       {
         success: false,
         error: "Problema ao confirmar origem do domínio",
       },
-      { headers },
+      { headers }
     );
   }
 
@@ -55,7 +57,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         success: false,
         error: "Erro ao efetuar login",
       },
-      { headers },
+      { headers }
     );
   }
 
@@ -95,29 +97,17 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold tracking-tight">Acesso admin</h1>
         {!actionResponse?.success ? (
           <>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Faça o login com seu e-mail. Enviaremos um link de acesso.
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Faça o login com seu e-mail. Enviaremos um link de acesso.</p>
             <Form method="post" onSubmit={handleSubmit} className="mt-8 space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  placeholder="Seu e-mail"
-                  required
-                  disabled={isDisabled}
-                />
+                <Input id="email" type="email" name="email" placeholder="Seu e-mail" required disabled={isDisabled} />
               </div>
               <Button type="submit" className="w-full" disabled={isDisabled}>
                 {isDisabled ? `Obter código (${timer}s)` : "Obter código"}
               </Button>
               {actionResponse?.error != undefined ? (
-                <div
-                  role="alert"
-                  className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive"
-                >
+                <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                   {actionResponse.error}
                 </div>
               ) : null}

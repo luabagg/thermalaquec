@@ -1,4 +1,5 @@
 import type { MetaFunction } from "@remix-run/node";
+
 import { About } from "~/components/marketing/About";
 import { CalculatorCtaSection } from "~/components/marketing/CalculatorCtaSection";
 import { FadeInOnScroll } from "~/components/marketing/FadeInOnScroll";
@@ -7,10 +8,16 @@ import { Hero } from "~/components/marketing/Hero";
 import { MissionVision } from "~/components/marketing/MissionVision";
 import { Products } from "~/components/marketing/Products";
 import { StatsSection } from "~/components/marketing/StatsSection";
+import { buildHomeJsonLd, buildSeoMeta } from "~/lib/seo";
+import { SITE_DESCRIPTION, SITE_NAME } from "~/lib/site";
 
-export const meta: MetaFunction = () => [
-  { title: "Thermal | Energia Solar e Aquecimento Industrial" },
-];
+export const meta: MetaFunction = () =>
+  buildSeoMeta({
+    title: `${SITE_NAME} | Energia Solar e Aquecimento Central`,
+    description: SITE_DESCRIPTION,
+    path: "/",
+    jsonLd: buildHomeJsonLd(),
+  });
 
 export default function Index() {
   return (

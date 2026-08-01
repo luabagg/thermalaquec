@@ -1,15 +1,18 @@
 import { Link } from "@remix-run/react";
-import { Button } from "~/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { FadeInOnScroll } from "./FadeInOnScroll";
+import { Button } from "~/components/ui/button";
 import { ProductData } from "~/data/products";
+import { FadeInOnScroll } from "./FadeInOnScroll";
 
 interface ProductListingItemProps {
   product: ProductData;
   reverse?: boolean;
 }
 
-export const ProductListingItem = ({ product, reverse = false }: ProductListingItemProps) => {
+export const ProductListingItem = ({
+  product,
+  reverse = false,
+}: ProductListingItemProps) => {
   const productDetailPageLink = `/produtos/${product.slug}`;
 
   const handleProductDetailClick = () => {
@@ -24,24 +27,33 @@ export const ProductListingItem = ({ product, reverse = false }: ProductListingI
 
   return (
     <FadeInOnScroll>
-      <div id={product.slug} className={`grid md:grid-cols-2 gap-12 items-center py-12 md:py-16 ${reverse ? "md:flex-row-reverse" : ""}`}>
+      <div
+        id={product.slug}
+        className="grid items-center gap-10 border-b border-border py-12 last:border-b-0 md:grid-cols-2 md:gap-14 md:py-16"
+      >
         <div className={reverse ? "md:order-2" : "md:order-1"}>
           <img
             src={product.mainImage}
             alt={product.name}
-            className="rounded-lg shadow-lg w-full object-cover h-64 md:h-96"
+            className="h-64 w-full rounded-lg object-cover md:h-96"
             width="550"
             height="384"
             loading="lazy"
           />
         </div>
-        <div className={`flex flex-col gap-4 ${reverse ? "md:order-1" : "md:order-2"}`}>
-          <h2 className="text-3xl font-bold tracking-tight text-gray-800">{product.name}</h2>
-          <p className="text-lg text-muted-foreground">{product.shortDescription}</p>
-          <Button asChild className="mt-4 bg-primary hover:bg-primary/90 text-white self-start">
+        <div
+          className={`flex flex-col gap-4 ${reverse ? "md:order-1" : "md:order-2"}`}
+        >
+          <h2 className="font-display text-3xl font-bold tracking-tight text-ink">
+            {product.name}
+          </h2>
+          <p className="max-w-[55ch] text-lg leading-relaxed text-muted-foreground">
+            {product.shortDescription}
+          </p>
+          <Button asChild className="mt-2 self-start">
             <Link to={productDetailPageLink} onClick={handleProductDetailClick}>
-              Saiba Mais
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Ver detalhes
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         </div>

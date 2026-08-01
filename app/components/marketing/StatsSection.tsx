@@ -12,16 +12,16 @@ const parseStatValue = (value: string): number => {
 
 const formatCountedValue = (originalValue: string, countedNumber: number): string => {
   if (originalValue.includes("MIL")) {
-    return `+ ${Math.floor(countedNumber / 1000)} MIL`;
+    return `+${Math.floor(countedNumber / 1000)} mil`;
   }
-  return `+ ${countedNumber}`;
+  return `+${countedNumber}`;
 };
 
 const stats = [
-  { value: "+ 14", label: "ANOS DE EXPERIÊNCIA" },
-  { value: "+ 6 MIL", label: "PLACAS INSTALADAS" },
-  { value: "+ 100", label: "CLIENTES CORPORATIVOS" },
-  { value: "+ 1000", label: "CLIENTES ATENDIDOS" },
+  { value: "+ 14", label: "Anos de experiência" },
+  { value: "+ 6 MIL", label: "Placas instaladas" },
+  { value: "+ 100", label: "Clientes corporativos" },
+  { value: "+ 1000", label: "Clientes atendidos" },
 ];
 
 function StatItem({
@@ -38,10 +38,14 @@ function StatItem({
   const displayedValue = formatCountedValue(value, countedValue);
 
   return (
-    <div className="flex flex-col items-center p-4">
-      <h3 className="mb-2 text-5xl font-bold text-white md:text-6xl">{displayedValue}</h3>
-      <div className="mb-4 h-1 w-16 bg-primary" />
-      <p className="text-lg uppercase tracking-wide text-gray-300">{label}</p>
+    <div className="flex flex-col items-start text-left">
+      <h3 className="font-display text-4xl font-bold tracking-tight text-white md:text-5xl">
+        {displayedValue}
+      </h3>
+      <div className="mt-3 h-0.5 w-10 bg-heat" />
+      <p className="mt-3 font-sans text-sm font-medium text-zinc-300 md:text-base">
+        {label}
+      </p>
     </div>
   );
 }
@@ -49,30 +53,32 @@ function StatItem({
 export const StatsSection = () => {
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0.1,
+    threshold: 0.15,
   });
 
   return (
     <section
       ref={ref}
-      className="relative w-full overflow-hidden bg-gray-900 py-16 text-white md:py-24"
+      className="relative w-full overflow-hidden bg-ink py-16 text-white md:py-24"
     >
       <img
         src="/solar-panels-roof.webp"
-        alt="Painéis solares"
-        className="absolute inset-0 h-full w-full object-cover opacity-30"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover opacity-25"
       />
-      <div className="relative z-10 container mx-auto max-w-screen-xl px-4 text-center md:px-6">
+      <div className="absolute inset-0 bg-ink/70" />
+      <div className="relative z-10 container mx-auto max-w-screen-xl px-4 md:px-6">
         <div
-          className={`flex flex-col items-center transition-all duration-1000 ease-out ${
-            inView ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+          className={`transition-all duration-700 ease-thermal ${
+            inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
-          <p className="mb-12 max-w-3xl text-lg text-gray-200 md:text-xl">
-            Com mais de 14 anos de experiência, a Thermal se orgulha de seus números e da confiança
-            de seus clientes.
+          <p className="mb-12 max-w-2xl text-lg leading-relaxed text-zinc-200 md:text-xl">
+            Mais de uma década instalando solar e aquecimento com números que
+            sustentam a confiança dos nossos clientes.
           </p>
-          <div className="grid w-full grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid w-full grid-cols-2 gap-10 lg:grid-cols-4 lg:gap-8">
             {stats.map((stat) => (
               <StatItem
                 key={stat.label}
