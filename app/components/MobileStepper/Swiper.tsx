@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Box, Container, Typography } from "@mui/material";
 import { MobileStepper } from "./MobileStepper";
 import { useViewport } from "~/hooks/viewport";
 
@@ -20,7 +19,6 @@ export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode; text:
     });
   };
 
-  // Swiping effect for mobile users.
   const [dragging, setDragging] = React.useState(false);
   const [startX, setStartX] = React.useState(0);
   const [currentX, setCurrentX] = React.useState(0);
@@ -39,7 +37,6 @@ export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode; text:
     setDragging(true);
   };
 
-  // Verifies states to move section according to user drag.
   const handleTouchEnd = () => {
     if (!dragging) {
       return;
@@ -63,9 +60,8 @@ export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode; text:
   }, [handleNext]);
 
   return (
-    <Container
-      maxWidth="md"
-      className="text-center lg:text-left"
+    <div
+      className="max-w-screen-md mx-auto px-4 text-center lg:text-left"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -80,17 +76,13 @@ export function Swiper({ steps }: { steps: Array<{ title: React.ReactNode; text:
           mt-20 lg:justify-start
       "
       />
-    </Container>
+    </div>
   );
 }
 
 const SwiperSection = function ({ title, text }: { title: React.ReactNode; text: string }) {
   return (
-    <Box
-      className="
-      w-full lg:w-[65%]
-    "
-    >
+    <div className="w-full lg:w-[65%]">
       <h1
         className="
         font-sansbold font-bold
@@ -101,16 +93,15 @@ const SwiperSection = function ({ title, text }: { title: React.ReactNode; text:
       >
         {title}
       </h1>
-      <Typography
-        variant="subtitle1"
-        component={"span"}
+      <span
         className="
+        block text-lg
         text-gray-300 opacity-90
         animate-fadeInUp
       "
       >
         {text}
-      </Typography>
-    </Box>
+      </span>
+    </div>
   );
 };
