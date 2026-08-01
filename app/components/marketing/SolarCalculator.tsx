@@ -18,6 +18,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from "~/lib/utils";
 import InputMaskLib from "react-input-mask";
 import { NumericFormat } from "react-number-format";
+import { submitMarketingForm } from "~/utils/submit-marketing-form";
 
 // react-input-mask typings disagree with React 18 JSX element types
 const InputMask = InputMaskLib as unknown as React.ComponentType<
@@ -62,6 +63,7 @@ export const SolarCalculator = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [fetchedLocation, setFetchedLocation] = useState<string | null>(null);
 
   const [results, setResults] = useState<{
@@ -123,6 +125,7 @@ export const SolarCalculator = () => {
   const handleCalculateAndSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFormError(null);
 
     // Parse accountValue from string (e.g., "2500.00") to float
     const bill = parseFloat(formData.accountValue || '0');
@@ -177,36 +180,26 @@ export const SolarCalculator = () => {
     });
 
     try {
-      const response = await fetch("/api/forms/calculator", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nome_completo: formData.nomeCompleto,
-          telefone_contato: formData.telefone,
-          email_contato: formData.email,
-          cep_usuario: formData.cep,
-          uf_usuario: formData.uf,
-          valor_medio_conta_rs: formData.accountValue,
-          concessionaria_selecionada: selectedUtility.name,
-          geracao_mensal_estimada_kwh: Math.round(generation),
-          potencia_sistema_kwp: Number(kwp.toFixed(2)),
-          economia_anual_estimada_rs: Number(annualSaving.toFixed(2)),
-          payback_estimado_meses: payback ? Math.round(payback) : "N/A",
-          quantidade_modulos: modulesCount,
-          area_necessaria_m2: Math.round(areaNeeded),
-          investimento_minimo_rs: Number(investmentMin.toFixed(2)),
-          investimento_maximo_rs: Number(investmentMax.toFixed(2)),
-          modelo_painel_selecionado: panel.model,
-        }),
+      const result = await submitMarketingForm("calculator", {
+        nome_completo: formData.nomeCompleto,
+        telefone_contato: formData.telefone,
+        email_contato: formData.email,
+        cep_usuario: formData.cep,
+        uf_usuario: formData.uf,
+        valor_medio_conta_rs: formData.accountValue,
+        concessionaria_selecionada: selectedUtility.name,
+        geracao_mensal_estimada_kwh: Math.round(generation),
+        potencia_sistema_kwp: Number(kwp.toFixed(2)),
+        economia_anual_estimada_rs: Number(annualSaving.toFixed(2)),
+        payback_estimado_meses: payback ? Math.round(payback) : "N/A",
+        quantidade_modulos: modulesCount,
+        area_necessaria_m2: Math.round(areaNeeded),
+        investimento_minimo_rs: Number(investmentMin.toFixed(2)),
+        investimento_maximo_rs: Number(investmentMax.toFixed(2)),
+        modelo_painel_selecionado: panel.model,
       });
 
-      const result = (await response.json().catch(() => null)) as
-        | { ok?: boolean; error?: string; retryAfterSec?: number }
-        | null;
-
-      if (response.ok && result?.ok) {
+      if (result.ok) {
         if (window.dataLayer) {
           window.dataLayer.push({
             event: "solar_calculator_submission",
@@ -229,11 +222,14 @@ export const SolarCalculator = () => {
           document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
       } else {
-        toast.error(result?.error || "Erro ao enviar a simulação. Tente novamente.");
+        setFormError(result.error);
+        toast.error(result.error);
       }
     } catch (error) {
       console.error("Erro ao enviar o formulário:", error);
-      toast.error("Ocorreu um erro inesperado. Por favor, tente novamente.");
+      const message = "Ocorreu um erro inesperado. Por favor, tente novamente.";
+      setFormError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -272,6 +268,14 @@ export const SolarCalculator = () => {
               </TabsList>
               <TabsContent value="simulacao" className="mt-6">
                 <form onSubmit={handleCalculateAndSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {formError ? (
+                    <div
+                      role="alert"
+                      className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-left text-sm text-destructive md:col-span-2"
+                    >
+                      {formError}
+                    </div>
+                  ) : null}
                   {/* Campo de CEP e Endereço */}
                   <div>
                     <Label htmlFor="cep" className="block text-left mb-2">CEP</Label>
