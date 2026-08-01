@@ -18,7 +18,6 @@ import { Loader2 } from 'lucide-react';
 import { cn } from "~/lib/utils";
 import InputMaskLib from "react-input-mask";
 import { NumericFormat } from "react-number-format";
-import { FORMSPREE } from "~/lib/site";
 
 // react-input-mask typings disagree with React 18 JSX element types
 const InputMask = InputMaskLib as unknown as React.ComponentType<
@@ -178,37 +177,40 @@ export const SolarCalculator = () => {
     });
 
     try {
-      const response = await fetch(FORMSPREE.calculator, {
-        method: 'POST',
+      const response = await fetch("/api/forms/calculator", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nome_completo: formData.nomeCompleto, // Renomeado
-          telefone_contato: formData.telefone,    // Renomeado
-          email_contato: formData.email,         // Renomeado
-          cep_usuario: formData.cep,             // Renomeado
-          uf_usuario: formData.uf,               // Renomeado
-          valor_medio_conta_rs: formData.accountValue, // Renomeado
-          concessionaria_selecionada: selectedUtility.name, // Renomeado
-          
-          geracao_mensal_estimada_kwh: Math.round(generation), // Renomeado
-          potencia_sistema_kwp: Number(kwp.toFixed(2)),        // Renomeado
-          economia_anual_estimada_rs: Number(annualSaving.toFixed(2)), // Renomeado
-          payback_estimado_meses: payback ? Math.round(payback) : 'N/A', // Renomeado
-          quantidade_modulos: modulesCount,                    // Renomeado
-          area_necessaria_m2: Math.round(areaNeeded),          // Renomeado
-          investimento_minimo_rs: Number(investmentMin.toFixed(2)), // Renomeado
-          investimento_maximo_rs: Number(investmentMax.toFixed(2)), // Renomeado
-          modelo_painel_selecionado: panel.model,              // Renomeado
+          nome_completo: formData.nomeCompleto,
+          telefone_contato: formData.telefone,
+          email_contato: formData.email,
+          cep_usuario: formData.cep,
+          uf_usuario: formData.uf,
+          valor_medio_conta_rs: formData.accountValue,
+          concessionaria_selecionada: selectedUtility.name,
+          geracao_mensal_estimada_kwh: Math.round(generation),
+          potencia_sistema_kwp: Number(kwp.toFixed(2)),
+          economia_anual_estimada_rs: Number(annualSaving.toFixed(2)),
+          payback_estimado_meses: payback ? Math.round(payback) : "N/A",
+          quantidade_modulos: modulesCount,
+          area_necessaria_m2: Math.round(areaNeeded),
+          investimento_minimo_rs: Number(investmentMin.toFixed(2)),
+          investimento_maximo_rs: Number(investmentMax.toFixed(2)),
+          modelo_painel_selecionado: panel.model,
         }),
       });
 
-      if (response.ok) {
+      const result = (await response.json().catch(() => null)) as
+        | { ok?: boolean; error?: string; retryAfterSec?: number }
+        | null;
+
+      if (response.ok && result?.ok) {
         if (window.dataLayer) {
           window.dataLayer.push({
-            event: 'solar_calculator_submission',
-            form_name: 'solar_calculator',
+            event: "solar_calculator_submission",
+            form_name: "solar_calculator",
             nome_completo: formData.nomeCompleto,
             telefone_contato: formData.telefone,
             email_contato: formData.email,
@@ -224,11 +226,10 @@ export const SolarCalculator = () => {
         toast.success("Sua simulação foi enviada com sucesso! Veja os resultados.");
         setActiveTab("resumo");
         setTimeout(() => {
-          document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
         }, 100);
       } else {
-        const errorData = await response.json();
-        toast.error(`Erro ao enviar a simulação: ${errorData.error || 'Tente novamente.'}`);
+        toast.error(result?.error || "Erro ao enviar a simulação. Tente novamente.");
       }
     } catch (error) {
       console.error("Erro ao enviar o formulário:", error);
@@ -391,40 +392,59 @@ export const SolarCalculator = () => {
               </TabsContent>
               <TabsContent value="resumo" className="mt-6">
                 {results ? (
-                  <div id="results-section" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-left">
-                    <Card className="p-4 shadow-sm">
+                  // Parent is max-w-[450px]: 3 cols leave ~130px — long BRL values overflow
+                  <div id="results-section" className="grid grid-cols-1 gap-4 text-left sm:grid-cols-2">
+                    <Card className="min-w-0 p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Geração mensal estimada</p>
-                      <p className="text-xl font-bold text-ink">{formatNumber(results.generation || 0)} kWh/mês</p>
+                      <p className="break-words text-lg font-bold leading-snug text-ink tabular-nums">
+                        {formatNumber(results.generation || 0)} kWh/mês
+                      </p>
                     </Card>
-                    <Card className="p-4 shadow-sm">
+                    <Card className="min-w-0 p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Potência do sistema</p>
-                      <p className="text-xl font-bold text-ink">{formatNumber(results.systemPower || 0, 2)} kWp</p>
+                      <p className="break-words text-lg font-bold leading-snug text-ink tabular-nums">
+                        {formatNumber(results.systemPower || 0, 2)} kWp
+                      </p>
                     </Card>
-                    <Card className="p-4 shadow-sm">
+                    <Card className="min-w-0 p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Economia anual</p>
-                      <p className="text-xl font-bold text-ink">R$ {formatBrazilianCurrency(results.annualSaving || 0)}</p>
+                      <p className="break-words text-lg font-bold leading-snug text-ink tabular-nums">
+                        R$ {formatBrazilianCurrency(results.annualSaving || 0)}
+                      </p>
                     </Card>
-                    <Card className="p-4 shadow-sm">
+                    <Card className="min-w-0 p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Payback estimado</p>
-                      <p className="text-xl font-bold text-ink">{results.payback ? `${formatNumber(results.payback)} meses` : '—'}</p>
+                      <p className="break-words text-lg font-bold leading-snug text-ink tabular-nums">
+                        {results.payback ? `${formatNumber(results.payback)} meses` : '—'}
+                      </p>
                     </Card>
-                    <Card className="p-4 shadow-sm">
+                    <Card className="min-w-0 p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Qtd. de módulos</p>
-                      <p className="text-xl font-bold text-ink">{formatNumber(results.modulesCount || 0)}</p>
+                      <p className="break-words text-lg font-bold leading-snug text-ink tabular-nums">
+                        {formatNumber(results.modulesCount || 0)}
+                      </p>
                     </Card>
-                    <Card className="p-4 shadow-sm">
+                    <Card className="min-w-0 p-4 shadow-sm">
                       <p className="text-sm text-gray-600">Área necessária</p>
-                      <p className="text-xl font-bold text-ink">{formatNumber(results.areaNeeded || 0)} m²</p>
+                      <p className="break-words text-lg font-bold leading-snug text-ink tabular-nums">
+                        {formatNumber(results.areaNeeded || 0)} m²
+                      </p>
                     </Card>
-                    <Card className="p-4 shadow-sm lg:col-span-3">
+                    <Card className="min-w-0 p-4 shadow-sm sm:col-span-2">
                       <p className="text-sm text-gray-600">Investimento estimado</p>
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2 text-base font-semibold text-ink">
-                        <div>
-                          <span className="text-gray-500">Menor:</span> R$ {formatBrazilianCurrency(results.investmentMin || 0)}
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Maior:</span> R$ {formatBrazilianCurrency(results.investmentMax || 0)}
-                        </div>
+                      <div className="mt-2 grid gap-2 text-base font-semibold text-ink sm:grid-cols-2">
+                        <p className="min-w-0 break-words leading-snug">
+                          <span className="text-gray-500">Menor:</span>{" "}
+                          <span className="tabular-nums">
+                            R$ {formatBrazilianCurrency(results.investmentMin || 0)}
+                          </span>
+                        </p>
+                        <p className="min-w-0 break-words leading-snug">
+                          <span className="text-gray-500">Maior:</span>{" "}
+                          <span className="tabular-nums">
+                            R$ {formatBrazilianCurrency(results.investmentMax || 0)}
+                          </span>
+                        </p>
                       </div>
                     </Card>
                   </div>

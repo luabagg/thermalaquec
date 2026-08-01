@@ -28,11 +28,6 @@ export const SOCIAL = {
   instagram: "https://www.instagram.com/_thermalaq",
 } as const;
 
-export const FORMSPREE = {
-  contact: "https://formspree.io/f/xzdnladq",
-  calculator: "https://formspree.io/f/xgogjlaw",
-} as const;
-
 export const GTM_ID = "GTM-KCMFZQ6Q";
 
 export function whatsappHref(message: string) {
