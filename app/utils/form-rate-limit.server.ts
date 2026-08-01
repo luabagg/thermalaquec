@@ -1,5 +1,5 @@
 import { createCookie } from "@remix-run/node";
-import type { FormKind } from "~/lib/formspree.server";
+import type { FormKind } from "~/lib/formspree";
 
 /** Min seconds between successful submits per form, per browser. */
 export const FORM_COOLDOWN_SEC = 60;
