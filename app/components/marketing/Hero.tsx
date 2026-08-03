@@ -26,15 +26,14 @@ export const Hero = () => {
           }`}
         >
           <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
-            Aquecimento central e energia solar com engenharia própria
+            Sistemas de aquecimento e energia
           </h1>
           <p className="mx-auto mt-5 max-w-[36ch] text-base leading-relaxed text-zinc-200 sm:text-lg md:mx-0 md:text-xl">
-            Projetos sob medida para residências, comércios e indústrias no Rio
-            Grande do Sul.
+            Projetos sob medida para Indústria, comércio e residências
           </p>
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap md:justify-start">
             <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link to="/calculadora-solar">Calcular economia</Link>
+              <Link to="/calculadora-solar">Simulador solar</Link>
             </Button>
             <Button
               asChild

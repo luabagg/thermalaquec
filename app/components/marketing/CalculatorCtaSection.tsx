@@ -19,7 +19,7 @@ export const CalculatorCtaSection = () => {
           </div>
           <Button asChild size="lg" className="w-full md:w-auto">
             <Link to="/calculadora-solar">
-              Abrir calculadora
+              Abrir simulador
               <ArrowRight className="h-5 w-5" />
             </Link>
           </Button>

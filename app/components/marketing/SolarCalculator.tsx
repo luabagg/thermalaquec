@@ -245,7 +245,7 @@ export const SolarCalculator = () => {
             )}
           >
             <h2 className="font-display mb-4 text-2xl font-bold tracking-tight text-ink">
-              Calculadora solar
+              Simulador solar
             </h2>
             <p className="mb-6 text-sm text-muted-foreground">
               Simule o gerador a partir do seu consumo

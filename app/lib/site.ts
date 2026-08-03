@@ -5,7 +5,7 @@ export const SITE_NAME = "Thermal Aquecimento";
 export const SITE_SHORT_NAME = "Thermal";
 
 export const SITE_DESCRIPTION =
-  "Aquecimento central e energia solar com engenharia própria. Projetos para residências, comércios e indústrias no Rio Grande do Sul.";
+  "Sistemas de aquecimento e energia. Projetos sob medida para indústria, comércio e residências no Rio Grande do Sul e Santa Catarina.";
 
 export const CONTACT = {
   email: "contato@thermalaquec.com.br",

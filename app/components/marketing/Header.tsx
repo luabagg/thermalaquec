@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "~/components/ui/sheet";
 const navItems = [
   { href: "/sobre", label: "A Empresa" },
   { href: "/produtos", label: "Produtos" },
-  { href: "/calculadora-solar", label: "Calculadora" },
+  { href: "/calculadora-solar", label: "Simulador" },
   { href: "/panorama-energetico", label: "Panorama" },
   { href: "/contato", label: "Contato" },
 ];
