@@ -50,7 +50,7 @@ export const Footer = () => {
             Produtos
           </Link>
           <Link to="/calculadora-solar" className="text-sm text-zinc-400 transition-colors hover:text-white">
-            Simulador
+            Calculadora
           </Link>
           <Link to="/contato" className="text-sm text-zinc-400 transition-colors hover:text-white">
             Contato

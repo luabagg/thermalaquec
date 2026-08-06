@@ -5,7 +5,7 @@ export const SITE_NAME = "Thermal Aquecimento";
 export const SITE_SHORT_NAME = "Thermal";
 
 export const SITE_DESCRIPTION =
-  "Sistemas de aquecimento e energia. Projetos sob medida para indústria, comércio e residências no Rio Grande do Sul e Santa Catarina.";
+  "Aquecimento central e energia solar com engenharia própria. Projetos para residências, comércios e indústrias no Rio Grande do Sul.";
 
 export const CONTACT = {
   email: "contato@thermalaquec.com.br",
@@ -28,7 +28,22 @@ export const SOCIAL = {
   instagram: "https://www.instagram.com/_thermalaq",
 } as const;
 
+export const FORMSPREE = {
+  contact: "https://formspree.io/f/xzdnladq",
+  calculator: "https://formspree.io/f/xgogjlaw",
+} as const;
+
 export const GTM_ID = "GTM-KCMFZQ6Q";
+
+/** Company block used on printable orçamentos (Canva template). */
+export const QUOTE_COMPANY = {
+  legalName: "Thermal Aquecimento LTDA",
+  taxRegime: "Empresa simples nacional",
+  cnpj: "43.706.051/0001-46",
+  footerPhone: "(54) 9 9916-1816",
+  footerCity: "Bento Gonçalves",
+  brandPerson: "LUCAS BAGGIO",
+} as const;
 
 export function whatsappHref(message: string) {
   return `${CONTACT.whatsappUrl}?text=${encodeURIComponent(message)}`;

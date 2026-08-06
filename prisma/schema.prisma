@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL_PGBOUNCER")
+  url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
@@ -62,10 +62,12 @@ model ProductSpec {
 }
 
 model Image {
-  id       Int        @id @default(autoincrement())
-  location String     @unique @db.VarChar(250)
-  Product  Product[]
-  Showcase Showcase[]
+  id               Int                @id @default(autoincrement())
+  location         String             @unique @db.VarChar(250)
+  Product          Product[]
+  Showcase         Showcase[]
+  QuoteCatalogItem QuoteCatalogItem[]
+  QuotationLine    QuotationLine[]
 }
 
 model ShowcaseProduct {
@@ -89,4 +91,87 @@ model Showcase {
 
   @@index([name, visible])
   @@index([viewCount])
+}
+
+// --- Quotation domain (separate from marketing Product) ---
+
+enum QuotationStatus {
+  draft
+  final
+}
+
+model QuoteClient {
+  id         Int         @id @default(autoincrement())
+  createdAt  DateTime    @default(now()) @map("created_at")
+  name       String      @db.VarChar(150)
+  location   String?     @db.VarChar(150)
+  document   String?     @db.VarChar(20)
+  Quotation  Quotation[]
+
+  @@index([name])
+  @@map("quote_clients")
+}
+
+model QuoteCatalogItem {
+  id                    Int              @id @default(autoincrement())
+  createdAt             DateTime         @default(now()) @map("created_at")
+  slug                  String           @unique @db.VarChar(100)
+  name                  String           @db.VarChar(200)
+  descriptionLines      Json             @default("[]") @map("description_lines")
+  defaultUnitPriceCents Int?             @map("default_unit_price_cents")
+  imageId               Int?             @map("image_id")
+  Image                 Image?           @relation(fields: [imageId], references: [id])
+  QuotationLine         QuotationLine[]
+
+  @@index([name])
+  @@map("quote_catalog_items")
+}
+
+model Quotation {
+  id             Int                      @id @default(autoincrement())
+  createdAt      DateTime                 @default(now()) @map("created_at")
+  updatedAt      DateTime                 @updatedAt @map("updated_at")
+  title          String                   @db.VarChar(200)
+  issuedAt       DateTime                 @default(now()) @map("issued_at") @db.Date
+  status         QuotationStatus          @default(draft)
+  notes          String?
+  clientId       Int                      @map("client_id")
+  client         QuoteClient              @relation(fields: [clientId], references: [id])
+  lines          QuotationLine[]
+  paymentOptions QuotationPaymentOption[]
+
+  @@index([clientId])
+  @@index([issuedAt])
+  @@map("quotations")
+}
+
+model QuotationLine {
+  id               Int               @id @default(autoincrement())
+  sortOrder        Int               @default(0) @map("sort_order")
+  name             String            @db.VarChar(200)
+  quantity         Int               @default(1)
+  descriptionLines Json              @default("[]") @map("description_lines")
+  unitPriceCents   Int               @map("unit_price_cents")
+  quotationId      Int               @map("quotation_id")
+  catalogItemId    Int?              @map("catalog_item_id")
+  imageId          Int?              @map("image_id")
+  quotation        Quotation         @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  catalogItem      QuoteCatalogItem? @relation(fields: [catalogItemId], references: [id])
+  Image            Image?            @relation(fields: [imageId], references: [id])
+
+  @@index([quotationId])
+  @@map("quotation_lines")
+}
+
+model QuotationPaymentOption {
+  id          Int       @id @default(autoincrement())
+  sortOrder   Int       @default(0) @map("sort_order")
+  label       String    @db.VarChar(200)
+  amountCents Int       @map("amount_cents")
+  detail      String?   @db.VarChar(300)
+  quotationId Int       @map("quotation_id")
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  @@index([quotationId])
+  @@map("quotation_payment_options")
 }

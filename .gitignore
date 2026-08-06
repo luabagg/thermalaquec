@@ -4,3 +4,8 @@ node_modules
 .env
 
 .worktrees
+.env*
+
+# Local quotation extracts (client PII / full Canva dumps) — seed from disk, never commit
+data/quotations/**
+!data/quotations/README.md

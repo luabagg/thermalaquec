@@ -94,17 +94,10 @@ const organizationNode: JsonLd = {
     "@type": "PostalAddress",
     ...CONTACT.address,
   },
-  areaServed: [
-    {
-      "@type": "State",
-      name: "Rio Grande do Sul",
-    },
-    {
-      "@type": "State",
-      name: "Santa Catarina",
-    },
-  ],
-
+  areaServed: {
+    "@type": "State",
+    name: "Rio Grande do Sul",
+  },
   sameAs: [SOCIAL.instagram],
 };
 

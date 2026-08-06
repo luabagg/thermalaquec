@@ -24,7 +24,7 @@ export const About = () => {
           {/* Text first on mobile; image left on desktop */}
           <div className="order-1 flex flex-col gap-5 md:order-2">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-              Engenharia de aquecimento e solar, de Farroupilha para RS e SC
+              Engenharia de aquecimento e solar, de Farroupilha para o RS
             </h2>
             <p className="max-w-[58ch] text-lg leading-relaxed text-muted-foreground">
               A Thermal nasceu para elevar o padrão de qualidade em sistemas de

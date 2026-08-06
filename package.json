@@ -13,6 +13,8 @@
     "prismaPull": "npx prisma db pull",
     "prismaPush": "npx prisma db push",
     "prismaMigrate": "npx prisma migrate dev",
+    "prismaSeed": "npx prisma db seed",
+    "catalogParse": "node scripts/canva-catalog/parse-catalog.mjs && node scripts/canva-catalog/review-catalog.mjs",
     "supabaseTypes": "eval $(grep '^SUPABASE_ID' .env) && supabase gen types typescript --project-id ${SUPABASE_ID} > app/libs/supabase/database.types.ts",
     "envPull": "vercel env pull .env"
   },
@@ -77,5 +79,8 @@
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

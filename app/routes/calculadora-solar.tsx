@@ -6,7 +6,7 @@ import { SITE_NAME } from "~/lib/site";
 
 export const meta: MetaFunction = () =>
   buildSeoMeta({
-    title: `Simulador Solar | ${SITE_NAME}`,
+    title: `Calculadora Solar | ${SITE_NAME}`,
     description: "Estime economia e investimento para um sistema de energia solar com base no consumo da sua conta de luz.",
     path: "/calculadora-solar",
     image: "/energia-solar.webp",

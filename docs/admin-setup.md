@@ -30,8 +30,8 @@ Optional later (Prisma / DB product CMS — not used by admin UI yet):
 
 | Variable | Notes |
 |---|---|
-| `POSTGRES_PRISMA_URL_PGBOUNCER` | pooled URL (Prisma `url`) |
-| `POSTGRES_URL_NON_POOLING` | direct URL (Prisma `directUrl`) |
+| `POSTGRES_PRISMA_URL` | Prisma `url`. Prefer Supabase **session** pooler (`:5432`) locally if transaction (`:6543`) fails with “Can't reach database server”. Vercel can keep transaction mode for serverless. |
+| `POSTGRES_URL_NON_POOLING` | Prisma `directUrl` (migrate); session pooler or direct DB host |
 | `SUPABASE_SERVICE_ROLE_KEY` | server-only; not used by current admin routes |
 | `SUPABASE_JWT_SECRET` | not used by current admin routes |
 
@@ -72,10 +72,34 @@ In Supabase Dashboard → Authentication:
 
 ### Not implemented yet
 
-- Product CRUD / Prisma management UI (explicit stub in `/admin`)
-- Reading products from DB (public site uses `app/data/products.ts`)
+- Image upload for quotation line photos
 - Role / allowlist beyond “any authenticated Supabase user”
-- Image upload, categories, brands, showcases UI (schema exists in Prisma only)
+- Marketing product CMS (Prisma `Product` — separate from quotation catalog)
+- Server-side PDF library (print via browser Print → PDF)
+
+## Quotation admin (Phase 2)
+
+| Path | Role |
+|---|---|
+| `/admin` | Dashboard links |
+| `/admin/quotations` | List orçamentos |
+| `/admin/quotations/new` | Create (pick/create client) |
+| `/admin/quotations/:id` | Interactive builder + live preview |
+| `/admin/quotations/:id/print` | Printable A4 (browser Print → PDF) |
+| `/admin/catalog` | Quotation catalog CRUD |
+| `/admin/clients` | Quote clients CRUD |
+
+### Database
+
+Quotation models: `QuoteClient`, `QuoteCatalogItem`, `Quotation`, `QuotationLine`, `QuotationPaymentOption`.
+
+```bash
+# after .env has Postgres URLs:
+yarn prismaMigrate   # or yarn prismaPush
+yarn prismaSeed      # loads data/quotations/catalog.*.json
+```
+
+Catalog JSON lives in `data/quotations/` (from Canva Phase 1).
 
 ## Routes cheat sheet
 
@@ -83,11 +107,15 @@ In Supabase Dashboard → Authentication:
 |---|---|
 | `/admin/login` | request magic link |
 | `/admin/login/callback` | finish OAuth/OTP code exchange |
-| `/admin` | stub dashboard (auth required) |
+| `/admin` | dashboard (auth required) |
 | `/admin/logout` | POST sign-out |
+| `/admin/quotations` | orçamentos |
+| `/admin/catalog` | catálogo |
+| `/admin/clients` | clientes |
 
 ## Note on database
 
 Login does **not** need your Prisma product tables. Supabase Auth has its own auth schema.
 
-Prisma models (`Product`, `Category`, `Brand`, …) are ready in `prisma/schema.prisma` for a future CMS step — not connected to the current admin UI.
+Prisma marketing models (`Product`, `Category`, `Brand`, …) remain for a future CMS step. Quotation models are separate and used by `/admin/quotations*`.
+
