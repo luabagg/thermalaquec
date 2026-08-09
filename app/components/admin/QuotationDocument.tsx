@@ -1,6 +1,6 @@
 import type { QuotationLine, QuotationPaymentOption, QuoteClient } from "@prisma/client";
 
-import { formatBRL, quotationTotalCents } from "~/models/quotation.server";
+import { formatBRL, quotationTotalCents } from "~/utils/quotation";
 import { QUOTE_COMPANY } from "~/lib/site";
 
 type QuotationDocumentProps = {

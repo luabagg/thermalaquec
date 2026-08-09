@@ -6,13 +6,8 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import {
-  createCatalogItem,
-  formatBRL,
-  listCatalogItems,
-  parseBRLToCents,
-  slugifyCatalog,
-} from "~/models/quotation.server";
+import { createCatalogItem, listCatalogItems } from "~/models/quotation.server";
+import { formatBRL, parseBRLToCents, slugifyCatalog } from "~/utils/quotation";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Catálogo | ${SITE_NAME}`);

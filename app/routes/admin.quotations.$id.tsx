@@ -8,14 +8,13 @@ import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import {
-  formatBRL,
   getQuotation,
   listCatalogItems,
-  parseBRLToCents,
   replacePaymentOptions,
   replaceQuotationLines,
   updateQuotationMeta,
 } from "~/models/quotation.server";
+import { formatBRL, parseBRLToCents } from "~/utils/quotation";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
 

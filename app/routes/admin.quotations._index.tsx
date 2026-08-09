@@ -4,7 +4,8 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { formatBRL, listQuotations, quotationTotalCents } from "~/models/quotation.server";
+import { listQuotations } from "~/models/quotation.server";
+import { formatBRL, quotationTotalCents } from "~/utils/quotation";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Orçamentos | ${SITE_NAME}`);
