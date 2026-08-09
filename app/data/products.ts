@@ -5,6 +5,8 @@ export interface ProductData {
   mainImage: string; // Imagem principal para cards e hero da página de detalhes
   fullDescription: string; // Descrição completa para a página de detalhes
   galleryImages?: string[]; // Imagens adicionais para uma galeria na página de detalhes
+  /** Use contain for product cutouts so the full unit stays visible in wide frames. */
+  imageFit?: "cover" | "contain";
 }
 
 export const productsData: ProductData[] = [
@@ -77,7 +79,8 @@ export const productsData: ProductData[] = [
     slug: "geradoras-murais",
     shortDescription: "Geradoras de calor murais compactas e eficientes, ideais para espaços menores e aquecimento pontual.",
     mainImage: "/geradorasmurais.webp",
+    imageFit: "contain",
     fullDescription: "Geradora de água quente a gás, de fabricação italiana, tem um excelente poder de aquecimento instantâneo para uma boa vazão de água. Ideais para uso combinado de aquecimento de ambiente (piso ou radiadores) e água quente de consumo diário.\n\nEmissão mínima de poluentes: Performance classe 5 (EN 483).\n\nUso combinado de: Calefação (piso aquecido e/ou radiador) e aquecimento de água uso diário.\n\nCombustível: Gás GLP / GN - Gás Natural.\n\nResidencial ou comercial (espaços compactos).",
-    galleryImages: ["/geradorasmurais.webp"]
+    galleryImages: ["/geradorasmurais.webp", "/geradorasmurais-2.webp"]
   },
 ];

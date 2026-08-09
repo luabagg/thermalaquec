@@ -75,8 +75,8 @@ export const StatsSection = () => {
           }`}
         >
           <p className="mb-12 max-w-2xl text-lg leading-relaxed text-zinc-200 md:text-xl">
-            Mais de uma década instalando solar e aquecimento com números que
-            sustentam a confiança dos nossos clientes.
+            Escala e consistência em projetos de solar e aquecimento no Rio
+            Grande do Sul e em Santa Catarina.
           </p>
           <div className="grid w-full grid-cols-2 gap-10 lg:grid-cols-4 lg:gap-8">
             {stats.map((stat) => (

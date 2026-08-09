@@ -64,10 +64,9 @@ export const ProductDetailTemplate = ({ product }: ProductDetailTemplateProps) =
     <>
       <main className="flex-grow">
         <PageHero
+          variant="ink"
           title={product.name}
           description={product.shortDescription}
-          imageSrc={product.mainImage}
-          imageAlt={product.name}
         />
 
         <div className="w-full border-b border-border bg-secondary py-4 md:py-5">
@@ -104,7 +103,11 @@ export const ProductDetailTemplate = ({ product }: ProductDetailTemplateProps) =
                             <img
                               src={imgSrc}
                               alt={`${product.name} - imagem ${index + 1}`}
-                              className="h-64 w-full object-cover transition-transform duration-300 ease-thermal hover:scale-[1.03]"
+                              className={`h-64 w-full transition-transform duration-300 ease-thermal hover:scale-[1.03] ${
+                                product.imageFit === "contain"
+                                  ? "bg-white object-contain p-4"
+                                  : "object-cover"
+                              }`}
                             />
                           </button>
                         </CarouselItem>

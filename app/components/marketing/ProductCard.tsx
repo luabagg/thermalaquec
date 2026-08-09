@@ -24,11 +24,17 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <FadeInOnScroll className="h-full">
       <article className="group flex h-full flex-col overflow-hidden rounded-lg bg-card transition-transform duration-300 ease-thermal hover:-translate-y-1">
-        <div className="relative overflow-hidden">
+        <div
+          className={`relative overflow-hidden ${
+            product.imageFit === "contain" ? "bg-white" : ""
+          }`}
+        >
           <img
             src={product.mainImage}
             alt={product.name}
-            className="h-52 w-full object-cover transition-transform duration-500 ease-thermal group-hover:scale-[1.03]"
+            className={`h-52 w-full transition-transform duration-500 ease-thermal group-hover:scale-[1.03] ${
+              product.imageFit === "contain" ? "object-contain p-4" : "object-cover"
+            }`}
             width="400"
             height="208"
             loading="lazy"

@@ -5,7 +5,6 @@ import { CalculatorCtaSection } from "~/components/marketing/CalculatorCtaSectio
 import { FadeInOnScroll } from "~/components/marketing/FadeInOnScroll";
 import { Features } from "~/components/marketing/Features";
 import { Hero } from "~/components/marketing/Hero";
-import { MissionVision } from "~/components/marketing/MissionVision";
 import { Products } from "~/components/marketing/Products";
 import { StatsSection } from "~/components/marketing/StatsSection";
 import { buildHomeJsonLd, buildSeoMeta } from "~/lib/seo";
@@ -28,9 +27,6 @@ export default function Index() {
         <About />
       </FadeInOnScroll>
       <StatsSection />
-      <FadeInOnScroll>
-        <MissionVision />
-      </FadeInOnScroll>
       <FadeInOnScroll>
         <Products />
       </FadeInOnScroll>

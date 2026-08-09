@@ -32,14 +32,24 @@ export const ProductListingItem = ({
         className="grid items-center gap-10 border-b border-border py-12 last:border-b-0 md:grid-cols-2 md:gap-14 md:py-16"
       >
         <div className={reverse ? "md:order-2" : "md:order-1"}>
-          <img
-            src={product.mainImage}
-            alt={product.name}
-            className="h-64 w-full rounded-lg object-cover md:h-96"
-            width="550"
-            height="384"
-            loading="lazy"
-          />
+          <div
+            className={`overflow-hidden rounded-lg ${
+              product.imageFit === "contain" ? "bg-white" : ""
+            }`}
+          >
+            <img
+              src={product.mainImage}
+              alt={product.name}
+              className={`h-64 w-full md:h-96 ${
+                product.imageFit === "contain"
+                  ? "object-contain p-6"
+                  : "object-cover"
+              }`}
+              width="550"
+              height="384"
+              loading="lazy"
+            />
+          </div>
         </div>
         <div
           className={`flex flex-col gap-4 ${reverse ? "md:order-1" : "md:order-2"}`}

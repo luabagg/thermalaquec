@@ -1,18 +1,18 @@
 const features = [
   {
-    title: "Materiais e instalação de alto padrão",
+    title: "Qualidade e confiabilidade",
     description:
-      "Componentes selecionados e execução cuidadosa para desempenho estável ao longo dos anos.",
+      "Materiais selecionados e instalação criteriosa para operação estável ao longo dos anos.",
   },
   {
-    title: "Atendimento técnico direto",
+    title: "Eficiência e economia",
     description:
-      "Orientação clara do dimensionamento à pós-venda, sem intermediário genérico.",
+      "Projeto alinhado ao consumo real do imóvel, com foco em retorno sobre o investimento.",
   },
   {
-    title: "Projeto com engenharia interna",
+    title: "Suporte técnico",
     description:
-      "Cada sistema nasce no nosso departamento de engenharia, alinhado à demanda do cliente.",
+      "Acompanhamento direto da equipe Thermal do dimensionamento à pós-venda.",
   },
 ];
 
@@ -23,11 +23,10 @@ export const Features = () => {
         <div className="grid gap-12 md:grid-cols-[0.9fr_1.1fr] md:gap-16">
           <div>
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-              Por que a Thermal
+              Por que escolher a Thermal
             </h2>
             <p className="mt-4 max-w-[40ch] text-lg text-muted-foreground leading-relaxed">
-              Diferenciais práticos que aparecem no resultado do projeto, não em
-              discurso de marketing.
+              Diferenciais que aparecem no desempenho e no suporte do projeto.
             </p>
           </div>
           <ul className="divide-y divide-border border-t border-border">

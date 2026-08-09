@@ -1,6 +1,6 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { useIsHomepage } from "~/hooks/isHomepage";
-import { CONTACT, SITE_SHORT_NAME } from "~/lib/site";
+import { CONTACT } from "~/lib/site";
 import type { WhatsAppWidgetProps } from "react-whatsapp-widget";
 
 /** CSS-module hashes from `react-whatsapp-widget/dist/index.css` */
@@ -120,7 +120,7 @@ export function FloatingWhatsApp() {
     >
       <Widget
         phoneNumber={CONTACT.phoneE164}
-        companyName={SITE_SHORT_NAME}
+        companyName="Jiovani"
         replyTimeText="Responde em horário comercial"
         message="Olá, como posso ajudar?"
         inputPlaceHolder="Mensagem"

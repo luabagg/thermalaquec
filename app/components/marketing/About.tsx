@@ -1,13 +1,13 @@
 const highlights = [
   {
-    title: "+14 anos no mercado",
+    title: "Projeto completo",
     description:
-      "Atuação desde 2010 em energias renováveis e sistemas de aquecimento, com projetos residenciais e corporativos.",
+      "Do dimensionamento à instalação, as áreas técnicas trabalham integradas em cada entrega.",
   },
   {
-    title: "Equipe certificada",
+    title: "Atendimento em RS e SC",
     description:
-      "Técnicos treinados nas normas NR 10, NR 18, NR 20 e NR 35, com foco em segurança em campo.",
+      "Presença em diversos pontos do Rio Grande do Sul e de Santa Catarina, com soluções para residências, comércios e indústrias.",
   },
   {
     title: "Engenharia própria",
@@ -24,18 +24,12 @@ export const About = () => {
           {/* Text first on mobile; image left on desktop */}
           <div className="order-1 flex flex-col gap-5 md:order-2">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-              Engenharia de aquecimento e solar, de Farroupilha para o RS
+              Engenharia de aquecimento e solar no RS e em SC
             </h2>
             <p className="max-w-[58ch] text-lg leading-relaxed text-muted-foreground">
-              A Thermal nasceu para elevar o padrão de qualidade em sistemas de
-              aquecimento e geração solar. Estruturamos engenharia própria e
-              integramos as áreas técnicas para entregar projetos completos, do
-              dimensionamento à instalação.
-            </p>
-            <p className="max-w-[58ch] text-lg leading-relaxed text-muted-foreground">
-              Nossa experiência vem de meados de 2010, em outras empresas do
-              ramo. Com o tempo, dedicamos o negócio 100% a otimizar atendimento
-              e soluções conforme a exigência de cada cliente.
+              A Thermal estrutura engenharia própria e integra as áreas técnicas
+              para entregar sistemas de aquecimento e geração solar sob medida,
+              do dimensionamento à instalação.
             </p>
           </div>
 
