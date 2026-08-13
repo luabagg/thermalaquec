@@ -23,7 +23,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  await requireAdmin(request);
+  const { user } = await requireAdmin(request);
   const form = await request.formData();
   const mode = String(form.get("mode") || "existing");
 
@@ -44,7 +44,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
   }
 
-  const quotation = await createQuotation({ clientId });
+  const quotation = await createQuotation({ clientId, ownerUserId: user.id });
   return redirect(`/admin/quotations/${quotation.id}`);
 };
 

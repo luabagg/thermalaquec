@@ -1,20 +1,55 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { listQuotations } from "~/models/quotation.server";
+import { cn } from "~/lib/utils";
+import { deleteQuotation, listQuotations, updateQuotationMeta } from "~/models/quotation.server";
 import { formatBRL, quotationTotalCents } from "~/utils/quotation";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Orçamentos | ${SITE_NAME}`);
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await requireAdmin(request);
-  const quotations = await listQuotations();
+  const { user } = await requireAdmin(request);
+  const quotations = await listQuotations(user.id);
   return json({ quotations });
 };
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const { user } = await requireAdmin(request);
+  const form = await request.formData();
+  const intent = String(form.get("intent"));
+  const id = Number(form.get("id"));
+  if (!Number.isFinite(id)) return json({ error: "Invalid" }, { status: 400 });
+  if (intent === "delete") {
+    const deleted = await deleteQuotation(id, user.id);
+    if (!deleted) return json({ error: "Not found" }, { status: 404 });
+    return json({ ok: true });
+  }
+  if (intent === "set-status") {
+    const status = String(form.get("status")) === "final" ? "final" : "draft";
+    const updated = await updateQuotationMeta(id, user.id, { status });
+    if (!updated) return json({ error: "Not found" }, { status: 404 });
+    return json({ ok: true });
+  }
+  return json({ error: "Unknown" }, { status: 400 });
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const isFinal = status === "final";
+  return (
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
+        isFinal ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+      )}
+    >
+      {isFinal ? "Final" : "Rascunho"}
+    </span>
+  );
+}
 
 export default function AdminQuotations() {
   const { quotations } = useLoaderData<typeof loader>();
@@ -41,19 +76,50 @@ export default function AdminQuotations() {
           const total = quotationTotalCents(q.lines);
           const issued = new Date(q.issuedAt).toLocaleDateString("pt-BR");
           return (
-            <li key={q.id}>
-              <Link
-                to={`/admin/quotations/${q.id}`}
-                className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 hover:bg-muted/40"
-              >
-                <div>
-                  <p className="font-medium">{q.title}</p>
+            <li key={q.id} className="px-4 py-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">{q.title}</p>
+                    <StatusBadge status={q.status} />
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    {q.client.name} · {issued} · {q.status}
+                    {q.client.name} · {issued}
                   </p>
                 </div>
-                <p className="font-medium">{formatBRL(total)}</p>
-              </Link>
+                <p className="font-medium sm:text-right">{formatBRL(total)}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button asChild variant="outline" size="sm">
+                    <Link to={`/admin/quotations/${q.id}`}>Abrir</Link>
+                  </Button>
+                  <Form method="post" className="flex items-center">
+                    <input type="hidden" name="intent" value="set-status" />
+                    <input type="hidden" name="id" value={q.id} />
+                    <select
+                      name="status"
+                      defaultValue={q.status}
+                      aria-label="Status do orçamento"
+                      className="flex h-9 rounded-md border border-input bg-background px-2 text-sm"
+                      onChange={(event) => event.currentTarget.form?.requestSubmit()}
+                    >
+                      <option value="draft">Rascunho</option>
+                      <option value="final">Final</option>
+                    </select>
+                  </Form>
+                  <Form
+                    method="post"
+                    onSubmit={(event) => {
+                      if (!confirm("Excluir este orçamento?")) event.preventDefault();
+                    }}
+                  >
+                    <input type="hidden" name="intent" value="delete" />
+                    <input type="hidden" name="id" value={q.id} />
+                    <Button type="submit" variant="destructive" size="sm">
+                      Excluir
+                    </Button>
+                  </Form>
+                </div>
+              </div>
             </li>
           );
         })}

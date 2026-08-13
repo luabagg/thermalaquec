@@ -1,10 +1,10 @@
 /* Printable orçamento — mirrors Canva Daniel Viana template */
 
 .quote-doc {
-  --quote-red: #c2410c;
+  --quote-red: #d55711;
   --quote-ink: #141414;
   --quote-muted: #71717a;
-  --quote-bar: #3f3f46;
+  --quote-bar: #1f1f1f; /* same as site nav ink-soft */
   --quote-rule: #e4e4e7;
   width: 210mm;
   max-width: 100%;
@@ -99,34 +99,33 @@
 
 .quote-doc__logo {
   width: 7.5rem;
-  background: #141414;
-  color: #fff;
-  padding: 0.85rem 0.75rem 0.7rem;
+  background: #1f1f1f;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: stretch;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.quote-doc__logo-mark {
-  color: #ea580c;
-  font-size: 1.1rem;
-  line-height: 1;
-  margin-bottom: 0.2rem;
-}
-
-.quote-doc__logo-brand {
-  font-family: "Outfit", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.02em;
+.quote-doc__logo img {
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  object-fit: cover;
+  display: block;
 }
 
 .quote-doc__logo-person {
-  margin-top: 0.2rem;
+  margin: 0;
+  padding: 0.35rem 0.3rem 0.4rem;
+  color: #fff;
+  font-family: "Outfit", system-ui, sans-serif;
   font-size: 0.55rem;
-  letter-spacing: 0.12em;
-  opacity: 0.85;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .quote-doc__table-head {
@@ -205,6 +204,8 @@
   background: #f4f4f5;
   border: 1px solid var(--quote-rule);
   justify-self: end;
+  object-fit: cover;
+  display: block;
 }
 
 .quote-doc__line-price {

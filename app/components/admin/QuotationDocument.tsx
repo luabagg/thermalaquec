@@ -1,15 +1,20 @@
 import type { QuotationLine, QuotationPaymentOption, QuoteClient } from "@prisma/client";
 
 import { formatBRL, quotationTotalCents } from "~/utils/quotation";
-import { QUOTE_COMPANY } from "~/lib/site";
+import { QUOTE_COMPANY, type QuoteRepProfile } from "~/lib/site";
 
 type QuotationDocumentProps = {
   title: string;
   issuedAt: Date | string;
   client: Pick<QuoteClient, "name" | "location" | "document">;
-  lines: Array<Pick<QuotationLine, "name" | "quantity" | "descriptionLines" | "unitPriceCents">>;
+  lines: Array<
+    Pick<QuotationLine, "name" | "quantity" | "descriptionLines" | "unitPriceCents"> & {
+      imageUrl?: string | null;
+    }
+  >;
   paymentOptions: Array<Pick<QuotationPaymentOption, "label" | "amountCents" | "detail">>;
   notes: string | null;
+  rep: QuoteRepProfile;
   /** When true, hide on-screen chrome (print stylesheet still applies). */
   printMode?: boolean;
 };
@@ -39,6 +44,7 @@ export function QuotationDocument({
   lines,
   paymentOptions,
   notes,
+  rep,
 }: QuotationDocumentProps) {
   const total = quotationTotalCents(lines);
   const year = asDate(issuedAt).getFullYear();
@@ -77,11 +83,8 @@ export function QuotationDocument({
             <strong>{formatDateBR(issuedAt)}</strong>
           </div>
           <div className="quote-doc__logo" aria-label={QUOTE_COMPANY.legalName}>
-            <span className="quote-doc__logo-mark" aria-hidden>
-              ▲
-            </span>
-            <span className="quote-doc__logo-brand">Thermal</span>
-            <span className="quote-doc__logo-person">{QUOTE_COMPANY.brandPerson}</span>
+            <img src="/quote-logo.webp" alt={QUOTE_COMPANY.legalName} width={120} height={120} />
+            <span className="quote-doc__logo-person">{rep.brandPerson}</span>
           </div>
         </div>
       </header>
@@ -111,7 +114,11 @@ export function QuotationDocument({
                   ) : (
                     <span className="quote-doc__line-desc-empty" />
                   )}
-                  <div className="quote-doc__line-photo" aria-hidden />
+                  {line.imageUrl ? (
+                    <img className="quote-doc__line-photo" src={line.imageUrl} alt="" />
+                  ) : (
+                    <div className="quote-doc__line-photo" aria-hidden />
+                  )}
                 </div>
               </div>
               <p className="quote-doc__line-price">
@@ -146,7 +153,7 @@ export function QuotationDocument({
       ) : null}
 
       <footer className="quote-doc__footer">
-        Contato: {QUOTE_COMPANY.footerPhone} | {QUOTE_COMPANY.footerCity}, {year}
+        Contato: {rep.phone} | {rep.city} | {rep.email} | {year}
       </footer>
     </article>
   );

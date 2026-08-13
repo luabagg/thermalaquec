@@ -4,7 +4,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { QuotationDocument } from "~/components/admin/QuotationDocument";
 import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
-import { SITE_NAME } from "~/lib/site";
+import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
 import { getQuotation } from "~/models/quotation.server";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
@@ -15,16 +15,16 @@ export const meta: MetaFunction<typeof loader> = ({ data }) =>
   buildNoIndexMeta(`Imprimir ${data?.quotation.title ?? "orçamento"} | ${SITE_NAME}`);
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  await requireAdmin(request);
+  const { user } = await requireAdmin(request);
   const id = Number(params.id);
   if (!Number.isFinite(id)) throw redirect("/admin/quotations");
-  const quotation = await getQuotation(id);
+  const quotation = await getQuotation(id, user.id);
   if (!quotation) throw new Response("Not found", { status: 404 });
-  return json({ quotation });
+  return json({ quotation, rep: resolveQuoteRep(user.email) });
 };
 
 export default function QuotationPrint() {
-  const { quotation } = useLoaderData<typeof loader>();
+  const { quotation, rep } = useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-screen bg-white">
@@ -41,9 +41,13 @@ export default function QuotationPrint() {
           title={quotation.title}
           issuedAt={quotation.issuedAt}
           client={quotation.client}
-          lines={quotation.lines}
+          lines={quotation.lines.map((line) => ({
+            ...line,
+            imageUrl: line.Image?.location ?? null,
+          }))}
           paymentOptions={quotation.paymentOptions}
           notes={quotation.notes}
+          rep={rep}
           printMode
         />
       </div>

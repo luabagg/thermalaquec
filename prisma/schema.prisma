@@ -135,6 +135,7 @@ model Quotation {
   issuedAt       DateTime                 @default(now()) @map("issued_at") @db.Date
   status         QuotationStatus          @default(draft)
   notes          String?
+  ownerUserId    String                   @map("owner_user_id") @db.Uuid
   clientId       Int                      @map("client_id")
   client         QuoteClient              @relation(fields: [clientId], references: [id])
   lines          QuotationLine[]
@@ -142,6 +143,7 @@ model Quotation {
 
   @@index([clientId])
   @@index([issuedAt])
+  @@index([ownerUserId])
   @@map("quotations")
 }
 
