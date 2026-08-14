@@ -132,8 +132,12 @@ export async function createQuotation(data: {
   });
 }
 
-export const DEFAULT_WARRANTY_NOTES =
-  "Garantia de 3 anos nas bombas de calor. Garantia de 5 anos nos componentes hidráulicos e acumulador. Mão de obra, serviços elétricos, hidráulico, frete, guincho (se necessário) por conta da empresa. Venda toda feita diretamente pela Thermal Aquecimento.";
+export const DEFAULT_WARRANTY_NOTES = [
+  "Garantia de 3 anos nas bombas de calor",
+  "Garantia de 5 anos nos componentes hidráulicos e acumulador",
+  "Mão de obra, serviços elétricos, hidráulico, frete, guincho (se necessário) por conta da empresa",
+  "Venda toda feita diretamente pela Thermal Aquecimento",
+].join("\n");
 
 export async function updateQuotationMeta(
   id: number,

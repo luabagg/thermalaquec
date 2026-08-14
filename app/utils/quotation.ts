@@ -24,6 +24,14 @@ export function parseBRLToCents(value: string): number | null {
   return Math.round(n * 100);
 }
 
+export function splitNoteLines(raw: string | null | undefined) {
+  if (!raw?.trim()) return [];
+  return raw
+    .split(/\n/)
+    .map((line) => line.replace(/^\s*[-•]\s*/, "").trim())
+    .filter(Boolean);
+}
+
 export function slugifyCatalog(name: string) {
   return name
     .normalize("NFD")

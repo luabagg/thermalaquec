@@ -1,33 +1,66 @@
 /* Printable orçamento — mirrors Canva Daniel Viana template */
 
-.quote-doc {
+/* Printable orçamento — white page inset on architectural stage */
+
+.quote-stage {
   --quote-red: #d55711;
   --quote-ink: #141414;
   --quote-muted: #71717a;
-  --quote-bar: #1f1f1f; /* same as site nav ink-soft */
+  --quote-bar: #1f1f1f;
   --quote-rule: #e4e4e7;
+  position: relative;
   width: 210mm;
   max-width: 100%;
   min-height: 297mm;
-  padding: 14mm 14mm 0;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   color: var(--quote-ink);
   font-family: "IBM Plex Sans", system-ui, sans-serif;
   font-size: 11px;
   line-height: 1.35;
+  background: #111;
+}
+
+.quote-stage__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.quote-doc {
+  position: relative;
+  z-index: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  background: #fff;
+  margin: 8mm 11mm 0;
+  padding: 12mm 12mm 10mm;
+  box-sizing: border-box;
+  min-height: 0;
 }
 
 .quote-doc__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1.5rem;
   margin-bottom: 1.25rem;
+  padding-right: 44mm;
+}
+
+.quote-doc__header-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
 }
 
 .quote-doc__title {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-family: "Outfit", system-ui, sans-serif;
   font-size: 2rem;
   font-weight: 700;
@@ -76,20 +109,13 @@
   font-weight: 700;
 }
 
-.quote-doc__header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
 .quote-doc__date {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
   color: var(--quote-muted);
   font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
 .quote-doc__date strong {
@@ -98,30 +124,39 @@
 }
 
 .quote-doc__logo {
-  width: 7.5rem;
+  position: absolute;
+  top: 0;
+  right: 20mm;
+  z-index: 2;
+  width: 38mm;
+  height: 38mm;
+  aspect-ratio: 1;
   background: #1f1f1f;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
   overflow: hidden;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .quote-doc__logo img {
-  width: 100%;
-  aspect-ratio: 1;
-  height: auto;
+  width: 38mm;
+  height: 38mm;
+  max-width: none;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
 .quote-doc__logo-person {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   margin: 0;
-  padding: 0.35rem 0.3rem 0.4rem;
+  padding: 0.3rem 0.25rem 0.35rem;
+  background: linear-gradient(transparent, #1f1f1f 40%);
   color: #fff;
   font-family: "Outfit", system-ui, sans-serif;
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-align: center;
@@ -173,6 +208,10 @@
   grid-template-columns: 1fr 4rem 1.4fr 3.5rem;
   gap: 0.5rem;
   align-items: start;
+}
+
+.quote-doc__line-body--no-photo {
+  grid-template-columns: 1fr 4rem 1.4fr;
 }
 
 .quote-doc__line-name {
@@ -243,9 +282,14 @@
 
 .quote-doc__notes {
   margin: 0;
+  padding-left: 1.1rem;
   color: var(--quote-muted);
   font-size: 0.78rem;
   line-height: 1.45;
+}
+
+.quote-doc__notes li + li {
+  margin-top: 0.2rem;
 }
 
 .quote-doc__payments {
@@ -289,6 +333,9 @@
 }
 
 .quote-doc__footer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
   margin-top: auto;
   background: var(--quote-red);
   color: #fff;
@@ -296,8 +343,6 @@
   padding: 0.65rem 1rem;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
-  margin-left: -14mm;
-  margin-right: -14mm;
 }
 
 @media print {
@@ -306,19 +351,43 @@
     margin: 0;
   }
 
+  html,
   body {
     background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .no-print {
     display: none !important;
   }
 
-  .quote-doc {
+  .quote-stage {
     width: 210mm;
     min-height: 297mm;
+    height: auto;
+    overflow: visible;
+  }
+
+  .quote-doc {
+    display: flex;
+    overflow: visible;
+    width: auto;
+    max-width: none;
+    min-height: 0;
+    height: auto;
     box-shadow: none !important;
-    margin: 0 !important;
+    margin: 8mm 11mm 0;
+  }
+
+  .quote-doc__line,
+  .quote-doc__payments li,
+  .quote-doc__footer {
+    break-inside: avoid;
+  }
+
+  .quote-doc__footer {
+    margin-top: 0;
   }
 
   .quote-doc__line-photo {
@@ -326,6 +395,7 @@
     -webkit-print-color-adjust: exact;
   }
 
+  .quote-stage__bg,
   .quote-doc__logo,
   .quote-doc__table-head,
   .quote-doc__footer {
@@ -335,10 +405,21 @@
 }
 
 @media screen and (max-width: 900px) {
-  .quote-doc {
-    width: 100%;
+  .quote-stage {
     min-height: auto;
+  }
+
+  .quote-doc {
+    margin: 0.75rem 0.75rem 0;
     padding: 1.25rem;
+  }
+
+  .quote-doc__logo {
+    right: 1.5rem;
+  }
+
+  .quote-doc__header {
+    padding-right: 42mm;
   }
 
   .quote-doc__line-body {
@@ -347,6 +428,12 @@
       "name qty"
       "desc desc"
       "photo photo";
+  }
+
+  .quote-doc__line-body--no-photo {
+    grid-template-areas:
+      "name qty"
+      "desc desc";
   }
 
   .quote-doc__line-name {
@@ -369,10 +456,5 @@
 
   .quote-doc__summary {
     grid-template-columns: 1fr;
-  }
-
-  .quote-doc__footer {
-    margin-left: -1.25rem;
-    margin-right: -1.25rem;
   }
 }

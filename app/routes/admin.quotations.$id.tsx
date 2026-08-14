@@ -1,32 +1,22 @@
 import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import {
-  Form,
-  Link,
-  useFetcher,
-  useLoaderData,
-  useNavigation,
-  useSearchParams,
-} from "@remix-run/react";
+import { Form, Link, useFetcher, useLoaderData, useNavigation, useSearchParams } from "@remix-run/react";
 import { Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { QuotationDocument } from "~/components/admin/QuotationDocument";
 import { Button } from "~/components/ui/button";
+import { FileButton } from "~/components/ui/file-button";
+import { TaxIdInput } from "~/components/ui/tax-id-input";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
 import {
-  appendPaymentOption,
-  appendQuotationLine,
-  deletePaymentOptionForQuotation,
-  deleteQuotationLineForQuotation,
   getQuotation,
   listCatalogItems,
   replacePaymentOptions,
   replaceQuotationLines,
-  setQuotationLineImageForQuotation,
   updateQuotationMeta,
 } from "~/models/quotation.server";
 import { formatBRL, parseBRLToCents } from "~/utils/quotation";
@@ -46,17 +36,6 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   if (!quotation) throw new Response("Not found", { status: 404 });
   const catalog = await listCatalogItems();
   return json({ quotation, catalog, rep: resolveQuoteRep(user.email) });
-};
-
-type SerializedLine = {
-  id: number;
-  name: string;
-  quantity: number;
-  descriptionLines: unknown;
-  unitPriceCents: number;
-  catalogItemId: number | null;
-  imageId: number | null;
-  imageUrl: string | null;
 };
 
 type DraftLine = {
@@ -80,28 +59,6 @@ type DraftPayment = {
   amountCents: number;
   detail: string;
 };
-
-function serializeLine(line: {
-  id: number;
-  name: string;
-  quantity: number;
-  descriptionLines: unknown;
-  unitPriceCents: number;
-  catalogItemId: number | null;
-  imageId: number | null;
-  Image: { location: string } | null;
-}): SerializedLine {
-  return {
-    id: line.id,
-    name: line.name,
-    quantity: line.quantity,
-    descriptionLines: line.descriptionLines,
-    unitPriceCents: line.unitPriceCents,
-    catalogItemId: line.catalogItemId,
-    imageId: line.imageId,
-    imageUrl: line.Image?.location ?? null,
-  };
-}
 
 function descToString(raw: unknown) {
   if (Array.isArray(raw)) return raw.map(String).filter(Boolean).join("\n");
@@ -129,21 +86,6 @@ function lineToDraft(line: {
     catalogItemId: line.catalogItemId,
     imageId: line.imageId,
     imageUrl: line.Image?.location ?? null,
-  };
-}
-
-function serializedLineToDraft(line: SerializedLine, clientKey: string): DraftLine {
-  return {
-    id: line.id,
-    clientKey,
-    name: line.name,
-    quantity: line.quantity,
-    description: descToString(line.descriptionLines),
-    priceInput: centsToInput(line.unitPriceCents),
-    unitPriceCents: line.unitPriceCents,
-    catalogItemId: line.catalogItemId,
-    imageId: line.imageId,
-    imageUrl: line.imageUrl,
   };
 }
 
@@ -214,86 +156,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 
   const form = await request.formData();
   const intent = String(form.get("intent") || "save");
-  const clientKey = String(form.get("clientKey") || "");
-
-  if (intent === "add-from-catalog") {
-    const catalogItemId = Number(form.get("catalogItemId"));
-    const quotation = await getQuotation(id, ownerUserId);
-    if (!quotation) return json({ error: "Not found" }, { status: 404 });
-    const catalog = await listCatalogItems();
-    const item = catalog.find((c) => c.id === catalogItemId);
-    if (!item) return json({ error: "Item não encontrado" }, { status: 400 });
-
-    const line = await appendQuotationLine(id, ownerUserId, {
-      name: item.name,
-      quantity: 1,
-      descriptionLines: (Array.isArray(item.descriptionLines) ? item.descriptionLines : []) as string[],
-      unitPriceCents: item.defaultUnitPriceCents ?? 0,
-      catalogItemId: item.id,
-      imageId: item.imageId ?? null,
-    });
-    if (!line) return json({ error: "Not found" }, { status: 404 });
-    return json({ line: serializeLine(line), clientKey: clientKey || undefined });
-  }
-
-  if (intent === "add-blank-line") {
-    const quotation = await getQuotation(id, ownerUserId);
-    if (!quotation) return json({ error: "Not found" }, { status: 404 });
-    const line = await appendQuotationLine(id, ownerUserId, {
-      name: "Novo item",
-      quantity: 1,
-      descriptionLines: [],
-      unitPriceCents: 0,
-      catalogItemId: null,
-      imageId: null,
-    });
-    if (!line) return json({ error: "Not found" }, { status: 404 });
-    return json({ line: serializeLine(line), clientKey: clientKey || undefined });
-  }
-
-  if (intent === "remove-line") {
-    const lineId = Number(form.get("lineId"));
-    if (!Number.isFinite(lineId)) return json({ error: "Invalid lineId" }, { status: 400 });
-    const deleted = await deleteQuotationLineForQuotation(id, ownerUserId, lineId);
-    if (!deleted) return json({ error: "Not found" }, { status: 404 });
-    return json({ ok: true });
-  }
-
-  if (intent === "add-payment") {
-    const quotation = await getQuotation(id, ownerUserId);
-    if (!quotation) return json({ error: "Not found" }, { status: 404 });
-    const payment = await appendPaymentOption(id, ownerUserId, {
-      label: "À vista",
-      amountCents: 0,
-      detail: null,
-    });
-    if (!payment) return json({ error: "Not found" }, { status: 404 });
-    return json({ payment, clientKey: clientKey || undefined });
-  }
-
-  if (intent === "remove-payment") {
-    const paymentId = Number(form.get("paymentId"));
-    if (!Number.isFinite(paymentId)) return json({ error: "Invalid paymentId" }, { status: 400 });
-    const deleted = await deletePaymentOptionForQuotation(id, ownerUserId, paymentId);
-    if (!deleted) return json({ error: "Not found" }, { status: 404 });
-    return json({ ok: true });
-  }
-
-  if (intent === "set-line-image") {
-    const lineId = Number(form.get("lineId"));
-    const imageIdRaw = form.get("imageId");
-    const imageId =
-      imageIdRaw === null || imageIdRaw === "" ? null : Number(imageIdRaw);
-    if (!Number.isFinite(lineId)) return json({ error: "Invalid lineId" }, { status: 400 });
-    if (imageId !== null && !Number.isFinite(imageId)) {
-      return json({ error: "Invalid imageId" }, { status: 400 });
-    }
-    const line = await setQuotationLineImageForQuotation(id, ownerUserId, lineId, imageId);
-    if (!line) return json({ error: "Not found" }, { status: 404 });
-    return json({ line: serializeLine(line) });
-  }
-
-  if (intent !== "save" && intent !== "save-print") {
+  if (intent !== "save" && intent !== "save-print" && intent !== "autosave") {
     return json({ error: "Unknown intent" }, { status: 400 });
   }
 
@@ -317,8 +180,12 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     return json({ error: "Not found" }, { status: 404 });
   }
 
+  if (intent === "autosave") {
+    return json({ ok: true });
+  }
+
   if (intent === "save-print") {
-    return redirect(`/admin/quotations/${id}/print`);
+    return redirect(`/admin/quotations/${id}/print?autoprint=1`);
   }
 
   return redirect(`/admin/quotations/${id}?saved=1`);
@@ -332,17 +199,27 @@ function newClientKey() {
   return `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+const AUTOSAVE_EVERY_MS = 2 * 60 * 1000;
+
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(timer);
+  }, [value, delayMs]);
+  return debounced;
+}
+
 export default function QuotationBuilder() {
   const { quotation, catalog, rep } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
-  const fetcher = useFetcher<typeof action>();
   const [searchParams, setSearchParams] = useSearchParams();
   const busy = navigation.state !== "idle";
-  const fetcherBusy = fetcher.state !== "idle";
   const issuedValue = new Date(quotation.issuedAt).toISOString().slice(0, 10);
   const quotationId = quotation.id;
 
   const [pane, setPane] = useState<"edit" | "preview">("edit");
+  const [isLg, setIsLg] = useState<boolean | null>(null);
   const [title, setTitle] = useState(quotation.title);
   const [issuedAt, setIssuedAt] = useState(issuedValue);
   const [status, setStatus] = useState(quotation.status);
@@ -357,8 +234,26 @@ export default function QuotationBuilder() {
   const [lineUploadErrors, setLineUploadErrors] = useState<Record<string, string>>({});
   const [lineUploadingKey, setLineUploadingKey] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [autosaveHint, setAutosaveHint] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const autosaveFetcher = useFetcher<typeof action>();
+  const autosaveFetcherRef = useRef(autosaveFetcher);
+  const dirtyRef = useRef(false);
+  const ignoreDirtyUntilRef = useRef(1);
+  autosaveFetcherRef.current = autosaveFetcher;
 
   useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsLg(mql.matches);
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    ignoreDirtyUntilRef.current = 2;
+    dirtyRef.current = false;
+    setAutosaveHint(null);
     setTitle(quotation.title);
     setIssuedAt(new Date(quotation.issuedAt).toISOString().slice(0, 10));
     setStatus(quotation.status);
@@ -372,6 +267,8 @@ export default function QuotationBuilder() {
 
   useEffect(() => {
     if (searchParams.get("saved") !== "1") return;
+    ignoreDirtyUntilRef.current = 2;
+    dirtyRef.current = false;
     setTitle(quotation.title);
     setIssuedAt(new Date(quotation.issuedAt).toISOString().slice(0, 10));
     setStatus(quotation.status);
@@ -392,46 +289,37 @@ export default function QuotationBuilder() {
   }, [searchParams, quotation, setSearchParams]);
 
   useEffect(() => {
-    if (fetcher.state !== "idle" || !fetcher.data) return;
-    const data = fetcher.data as Record<string, unknown>;
-    if ("error" in data && data.error) {
-      setActionError(String(data.error));
+    if (ignoreDirtyUntilRef.current > 0) {
+      ignoreDirtyUntilRef.current -= 1;
       return;
     }
+    dirtyRef.current = true;
+  }, [title, issuedAt, status, location, document, notes, lines, payments]);
 
-    setActionError(null);
+  useEffect(() => {
+    const data = autosaveFetcher.data;
+    if (autosaveFetcher.state !== "idle" || !data || !("ok" in data) || !data.ok) return;
+    dirtyRef.current = false;
+    setAutosaveHint(
+      `Rascunho salvo às ${new Date().toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`,
+    );
+  }, [autosaveFetcher.state, autosaveFetcher.data]);
 
-    if ("line" in data && data.line) {
-      const line = data.line as SerializedLine;
-      const key = typeof data.clientKey === "string" ? data.clientKey : String(line.id);
-      setLines((prev) => {
-        const idx = prev.findIndex((l) => l.clientKey === key);
-        if (idx < 0) return prev;
-        const next = [...prev];
-        next[idx] = serializedLineToDraft(line, key);
-        return next;
-      });
-    }
-
-    if ("payment" in data && data.payment) {
-      const payment = data.payment as {
-        id: number;
-        label: string;
-        amountCents: number;
-        detail: string | null;
-      };
-      const key = typeof data.clientKey === "string" ? data.clientKey : String(payment.id);
-      setPayments((prev) => {
-        const idx = prev.findIndex((p) => p.clientKey === key);
-        if (idx < 0) return prev;
-        const draft = paymentToDraft(payment);
-        draft.clientKey = key;
-        const next = [...prev];
-        next[idx] = draft;
-        return next;
-      });
-    }
-  }, [fetcher.state, fetcher.data]);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (status !== "draft") return;
+      const fetcher = autosaveFetcherRef.current;
+      if (!dirtyRef.current || !formRef.current) return;
+      if (fetcher.state !== "idle") return;
+      const body = new FormData(formRef.current);
+      body.set("intent", "autosave");
+      fetcher.submit(body, { method: "post" });
+    }, AUTOSAVE_EVERY_MS);
+    return () => window.clearInterval(id);
+  }, [status]);
 
   function updateLine(clientKey: string, patch: Partial<DraftLine>) {
     setLines((prev) =>
@@ -476,7 +364,6 @@ export default function QuotationBuilder() {
         imageUrl: null,
       },
     ]);
-    fetcher.submit({ intent: "add-blank-line", clientKey }, { method: "post" });
   }
 
   function addFromCatalog() {
@@ -502,18 +389,11 @@ export default function QuotationBuilder() {
         imageUrl: item.Image?.location ?? null,
       },
     ]);
-    fetcher.submit(
-      { intent: "add-from-catalog", catalogItemId: catalogSelection, clientKey },
-      { method: "post" },
-    );
     setCatalogSelection("");
   }
 
-  function removeLine(clientKey: string, lineId: number | null) {
+  function removeLine(clientKey: string) {
     setLines((prev) => prev.filter((line) => line.clientKey !== clientKey));
-    if (lineId) {
-      fetcher.submit({ intent: "remove-line", lineId: String(lineId) }, { method: "post" });
-    }
   }
 
   function addPayment() {
@@ -529,30 +409,18 @@ export default function QuotationBuilder() {
         detail: "",
       },
     ]);
-    fetcher.submit({ intent: "add-payment", clientKey }, { method: "post" });
   }
 
-  function removePayment(clientKey: string, paymentId: number | null) {
+  function removePayment(clientKey: string) {
     setPayments((prev) => prev.filter((payment) => payment.clientKey !== clientKey));
-    if (paymentId) {
-      fetcher.submit({ intent: "remove-payment", paymentId: String(paymentId) }, { method: "post" });
-    }
   }
 
-  async function handleLineImageUpload(clientKey: string, lineId: number | null, file: File) {
+  async function handleLineImageUpload(clientKey: string, file: File) {
     setLineUploadErrors((prev) => {
       const next = { ...prev };
       delete next[clientKey];
       return next;
     });
-
-    if (!lineId) {
-      setLineUploadErrors((prev) => ({
-        ...prev,
-        [clientKey]: "Aguarde a linha ser salva",
-      }));
-      return;
-    }
 
     setLineUploadingKey(clientKey);
     try {
@@ -574,15 +442,6 @@ export default function QuotationBuilder() {
       }
 
       updateLine(clientKey, { imageId: data.id, imageUrl: data.location ?? null });
-      fetcher.submit(
-        {
-          intent: "set-line-image",
-          lineId: String(lineId),
-          imageId: String(data.id),
-          clientKey,
-        },
-        { method: "post" },
-      );
     } catch {
       setLineUploadErrors((prev) => ({
         ...prev,
@@ -593,25 +452,40 @@ export default function QuotationBuilder() {
     }
   }
 
-  const previewLines = lines.map((line) => ({
-    name: line.name,
-    quantity: line.quantity,
-    descriptionLines: line.description
-      .split(/\n/)
-      .map((l) => l.trim())
-      .filter(Boolean),
-    unitPriceCents: line.unitPriceCents,
-    imageUrl: line.imageUrl,
-  }));
-
-  const previewPayments = payments.map((payment) => ({
-    label: payment.label,
-    amountCents: payment.amountCents,
-    detail: payment.detail || null,
-  }));
+  const previewInput = useMemo(
+    () => ({
+      title,
+      issuedAt,
+      client: {
+        name: quotation.client.name,
+        location: location || null,
+        document: document || null,
+      },
+      lines: lines.map((line) => ({
+        name: line.name,
+        quantity: line.quantity,
+        descriptionLines: line.description
+          .split(/\n/)
+          .map((l) => l.trim())
+          .filter(Boolean),
+        unitPriceCents: line.unitPriceCents,
+        imageUrl: line.imageUrl,
+      })),
+      paymentOptions: payments.map((payment) => ({
+        label: payment.label,
+        amountCents: payment.amountCents,
+        detail: payment.detail || null,
+      })),
+      notes: notes || null,
+      rep,
+    }),
+    [title, issuedAt, quotation.client.name, location, document, lines, payments, notes, rep],
+  );
+  const preview = useDebouncedValue(previewInput, 120);
+  const showPreview = isLg === null || isLg || pane === "preview";
 
   return (
-    <div className="min-h-screen bg-secondary/60">
+    <div className="min-h-screen bg-secondary/60 print:min-h-0 print:bg-white">
       <div className="no-print border-b border-border bg-white">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div>
@@ -651,9 +525,10 @@ export default function QuotationBuilder() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 lg:grid-cols-[minmax(320px,420px)_1fr]">
+      <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 lg:grid-cols-[minmax(320px,420px)_1fr] print:block print:max-w-none print:p-0">
         <Form
           method="post"
+          ref={formRef}
           className={cn(
             "no-print space-y-6 self-start border border-border bg-white p-4",
             pane !== "edit" && "hidden lg:block",
@@ -714,55 +589,45 @@ export default function QuotationBuilder() {
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="document">CPF/CNPJ (opcional)</Label>
-              <Input
-                id="document"
-                name="document"
-                value={document}
-                onChange={(e) => setDocument(e.target.value)}
-              />
-            </div>
+            <TaxIdInput
+              id="document"
+              name="document"
+              value={document}
+              onValueChange={setDocument}
+            />
           </section>
 
           <section className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2">
               <h2 className="font-display text-lg font-semibold">Itens</h2>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={fetcherBusy}
-                  onClick={addBlankLine}
-                >
-                  + Linha avulsa
-                </Button>
-                <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={catalogSelection}
-                    onChange={(e) => setCatalogSelection(e.target.value)}
-                    className="h-9 min-w-[12rem] rounded-md border border-input bg-background px-2 text-sm"
-                  >
-                    <option value="" disabled>
-                      Do catálogo…
-                    </option>
-                    {catalog.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={catalog.length === 0 || !catalogSelection || fetcherBusy}
-                    onClick={addFromCatalog}
-                  >
-                    Adicionar
-                  </Button>
-                </div>
-              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addBlankLine}>
+                + Linha avulsa
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={catalogSelection}
+                onChange={(e) => setCatalogSelection(e.target.value)}
+                className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm"
+              >
+                <option value="" disabled>
+                  Do catálogo…
+                </option>
+                {catalog.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <Button
+                type="button"
+                size="sm"
+                className="shrink-0"
+                disabled={catalog.length === 0 || !catalogSelection}
+                onClick={addFromCatalog}
+              >
+                Adicionar
+              </Button>
             </div>
             {lines.map((line, i) => (
               <div key={line.clientKey} className="space-y-2 border border-border p-3">
@@ -773,8 +638,7 @@ export default function QuotationBuilder() {
                     variant="ghost"
                     size="sm"
                     className="h-8 text-destructive hover:text-destructive"
-                    disabled={fetcherBusy || !line.id}
-                    onClick={() => removeLine(line.clientKey, line.id)}
+                    onClick={() => removeLine(line.clientKey)}
                     aria-label="Remover item"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -827,34 +691,24 @@ export default function QuotationBuilder() {
                 ) : null}
                 <div>
                   <Label htmlFor={`line-img-${line.clientKey}`}>Imagem do item</Label>
-                  <input
+                  <FileButton
                     id={`line-img-${line.clientKey}`}
-                    type="file"
-                    accept="image/*"
-                    disabled={
-                      !line.id ||
-                      lineUploadingKey === line.clientKey ||
-                      fetcherBusy
-                    }
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void handleLineImageUpload(line.clientKey, line.id, file);
-                      e.target.value = "";
-                    }}
-                    className="mt-1 block w-full text-sm"
+                    className="mt-1"
+                    disabled={lineUploadingKey === line.clientKey}
+                    busy={lineUploadingKey === line.clientKey}
+                    onFile={(file) => void handleLineImageUpload(line.clientKey, file)}
                   />
-                  {lineUploadingKey === line.clientKey ? (
-                    <p className="mt-1 text-xs text-muted-foreground">Enviando…</p>
-                  ) : null}
                   {lineUploadErrors[line.clientKey] ? (
                     <p className="mt-1 text-sm text-destructive">
                       {lineUploadErrors[line.clientKey]}
                     </p>
                   ) : null}
                 </div>
-                <p className="text-right text-sm text-heat">
-                  Valor: {formatBRL(line.quantity * line.unitPriceCents)}
-                </p>
+                {line.quantity * line.unitPriceCents > 0 ? (
+                  <p className="text-right text-sm text-heat">
+                    Valor: {formatBRL(line.quantity * line.unitPriceCents)}
+                  </p>
+                ) : null}
               </div>
             ))}
           </section>
@@ -863,9 +717,10 @@ export default function QuotationBuilder() {
             <h2 className="font-display text-lg font-semibold">Notas / garantia</h2>
             <textarea
               name="notes"
-              rows={4}
+              rows={5}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              placeholder="Uma linha por item"
               className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             />
           </section>
@@ -873,13 +728,7 @@ export default function QuotationBuilder() {
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-display text-lg font-semibold">Formas de pagamento</h2>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={fetcherBusy}
-                onClick={addPayment}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={addPayment}>
                 + Pagamento
               </Button>
             </div>
@@ -891,8 +740,7 @@ export default function QuotationBuilder() {
                     variant="ghost"
                     size="sm"
                     className="h-8 text-destructive hover:text-destructive"
-                    disabled={fetcherBusy || !opt.id}
-                    onClick={() => removePayment(opt.clientKey, opt.id)}
+                    onClick={() => removePayment(opt.clientKey)}
                     aria-label="Remover pagamento"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -921,39 +769,42 @@ export default function QuotationBuilder() {
             ))}
           </section>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button type="submit" name="intent" value="save" disabled={busy}>
               Salvar
             </Button>
             <Button type="submit" name="intent" value="save-print" variant="outline" disabled={busy}>
               Salvar e imprimir
             </Button>
+            {autosaveHint ? (
+              <p className="text-xs text-muted-foreground">{autosaveHint}</p>
+            ) : status === "draft" ? (
+              <p className="text-xs text-muted-foreground">Rascunho salvo a cada 2 min</p>
+            ) : null}
           </div>
         </Form>
 
         <div
           className={cn(
-            "no-print space-y-3 self-start lg:sticky lg:top-4",
+            "space-y-3 self-start lg:sticky lg:top-4",
             pane !== "preview" && "hidden lg:block",
           )}
         >
-          <div className="overflow-x-auto border border-border bg-zinc-200/60 p-2 sm:p-4">
-            <div className="origin-top-left min-w-[320px]">
-              <QuotationDocument
-                title={title}
-                issuedAt={issuedAt}
-                client={{
-                  name: quotation.client.name,
-                  location: location || null,
-                  document: document || null,
-                }}
-                lines={previewLines}
-                paymentOptions={previewPayments}
-                notes={notes || null}
-                rep={rep}
-              />
+          {showPreview ? (
+            <div className="overflow-x-auto border border-border bg-zinc-200/60 p-2 print:overflow-visible print:border-0 print:bg-white print:p-0 sm:p-4">
+              <div className="origin-top-left min-w-[320px] print:min-w-0">
+                <QuotationDocument
+                  title={preview.title}
+                  issuedAt={preview.issuedAt}
+                  client={preview.client}
+                  lines={preview.lines}
+                  paymentOptions={preview.paymentOptions}
+                  notes={preview.notes}
+                  rep={preview.rep}
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { TaxIdInput } from "~/components/ui/tax-id-input";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { createQuoteClient, createQuotation, listQuoteClients } from "~/models/quotation.server";
@@ -104,10 +105,7 @@ export default function NewQuotation() {
             <Label htmlFor="location">Local (opcional)</Label>
             <Input id="location" name="location" />
           </div>
-          <div>
-            <Label htmlFor="document">CPF/CNPJ (opcional)</Label>
-            <Input id="document" name="document" />
-          </div>
+            <TaxIdInput id="document" name="document" />
         </div>
         <Button type="submit" variant="outline">
           Criar cliente e abrir builder

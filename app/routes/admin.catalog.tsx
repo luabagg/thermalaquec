@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
+import { FileButton } from "~/components/ui/file-button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
@@ -195,21 +196,13 @@ export default function AdminCatalog() {
                 ) : null}
                 <div className="mt-2">
                   <Label htmlFor={`catalog-img-${item.id}`}>Imagem</Label>
-                  <input
+                  <FileButton
                     id={`catalog-img-${item.id}`}
-                    type="file"
-                    accept="image/*"
+                    className="mt-1"
                     disabled={uploadingId === item.id || fetcher.state !== "idle"}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void handleImageUpload(item.id, file);
-                      e.target.value = "";
-                    }}
-                    className="mt-1 block w-full text-sm"
+                    busy={uploadingId === item.id}
+                    onFile={(file) => void handleImageUpload(item.id, file)}
                   />
-                  {uploadingId === item.id ? (
-                    <p className="mt-1 text-xs text-muted-foreground">Enviando…</p>
-                  ) : null}
                   {uploadErrors[item.id] ? (
                     <p className="mt-1 text-sm text-destructive">{uploadErrors[item.id]}</p>
                   ) : null}

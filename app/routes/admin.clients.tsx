@@ -4,9 +4,11 @@ import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { TaxIdInput } from "~/components/ui/tax-id-input";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { createQuoteClient, listQuoteClients } from "~/models/quotation.server";
+import { formatTaxId, taxIdLabel } from "~/utils/tax-id";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Clientes | ${SITE_NAME}`);
@@ -56,10 +58,7 @@ export default function AdminClients() {
           <Label htmlFor="location">Local (opcional)</Label>
           <Input id="location" name="location" />
         </div>
-        <div>
-          <Label htmlFor="document">CPF/CNPJ (opcional)</Label>
-          <Input id="document" name="document" />
-        </div>
+        <TaxIdInput id="document" name="document" />
         <div className="sm:col-span-4">
           <Button type="submit">Adicionar cliente</Button>
         </div>
@@ -71,7 +70,9 @@ export default function AdminClients() {
             <div>
               <p className="font-medium">{c.name}</p>
               <p className="text-sm text-muted-foreground">
-                {[c.location, c.document].filter(Boolean).join(" · ") || "—"}
+                {[c.location, c.document ? `${taxIdLabel(c.document)} ${formatTaxId(c.document)}` : null]
+                  .filter(Boolean)
+                  .join(" · ") || "—"}
               </p>
             </div>
             <Link

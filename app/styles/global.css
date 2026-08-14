@@ -1,1 +1,26 @@
 /* Intentionally minimal - marketing styles live in Tailwind + component classes. */
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Flex shells clip print to one page in Chromium. */
+  .admin-shell {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  header,
+  footer,
+  .no-print,
+  [data-sonner-toaster],
+  [data-radix-toast-viewport] {
+    display: none !important;
+  }
+}

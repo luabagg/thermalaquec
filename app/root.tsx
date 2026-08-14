@@ -1,7 +1,16 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
 import React from "react";
-import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "@remix-run/react";
+import {
+  isRouteErrorResponse,
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useLocation,
+  useRouteError,
+} from "@remix-run/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/remix";
 import { FloatingWhatsApp } from "~/components/marketing/FloatingWhatsApp";
@@ -17,6 +26,7 @@ import whatsappWidgetOverrides from "~/styles/whatsapp-widget.css?url";
 import fontStyles from "~/styles/fonts.css?url";
 import globalStyles from "~/styles/global.css?url";
 import tailwindStyles from "~/styles/tailwind.css?url";
+import { cn } from "~/lib/utils";
 import { ErrorPage } from "./pages/ErrorPage/ErrorPage";
 
 export const links: LinksFunction = () => [
@@ -88,13 +98,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 }
 
 export default function App() {
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith("/admin");
+
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+      <div
+        className={cn(
+          "flex min-h-screen flex-col bg-background",
+          isAdmin && "admin-shell",
+        )}
+      >
+        {isAdmin ? null : <Header />}
         <Outlet />
-        <Footer />
-        <FloatingWhatsApp />
+        {isAdmin ? null : (
+          <>
+            <Footer />
+            <FloatingWhatsApp />
+          </>
+        )}
         <Toaster />
         <Sonner />
       </div>

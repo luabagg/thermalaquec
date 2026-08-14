@@ -1,6 +1,7 @@
 import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
+import { useEffect } from "react";
 import { QuotationDocument } from "~/components/admin/QuotationDocument";
 import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
@@ -23,11 +24,44 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   return json({ quotation, rep: resolveQuoteRep(user.email) });
 };
 
+function waitForImages(root: ParentNode) {
+  const images = Array.from(root.querySelectorAll("img"));
+  return Promise.all(
+    images.map((img) => {
+      if (img.complete) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        img.addEventListener("load", () => resolve(), { once: true });
+        img.addEventListener("error", () => resolve(), { once: true });
+      });
+    }),
+  );
+}
+
 export default function QuotationPrint() {
   const { quotation, rep } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("autoprint") !== "1") return;
+    let cancelled = false;
+    const root = document.querySelector(".quote-stage");
+    void (async () => {
+      if (root) await waitForImages(root);
+      if (cancelled) return;
+      window.print();
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("autoprint")) {
+        url.searchParams.delete("autoprint");
+        window.history.replaceState({}, "", url);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-zinc-800 print:min-h-0 print:bg-white">
       <div className="no-print flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <Button asChild variant="outline" size="sm">
           <Link to={`/admin/quotations/${quotation.id}`}>Voltar ao builder</Link>
@@ -36,7 +70,7 @@ export default function QuotationPrint() {
           Imprimir / PDF
         </Button>
       </div>
-      <div className="flex justify-center p-4 print:p-0">
+      <div className="flex justify-center p-4 print:block print:p-0">
         <QuotationDocument
           title={quotation.title}
           issuedAt={quotation.issuedAt}

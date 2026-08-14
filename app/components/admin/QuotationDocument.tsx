@@ -1,6 +1,8 @@
+import { memo } from "react";
 import type { QuotationLine, QuotationPaymentOption, QuoteClient } from "@prisma/client";
 
-import { formatBRL, quotationTotalCents } from "~/utils/quotation";
+import { formatBRL, quotationTotalCents, splitNoteLines } from "~/utils/quotation";
+import { formatTaxId, taxIdLabel } from "~/utils/tax-id";
 import { QUOTE_COMPANY, type QuoteRepProfile } from "~/lib/site";
 
 type QuotationDocumentProps = {
@@ -15,7 +17,7 @@ type QuotationDocumentProps = {
   paymentOptions: Array<Pick<QuotationPaymentOption, "label" | "amountCents" | "detail">>;
   notes: string | null;
   rep: QuoteRepProfile;
-  /** When true, hide on-screen chrome (print stylesheet still applies). */
+  /** Dedicated print page: no screen chrome, print stylesheet applies. */
   printMode?: boolean;
 };
 
@@ -37,7 +39,7 @@ function descLines(raw: unknown): string[] {
   return [];
 }
 
-export function QuotationDocument({
+export const QuotationDocument = memo(function QuotationDocument({
   title,
   issuedAt,
   client,
@@ -45,15 +47,34 @@ export function QuotationDocument({
   paymentOptions,
   notes,
   rep,
+  printMode,
 }: QuotationDocumentProps) {
   const total = quotationTotalCents(lines);
   const year = asDate(issuedAt).getFullYear();
+  const noteItems = splitNoteLines(notes);
 
   return (
-    <article className="quote-doc mx-auto bg-white text-ink shadow-sm print:shadow-none">
-      <header className="quote-doc__header">
-        <div className="quote-doc__header-left">
-          <h1 className="quote-doc__title">Orçamento</h1>
+    <div
+      className={
+        printMode
+          ? "quote-stage quote-stage--print mx-auto"
+          : "quote-stage mx-auto shadow-sm print:shadow-none"
+      }
+    >
+      <img className="quote-stage__bg" src="/quote-building-bg.png" alt="" aria-hidden />
+      <div className="quote-doc__logo" aria-label={QUOTE_COMPANY.legalName}>
+        <img src="/quote-logo.webp" alt={QUOTE_COMPANY.legalName} width={160} height={160} />
+        <span className="quote-doc__logo-person">{rep.brandPerson}</span>
+      </div>
+      <article className="quote-doc text-ink">
+        <header className="quote-doc__header">
+          <div className="quote-doc__header-top">
+            <h1 className="quote-doc__title">Orçamento</h1>
+            <div className="quote-doc__date">
+              <span>Data</span>
+              <strong>{formatDateBR(issuedAt)}</strong>
+            </div>
+          </div>
           <p className="quote-doc__company">{QUOTE_COMPANY.legalName}</p>
           <p className="quote-doc__tax">
             {QUOTE_COMPANY.taxRegime}, {QUOTE_COMPANY.cnpj}
@@ -71,23 +92,12 @@ export function QuotationDocument({
             ) : null}
             {client.document ? (
               <div>
-                <dt>CPF</dt>
-                <dd>{client.document}</dd>
+                <dt>{taxIdLabel(client.document)}</dt>
+                <dd>{formatTaxId(client.document)}</dd>
               </div>
             ) : null}
           </dl>
-        </div>
-        <div className="quote-doc__header-right">
-          <div className="quote-doc__date">
-            <span>Data</span>
-            <strong>{formatDateBR(issuedAt)}</strong>
-          </div>
-          <div className="quote-doc__logo" aria-label={QUOTE_COMPANY.legalName}>
-            <img src="/quote-logo.webp" alt={QUOTE_COMPANY.legalName} width={120} height={120} />
-            <span className="quote-doc__logo-person">{rep.brandPerson}</span>
-          </div>
-        </div>
-      </header>
+        </header>
 
       <div className="quote-doc__table-head" role="row">
         <span>Item</span>
@@ -98,11 +108,19 @@ export function QuotationDocument({
       <ol className="quote-doc__lines">
         {lines.map((line, index) => {
           const bullets = descLines(line.descriptionLines);
+          const lineTotal = line.quantity * line.unitPriceCents;
+          const hasPhoto = Boolean(line.imageUrl);
           return (
             <li key={`${line.name}-${index}`} className="quote-doc__line">
               <div className="quote-doc__line-main">
                 <span className="quote-doc__line-num">{index + 1}</span>
-                <div className="quote-doc__line-body">
+                <div
+                  className={
+                    hasPhoto
+                      ? "quote-doc__line-body"
+                      : "quote-doc__line-body quote-doc__line-body--no-photo"
+                  }
+                >
                   <p className="quote-doc__line-name">{line.name}</p>
                   <span className="quote-doc__line-qty">{line.quantity}</span>
                   {bullets.length > 0 ? (
@@ -114,16 +132,16 @@ export function QuotationDocument({
                   ) : (
                     <span className="quote-doc__line-desc-empty" />
                   )}
-                  {line.imageUrl ? (
-                    <img className="quote-doc__line-photo" src={line.imageUrl} alt="" />
-                  ) : (
-                    <div className="quote-doc__line-photo" aria-hidden />
-                  )}
+                  {hasPhoto ? (
+                    <img className="quote-doc__line-photo" src={line.imageUrl ?? ""} alt="" />
+                  ) : null}
                 </div>
               </div>
-              <p className="quote-doc__line-price">
-                Valor: <strong>{formatBRL(line.quantity * line.unitPriceCents)}</strong>
-              </p>
+              {lineTotal > 0 ? (
+                <p className="quote-doc__line-price">
+                  Valor: <strong>{formatBRL(lineTotal)}</strong>
+                </p>
+              ) : null}
             </li>
           );
         })}
@@ -134,7 +152,13 @@ export function QuotationDocument({
           <span className="quote-doc__total-label">Valor total:</span>
           <strong className="quote-doc__total-value">{formatBRL(total)}</strong>
         </div>
-        {notes ? <p className="quote-doc__notes">{notes}</p> : null}
+        {noteItems.length > 0 ? (
+          <ul className="quote-doc__notes">
+            {noteItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ) : null}
       </section>
 
       {paymentOptions.length > 0 ? (
@@ -151,10 +175,11 @@ export function QuotationDocument({
           </ul>
         </section>
       ) : null}
+      </article>
 
       <footer className="quote-doc__footer">
         Contato: {rep.phone} | {rep.city} | {rep.email} | {year}
       </footer>
-    </article>
+    </div>
   );
-}
+});

@@ -5,7 +5,7 @@ import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { cn } from "~/lib/utils";
-import { deleteQuotation, listQuotations, updateQuotationMeta } from "~/models/quotation.server";
+import { deleteQuotation, listQuotations } from "~/models/quotation.server";
 import { formatBRL, quotationTotalCents } from "~/utils/quotation";
 import { requireAdmin } from "~/utils/require-admin.server";
 
@@ -26,12 +26,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (intent === "delete") {
     const deleted = await deleteQuotation(id, user.id);
     if (!deleted) return json({ error: "Not found" }, { status: 404 });
-    return json({ ok: true });
-  }
-  if (intent === "set-status") {
-    const status = String(form.get("status")) === "final" ? "final" : "draft";
-    const updated = await updateQuotationMeta(id, user.id, { status });
-    if (!updated) return json({ error: "Not found" }, { status: 404 });
     return json({ ok: true });
   }
   return json({ error: "Unknown" }, { status: 400 });
@@ -76,9 +70,12 @@ export default function AdminQuotations() {
           const total = quotationTotalCents(q.lines);
           const issued = new Date(q.issuedAt).toLocaleDateString("pt-BR");
           return (
-            <li key={q.id} className="px-4 py-3">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0 flex-1">
+            <li key={q.id} className="flex items-stretch gap-2 hover:bg-secondary/50">
+              <Link
+                to={`/admin/quotations/${q.id}`}
+                className="flex min-w-0 flex-1 flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+              >
+                <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-medium">{q.title}</p>
                     <StatusBadge status={q.status} />
@@ -87,39 +84,21 @@ export default function AdminQuotations() {
                     {q.client.name} · {issued}
                   </p>
                 </div>
-                <p className="font-medium sm:text-right">{formatBRL(total)}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button asChild variant="outline" size="sm">
-                    <Link to={`/admin/quotations/${q.id}`}>Abrir</Link>
-                  </Button>
-                  <Form method="post" className="flex items-center">
-                    <input type="hidden" name="intent" value="set-status" />
-                    <input type="hidden" name="id" value={q.id} />
-                    <select
-                      name="status"
-                      defaultValue={q.status}
-                      aria-label="Status do orçamento"
-                      className="flex h-9 rounded-md border border-input bg-background px-2 text-sm"
-                      onChange={(event) => event.currentTarget.form?.requestSubmit()}
-                    >
-                      <option value="draft">Rascunho</option>
-                      <option value="final">Final</option>
-                    </select>
-                  </Form>
-                  <Form
-                    method="post"
-                    onSubmit={(event) => {
-                      if (!confirm("Excluir este orçamento?")) event.preventDefault();
-                    }}
-                  >
-                    <input type="hidden" name="intent" value="delete" />
-                    <input type="hidden" name="id" value={q.id} />
-                    <Button type="submit" variant="destructive" size="sm">
-                      Excluir
-                    </Button>
-                  </Form>
-                </div>
-              </div>
+                {total > 0 ? <p className="font-medium sm:text-right">{formatBRL(total)}</p> : null}
+              </Link>
+              <Form
+                method="post"
+                className="flex items-center pr-4"
+                onSubmit={(event) => {
+                  if (!confirm("Excluir este orçamento?")) event.preventDefault();
+                }}
+              >
+                <input type="hidden" name="intent" value="delete" />
+                <input type="hidden" name="id" value={q.id} />
+                <Button type="submit" variant="destructive" size="sm">
+                  Excluir
+                </Button>
+              </Form>
             </li>
           );
         })}
