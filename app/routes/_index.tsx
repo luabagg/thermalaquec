@@ -1,6 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 
-import { About } from "~/components/marketing/About";
+import { ProjectPillars } from "~/components/marketing/About";
 import { CalculatorCtaSection } from "~/components/marketing/CalculatorCtaSection";
 import { FadeInOnScroll } from "~/components/marketing/FadeInOnScroll";
 import { Features } from "~/components/marketing/Features";
@@ -24,11 +24,11 @@ export default function Index() {
       <Hero />
       <CalculatorCtaSection />
       <FadeInOnScroll>
-        <About />
+        <Products />
       </FadeInOnScroll>
       <StatsSection />
       <FadeInOnScroll>
-        <Products />
+        <ProjectPillars />
       </FadeInOnScroll>
       <FadeInOnScroll>
         <Features />

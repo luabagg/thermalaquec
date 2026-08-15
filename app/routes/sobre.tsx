@@ -20,7 +20,7 @@ export default function SobrePage() {
     <main className="flex-grow">
       <PageHero title="A empresa" description="História, engenharia própria e equipe técnica por trás dos projetos Thermal." />
       <FadeInOnScroll>
-        <About />
+        <About title="Engenharia em soluções de aquecimento residencial e energia solar" />
       </FadeInOnScroll>
       <SpecializedTeamSection />
       <FadeInOnScroll>

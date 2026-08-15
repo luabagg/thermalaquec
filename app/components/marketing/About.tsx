@@ -16,7 +16,7 @@ const highlights = [
   },
 ];
 
-export const About = () => {
+export const About = ({ title }: { title: string }) => {
   return (
     <section id="about" className="bg-secondary py-16 md:py-24">
       <div className="container mx-auto max-w-screen-xl px-4 md:px-6">
@@ -24,12 +24,12 @@ export const About = () => {
           {/* Text first on mobile; image left on desktop */}
           <div className="order-1 flex flex-col gap-5 md:order-2">
             <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
-              Engenharia de aquecimento e solar no RS e em SC
+              {title}
             </h2>
             <p className="max-w-[58ch] text-lg leading-relaxed text-muted-foreground">
-              A Thermal estrutura engenharia própria e integra as áreas técnicas
-              para entregar sistemas de aquecimento e geração solar sob medida,
-              do dimensionamento à instalação.
+              Na Thermal, cada projeto parte das características do imóvel, do
+              perfil de consumo e da rotina de uso para definir sistemas de
+              aquecimento e geração solar sob medida.
             </p>
           </div>
 
@@ -45,23 +45,29 @@ export const About = () => {
             <div className="absolute -bottom-4 left-4 hidden h-1 w-24 bg-heat md:block" />
           </div>
         </div>
+      </div>
+    </section>
+  );
+};
 
-        <div className="mt-16 border-t border-border pt-12 md:mt-20 md:pt-16">
-          <h3 className="font-display max-w-xl text-2xl font-bold tracking-tight md:text-3xl">
-            O que sustenta cada projeto
-          </h3>
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            {highlights.map((item) => (
-              <div key={item.title} className="border-l-2 border-heat pl-5">
-                <h4 className="font-display text-xl font-semibold tracking-tight">
-                  {item.title}
-                </h4>
-                <p className="mt-2 text-muted-foreground leading-relaxed">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
+export const ProjectPillars = () => {
+  return (
+    <section className="bg-secondary pb-16 md:pb-24">
+      <div className="container mx-auto max-w-screen-xl border-t border-border px-4 pt-12 md:px-6 md:pt-16">
+        <h2 className="font-display max-w-xl text-2xl font-bold tracking-tight md:text-3xl">
+          O que sustenta cada projeto
+        </h2>
+        <div className="mt-10 grid gap-8 md:grid-cols-3">
+          {highlights.map((item) => (
+            <div key={item.title} className="border-l-2 border-heat pl-5">
+              <h3 className="font-display text-xl font-semibold tracking-tight">
+                {item.title}
+              </h3>
+              <p className="mt-2 text-muted-foreground leading-relaxed">
+                {item.description}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
