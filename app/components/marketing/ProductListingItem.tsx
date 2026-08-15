@@ -29,7 +29,7 @@ export const ProductListingItem = ({
     <FadeInOnScroll>
       <div
         id={product.slug}
-        className="grid items-center gap-10 border-b border-border py-12 last:border-b-0 md:grid-cols-2 md:gap-14 md:py-16"
+        className="grid scroll-mt-24 items-center gap-10 border-b border-border py-12 last:border-b-0 md:grid-cols-2 md:gap-14 md:py-16"
       >
         <div className={reverse ? "md:order-2" : "md:order-1"}>
           <div
