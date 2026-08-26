@@ -7,7 +7,7 @@ export const Footer = () => {
   const mapsQuery = encodeURIComponent(`${CONTACT.addressLine}, ${CONTACT.cityLine}`);
 
   return (
-    <footer className="bg-ink text-white">
+    <footer className="no-print bg-ink text-white">
       <div className="container mx-auto grid max-w-screen-xl grid-cols-1 gap-10 px-4 py-14 md:grid-cols-3 md:gap-12 md:px-6">
         <div className="flex flex-col items-start gap-5">
           <div className="flex items-center gap-4">

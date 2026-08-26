@@ -786,12 +786,12 @@ export default function QuotationBuilder() {
 
         <div
           className={cn(
-            "space-y-3 self-start lg:sticky lg:top-4",
-            pane !== "preview" && "hidden lg:block",
+            "space-y-3 self-start lg:sticky lg:top-4 print:static",
+            pane !== "preview" && "hidden lg:block print:block",
           )}
         >
           {showPreview ? (
-            <div className="overflow-x-auto border border-border bg-zinc-200/60 p-2 print:overflow-visible print:border-0 print:bg-white print:p-0 sm:p-4">
+            <div className="overflow-x-auto border border-border bg-zinc-200/60 p-2 print:flex print:justify-center print:overflow-visible print:border-0 print:bg-white print:p-0 sm:p-4">
               <div className="origin-top-left min-w-[320px] print:min-w-0">
                 <QuotationDocument
                   title={preview.title}

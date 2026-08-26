@@ -37,6 +37,11 @@ function waitForImages(root: ParentNode) {
   );
 }
 
+async function waitForPrintReady(root: ParentNode | null) {
+  if (root) await waitForImages(root);
+  if (document.fonts?.ready) await document.fonts.ready;
+}
+
 export default function QuotationPrint() {
   const { quotation, rep } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
@@ -46,7 +51,7 @@ export default function QuotationPrint() {
     let cancelled = false;
     const root = document.querySelector(".quote-stage");
     void (async () => {
-      if (root) await waitForImages(root);
+      await waitForPrintReady(root);
       if (cancelled) return;
       window.print();
       const url = new URL(window.location.href);
@@ -61,7 +66,7 @@ export default function QuotationPrint() {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen bg-zinc-800 print:min-h-0 print:bg-white">
+    <div className="quote-print-page min-h-screen bg-zinc-800 print:min-h-0 print:bg-white">
       <div className="no-print flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <Button asChild variant="outline" size="sm">
           <Link to={`/admin/quotations/${quotation.id}`}>Voltar ao builder</Link>

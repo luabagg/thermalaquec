@@ -353,6 +353,8 @@
 
   html,
   body {
+    margin: 0 !important;
+    padding: 0 !important;
     background: #fff !important;
     height: auto !important;
     overflow: visible !important;
@@ -362,11 +364,25 @@
     display: none !important;
   }
 
+  /* Collapse screen chrome so only .quote-stage is measured. */
+  .quote-print-page {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    display: block !important;
+  }
+
   .quote-stage {
-    width: 210mm;
+    width: 210mm !important;
+    max-width: none !important;
     min-height: 297mm;
     height: auto;
     overflow: visible;
+    margin: 0;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   .quote-doc {
@@ -380,14 +396,16 @@
     margin: 8mm 11mm 0;
   }
 
+  /* Defense: global print used to hide every header/footer. */
+  .quote-doc__header,
+  .quote-doc__footer {
+    display: block !important;
+  }
+
   .quote-doc__line,
   .quote-doc__payments li,
   .quote-doc__footer {
     break-inside: avoid;
-  }
-
-  .quote-doc__footer {
-    margin-top: 0;
   }
 
   .quote-doc__line-photo {

@@ -16,8 +16,7 @@
     overflow: visible !important;
   }
 
-  header,
-  footer,
+  /* Never hide document <header>/<footer> — quotation chrome uses those tags. */
   .no-print,
   [data-sonner-toaster],
   [data-radix-toast-viewport] {
