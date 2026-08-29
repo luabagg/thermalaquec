@@ -1,6 +1,13 @@
 import type { Prisma, QuoteCatalogItem, QuoteClient, Quotation, QuotationLine, QuotationPaymentOption } from "@prisma/client";
 
 import prisma from "~/libs/prisma/client.server";
+export {
+  createCatalogItem,
+  getCatalogItem,
+  listCatalogItems,
+  setCatalogItemImage,
+  updateCatalogItem,
+} from "./catalog.server";
 
 export type QuotationWithRelations = Quotation & {
   client: QuoteClient;
@@ -36,51 +43,6 @@ export async function updateQuoteClient(
       name: data.name.trim(),
       location: data.location?.trim() || null,
       document: data.document?.trim() || null,
-    },
-  });
-}
-
-export async function listCatalogItems() {
-  return prisma.quoteCatalogItem.findMany({
-    orderBy: { name: "asc" },
-    include: { Image: true },
-  });
-}
-
-export async function getCatalogItem(id: number) {
-  return prisma.quoteCatalogItem.findUnique({ where: { id } });
-}
-
-export async function createCatalogItem(data: {
-  slug: string;
-  name: string;
-  descriptionLines?: string[];
-  defaultUnitPriceCents?: number | null;
-}) {
-  return prisma.quoteCatalogItem.create({
-    data: {
-      slug: data.slug,
-      name: data.name.trim(),
-      descriptionLines: data.descriptionLines ?? [],
-      defaultUnitPriceCents: data.defaultUnitPriceCents ?? null,
-    },
-  });
-}
-
-export async function updateCatalogItem(
-  id: number,
-  data: {
-    name: string;
-    descriptionLines?: string[];
-    defaultUnitPriceCents?: number | null;
-  },
-) {
-  return prisma.quoteCatalogItem.update({
-    where: { id },
-    data: {
-      name: data.name.trim(),
-      descriptionLines: data.descriptionLines ?? [],
-      defaultUnitPriceCents: data.defaultUnitPriceCents ?? null,
     },
   });
 }
@@ -493,14 +455,6 @@ export async function setQuotationLineImageForQuotation(
   if (!line) return null;
   return prisma.quotationLine.update({
     where: { id: lineId },
-    data: { imageId },
-    include: { Image: true },
-  });
-}
-
-export async function setCatalogItemImage(catalogItemId: number, imageId: number | null) {
-  return prisma.quoteCatalogItem.update({
-    where: { id: catalogItemId },
     data: { imageId },
     include: { Image: true },
   });
