@@ -1,12 +1,13 @@
 import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { QuotationDocument } from "~/components/admin/QuotationDocument";
 import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
 import { getQuotation } from "~/models/quotation.server";
+import { waitForPrintReadiness } from "~/utils/print-readiness";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
 
@@ -24,46 +25,54 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   return json({ quotation, rep: resolveQuoteRep(user.email) });
 };
 
-function waitForImages(root: ParentNode) {
-  const images = Array.from(root.querySelectorAll("img"));
-  return Promise.all(
-    images.map((img) => {
-      if (img.complete) return Promise.resolve();
-      return new Promise<void>((resolve) => {
-        img.addEventListener("load", () => resolve(), { once: true });
-        img.addEventListener("error", () => resolve(), { once: true });
-      });
-    }),
-  );
-}
-
-async function waitForPrintReady(root: ParentNode | null) {
-  if (root) await waitForImages(root);
-  if (document.fonts?.ready) await document.fonts.ready;
-}
-
 export default function QuotationPrint() {
   const { quotation, rep } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
+  const printRequestInFlightRef = useRef(false);
+  const autoPrintStartedRef = useRef(false);
+  const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    if (searchParams.get("autoprint") !== "1") return;
-    let cancelled = false;
-    const root = document.querySelector(".quote-stage");
-    void (async () => {
-      await waitForPrintReady(root);
-      if (cancelled) return;
+  useEffect(
+    () => () => {
+      isMountedRef.current = false;
+    },
+    [],
+  );
+
+  const startPrint = useCallback(async (mode: "manual" | "autoprint") => {
+    if (printRequestInFlightRef.current) return;
+    printRequestInFlightRef.current = true;
+    setIsPreparingPrint(true);
+
+    try {
+      const root = document.querySelector(".quote-stage");
+      await waitForPrintReadiness(root);
+      if (!isMountedRef.current) return;
+
       window.print();
-      const url = new URL(window.location.href);
-      if (url.searchParams.has("autoprint")) {
-        url.searchParams.delete("autoprint");
-        window.history.replaceState({}, "", url);
+
+      if (mode === "autoprint") {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("autoprint")) {
+          url.searchParams.delete("autoprint");
+          window.history.replaceState({}, "", url);
+        }
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [searchParams]);
+    } finally {
+      printRequestInFlightRef.current = false;
+      if (isMountedRef.current) {
+        setIsPreparingPrint(false);
+      }
+    }
+  }, []);
+
+  const autoPrintRequested = searchParams.get("autoprint") === "1";
+  useEffect(() => {
+    if (!autoPrintRequested || autoPrintStartedRef.current) return;
+    autoPrintStartedRef.current = true;
+    void startPrint("autoprint");
+  }, [autoPrintRequested, startPrint]);
 
   return (
     <div className="quote-print-page min-h-screen bg-zinc-800 print:min-h-0 print:bg-white">
@@ -71,10 +80,19 @@ export default function QuotationPrint() {
         <Button asChild variant="outline" size="sm">
           <Link to={`/admin/quotations/${quotation.id}`}>Voltar ao builder</Link>
         </Button>
-        <Button size="sm" onClick={() => window.print()}>
-          Imprimir / PDF
+        <Button size="sm" onClick={() => void startPrint("manual")} disabled={isPreparingPrint}>
+          {isPreparingPrint ? "Preparando..." : "Imprimir / PDF"}
         </Button>
       </div>
+      {isPreparingPrint ? (
+        <div
+          className="no-print border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 print:hidden"
+          role="status"
+          aria-live="polite"
+        >
+          Preparando impressão...
+        </div>
+      ) : null}
       <div className="flex justify-center p-4 print:block print:p-0">
         <QuotationDocument
           title={quotation.title}
