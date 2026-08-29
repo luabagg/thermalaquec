@@ -85,6 +85,21 @@ describe("validateCatalogProposal", () => {
       .toEqual(expect.arrayContaining([{ code: "invalid_field_length", path: "family:boiler/nameTemplate", message: expect.any(String) }]));
   });
 
+  it("rejects invalid deserialized disposition values", () => {
+    const deserialized = JSON.parse(JSON.stringify(proposal())) as CatalogNormalizationProposal;
+    const mappedSource = deserialized.families[0].sources[1];
+    mappedSource.priceDisposition = "INVALID" as unknown as typeof mappedSource.priceDisposition;
+    mappedSource.imageDisposition = "INVALID" as unknown as typeof mappedSource.imageDisposition;
+
+    expect(validateCatalogProposal(source, deserialized)).toEqual(expect.objectContaining({
+      ok: false,
+      errors: expect.arrayContaining([
+        { code: "invalid_price_disposition", path: "family:boiler/source:2", message: expect.any(String) },
+        { code: "invalid_image_disposition", path: "family:boiler/source:2", message: expect.any(String) },
+      ]),
+    }));
+  });
+
   it("rejects invalid variant axes, sources, prices, templates, parent membership, and image dispositions", () => {
     expect(errorsFor((value) => {
       const otherFamily = { ...value.families[0], clientKey: "heater", slug: "heater", sources: [], variants: [], options: [{

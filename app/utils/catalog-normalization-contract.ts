@@ -103,6 +103,10 @@ function validNullablePrice(value: number | null) {
   return value === null || (Number.isInteger(value) && value >= 0);
 }
 
+function validSourceDisposition(value: unknown): value is SourceDisposition {
+  return value === "PARENT_SOURCE" || value === "VARIANT" || value === "USE_PARENT_FALLBACK";
+}
+
 function sameSelection(left: string[], right: string[]) {
   return left.length === right.length && [...left].sort().every((value, index) => value === [...right].sort()[index]);
 }
@@ -233,17 +237,25 @@ export function validateCatalogProposal(
       }
 
       const matchingVariant = family.variants.find((variant) => sameSelection(variant.valueClientKeys, mappedSource.selectedValueClientKeys));
+      const validPriceDisposition = validSourceDisposition(mappedSource.priceDisposition);
+      const validImageDisposition = validSourceDisposition(mappedSource.imageDisposition);
+      if (!validPriceDisposition) {
+        add("invalid_price_disposition", sourcePath, "Price disposition must be PARENT_SOURCE, VARIANT, or USE_PARENT_FALLBACK.");
+      }
+      if (!validImageDisposition) {
+        add("invalid_image_disposition", sourcePath, "Image disposition must be PARENT_SOURCE, VARIANT, or USE_PARENT_FALLBACK.");
+      }
       if (sourceItem) {
-        if (mappedSource.priceDisposition === "PARENT_SOURCE" && mappedSource.sourceId !== family.parentPriceSourceId) {
+        if (validPriceDisposition && mappedSource.priceDisposition === "PARENT_SOURCE" && mappedSource.sourceId !== family.parentPriceSourceId) {
           add("price_disposition_mismatch", sourcePath, "Only the declared parent price source may use PARENT_SOURCE.");
         }
-        if (mappedSource.priceDisposition === "VARIANT" && (!matchingVariant || matchingVariant.unitPriceCents !== sourceItem.defaultUnitPriceCents)) {
+        if (validPriceDisposition && mappedSource.priceDisposition === "VARIANT" && (!matchingVariant || matchingVariant.unitPriceCents !== sourceItem.defaultUnitPriceCents)) {
           add("price_disposition_mismatch", sourcePath, "VARIANT price disposition requires a matching variant price.");
         }
-        if (mappedSource.imageDisposition === "PARENT_SOURCE" && mappedSource.sourceId !== family.parentImageSourceId) {
+        if (validImageDisposition && mappedSource.imageDisposition === "PARENT_SOURCE" && mappedSource.sourceId !== family.parentImageSourceId) {
           add("image_disposition_mismatch", sourcePath, "Only the declared parent image source may use PARENT_SOURCE.");
         }
-        if (mappedSource.imageDisposition === "VARIANT" && (!matchingVariant || matchingVariant.imageSourceId !== mappedSource.sourceId)) {
+        if (validImageDisposition && mappedSource.imageDisposition === "VARIANT" && (!matchingVariant || matchingVariant.imageSourceId !== mappedSource.sourceId)) {
           add("image_disposition_mismatch", sourcePath, "VARIANT image disposition requires a matching variant image source.");
         }
       }
