@@ -1,8 +1,8 @@
 import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useFetcher, useLoaderData, useNavigation, useSearchParams } from "@remix-run/react";
+import { Form, Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import { Trash2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { QuotationDocument } from "~/components/admin/QuotationDocument";
 import { Button } from "~/components/ui/button";
 import { FileButton } from "~/components/ui/file-button";
@@ -12,16 +12,11 @@ import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
-import {
-  getQuotation,
-  listCatalogItems,
-  replacePaymentOptions,
-  replaceQuotationLines,
-  updateQuotationMeta,
-} from "~/models/quotation.server";
+import { saveQuotation, getQuotation, listCatalogItems } from "~/models/quotation.server";
 import { formatBRL, parseBRLToCents } from "~/utils/quotation";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
+import type { ShouldRevalidateFunctionArgs } from "@remix-run/react";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: quotationStyles }];
 
@@ -152,7 +147,6 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const { user } = await requireAdmin(request);
   const id = Number(params.id);
   if (!Number.isFinite(id)) return json({ error: "Invalid id" }, { status: 400 });
-  const ownerUserId = user.id;
 
   const form = await request.formData();
   const intent = String(form.get("intent") || "save");
@@ -160,35 +154,34 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
     return json({ error: "Unknown intent" }, { status: 400 });
   }
 
+  const revision = Number(form.get("revision") || 0);
   const issuedRaw = String(form.get("issuedAt") || "");
   const issuedAt = issuedRaw ? new Date(issuedRaw + "T12:00:00") : undefined;
-
-  const updated = await updateQuotationMeta(id, ownerUserId, {
+  const result = await saveQuotation({
+    quotationId: id,
+    ownerUserId: user.id,
+    revision: Number.isFinite(revision) ? revision : 0,
+    intent: intent as "save" | "save-print" | "autosave",
     title: String(form.get("title") || ""),
-    notes: String(form.get("notes") || "") || null,
-    status: String(form.get("status") || "draft") === "final" ? "final" : "draft",
     issuedAt,
-    clientLocation: String(form.get("location") || "") || null,
-    clientDocument: String(form.get("document") || "") || null,
+    status: String(form.get("status") || "draft") === "final" ? "final" : "draft",
+    location: String(form.get("location") || "") || null,
+    document: String(form.get("document") || "") || null,
+    notes: String(form.get("notes") || "") || null,
+    lines: parseLinesFromForm(form),
+    paymentOptions: parsePaymentsFromForm(form),
   });
-  if (!updated) return json({ error: "Not found" }, { status: 404 });
 
-  if (!(await replaceQuotationLines(id, ownerUserId, parseLinesFromForm(form)))) {
-    return json({ error: "Not found" }, { status: 404 });
-  }
-  if (!(await replacePaymentOptions(id, ownerUserId, parsePaymentsFromForm(form)))) {
-    return json({ error: "Not found" }, { status: 404 });
-  }
+  return json({ ...result, revision: Number.isFinite(revision) ? revision : 0 }, {
+    status: result.ok ? 200 : result.status,
+  });
+};
 
-  if (intent === "autosave") {
-    return json({ ok: true });
+export const shouldRevalidate = ({ actionResult, defaultShouldRevalidate }: ShouldRevalidateFunctionArgs) => {
+  if (actionResult && typeof actionResult === "object" && "ok" in actionResult) {
+    return false;
   }
-
-  if (intent === "save-print") {
-    return redirect(`/admin/quotations/${id}/print?autoprint=1`);
-  }
-
-  return redirect(`/admin/quotations/${id}?saved=1`);
+  return defaultShouldRevalidate;
 };
 
 function centsToInput(cents: number) {
@@ -212,9 +205,7 @@ function useDebouncedValue<T>(value: T, delayMs: number) {
 
 export default function QuotationBuilder() {
   const { quotation, catalog, rep } = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const busy = navigation.state !== "idle";
+  const navigate = useNavigate();
   const issuedValue = new Date(quotation.issuedAt).toISOString().slice(0, 10);
   const quotationId = quotation.id;
 
@@ -236,11 +227,19 @@ export default function QuotationBuilder() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [autosaveHint, setAutosaveHint] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const autosaveFetcher = useFetcher<typeof action>();
-  const autosaveFetcherRef = useRef(autosaveFetcher);
+  const saveFetcher = useFetcher<typeof action>();
+  const saveFetcherRef = useRef(saveFetcher);
   const dirtyRef = useRef(false);
   const ignoreDirtyUntilRef = useRef(1);
-  autosaveFetcherRef.current = autosaveFetcher;
+  const draftRevisionRef = useRef(0);
+  const requestRevisionRef = useRef(0);
+  const pendingSubmissionRef = useRef<{ requestRevision: number; draftRevision: number } | null>(null);
+  const handledRequestRevisionRef = useRef(0);
+  const lineUploadingKeyRef = useRef<string | null>(null);
+  saveFetcherRef.current = saveFetcher;
+  lineUploadingKeyRef.current = lineUploadingKey;
+  const saveBusy = saveFetcher.state !== "idle";
+  const busy = saveBusy || lineUploadingKey !== null;
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
@@ -251,8 +250,10 @@ export default function QuotationBuilder() {
   }, []);
 
   useEffect(() => {
-    ignoreDirtyUntilRef.current = 2;
+    ignoreDirtyUntilRef.current = 1;
     dirtyRef.current = false;
+    draftRevisionRef.current = 0;
+    pendingSubmissionRef.current = null;
     setAutosaveHint(null);
     setTitle(quotation.title);
     setIssuedAt(new Date(quotation.issuedAt).toISOString().slice(0, 10));
@@ -266,60 +267,84 @@ export default function QuotationBuilder() {
   }, [quotationId]);
 
   useEffect(() => {
-    if (searchParams.get("saved") !== "1") return;
-    ignoreDirtyUntilRef.current = 2;
-    dirtyRef.current = false;
-    setTitle(quotation.title);
-    setIssuedAt(new Date(quotation.issuedAt).toISOString().slice(0, 10));
-    setStatus(quotation.status);
-    setLocation(quotation.client.location ?? "");
-    setDocument(quotation.client.document ?? "");
-    setNotes(quotation.notes ?? "");
-    setLines(quotation.lines.map(lineToDraft));
-    setPayments(quotation.paymentOptions.map(paymentToDraft));
-    setActionError(null);
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete("saved");
-        return next;
-      },
-      { replace: true },
-    );
-  }, [searchParams, quotation, setSearchParams]);
-
-  useEffect(() => {
     if (ignoreDirtyUntilRef.current > 0) {
       ignoreDirtyUntilRef.current -= 1;
       return;
     }
     dirtyRef.current = true;
+    draftRevisionRef.current += 1;
+    setActionError(null);
+    setAutosaveHint(null);
   }, [title, issuedAt, status, location, document, notes, lines, payments]);
 
   useEffect(() => {
-    const data = autosaveFetcher.data;
-    if (autosaveFetcher.state !== "idle" || !data || !("ok" in data) || !data.ok) return;
+    const data = saveFetcher.data as
+      | { ok: true; quotationId: number; revision: number; redirectTo?: string }
+      | { ok: false; status: number; error: string; revision: number }
+      | undefined;
+    if (saveFetcher.state !== "idle" || !data) return;
+    const pending = pendingSubmissionRef.current;
+    if (!pending || data.revision !== pending.requestRevision || handledRequestRevisionRef.current === data.revision) {
+      return;
+    }
+    pendingSubmissionRef.current = null;
+    if (draftRevisionRef.current !== pending.draftRevision) {
+      return;
+    }
+    handledRequestRevisionRef.current = data.revision;
+    if (!data.ok) {
+      setActionError(data.error);
+      return;
+    }
+
     dirtyRef.current = false;
+    setActionError(null);
+    if (data.redirectTo) {
+      navigate(data.redirectTo);
+      return;
+    }
     setAutosaveHint(
       `Rascunho salvo às ${new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",
       })}`,
     );
-  }, [autosaveFetcher.state, autosaveFetcher.data]);
+  }, [navigate, saveFetcher.data, saveFetcher.state]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
       if (status !== "draft") return;
-      const fetcher = autosaveFetcherRef.current;
+      const fetcher = saveFetcherRef.current;
       if (!dirtyRef.current || !formRef.current) return;
-      if (fetcher.state !== "idle") return;
-      const body = new FormData(formRef.current);
-      body.set("intent", "autosave");
-      fetcher.submit(body, { method: "post" });
+      if (fetcher.state !== "idle" || lineUploadingKeyRef.current !== null) return;
+      submitQuotation("autosave");
     }, AUTOSAVE_EVERY_MS);
     return () => window.clearInterval(id);
   }, [status]);
+
+  function submitQuotation(intent: "save" | "save-print" | "autosave") {
+    const form = formRef.current;
+    const fetcher = saveFetcherRef.current;
+    if (!form || fetcher.state !== "idle" || lineUploadingKeyRef.current !== null) return;
+
+    const requestRevision = requestRevisionRef.current + 1;
+    const draftRevision = draftRevisionRef.current;
+    requestRevisionRef.current = requestRevision;
+    pendingSubmissionRef.current = { requestRevision, draftRevision };
+
+    const body = new FormData(form);
+    body.set("intent", intent);
+    body.set("revision", String(requestRevision));
+    fetcher.submit(body, { method: "post" });
+    setActionError(null);
+  }
+
+  function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const intent = submitter?.value === "save-print" ? "save-print" : "save";
+    submitQuotation(intent);
+  }
 
   function updateLine(clientKey: string, patch: Partial<DraftLine>) {
     setLines((prev) =>
@@ -529,6 +554,7 @@ export default function QuotationBuilder() {
         <Form
           method="post"
           ref={formRef}
+          onSubmit={handleFormSubmit}
           className={cn(
             "no-print space-y-6 self-start border border-border bg-white p-4",
             pane !== "edit" && "hidden lg:block",
@@ -694,8 +720,8 @@ export default function QuotationBuilder() {
                   <FileButton
                     id={`line-img-${line.clientKey}`}
                     className="mt-1"
-                    disabled={lineUploadingKey === line.clientKey}
-                    busy={lineUploadingKey === line.clientKey}
+                    disabled={busy || lineUploadingKey === line.clientKey}
+                    busy={busy || lineUploadingKey === line.clientKey}
                     onFile={(file) => void handleLineImageUpload(line.clientKey, file)}
                   />
                   {lineUploadErrors[line.clientKey] ? (
