@@ -7,7 +7,8 @@ afterEach(() => {
 
 test("waitForPrintReadiness waits for image decode and fonts", async () => {
   const decode = vi.fn().mockResolvedValue(undefined);
-  vi.stubGlobal("document", { fonts: { ready: Promise.resolve() } });
+  const ready = new Promise<void>(() => undefined);
+  vi.stubGlobal("document", { fonts: { ready } });
 
   const { waitForPrintReadiness } = await import("./print-readiness");
   const root = {
@@ -18,7 +19,38 @@ test("waitForPrintReadiness waits for image decode and fonts", async () => {
     ],
   } as unknown as ParentNode;
 
-  await expect(waitForPrintReadiness(root, { timeoutMs: 50 })).resolves.toEqual({ timedOut: false });
+  const readiness = waitForPrintReadiness(root, { timeoutMs: 50 });
+  let settled = false;
+  readiness.then(() => {
+    settled = true;
+  });
+
+  await Promise.resolve();
+  expect(settled).toBe(false);
+  expect(decode).toHaveBeenCalledTimes(1);
+});
+
+test("waitForPrintReadiness resolves once fonts become ready", async () => {
+  const decode = vi.fn().mockResolvedValue(undefined);
+  let resolveFonts!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    resolveFonts = resolve;
+  });
+  vi.stubGlobal("document", { fonts: { ready } });
+
+  const { waitForPrintReadiness } = await import("./print-readiness");
+  const root = {
+    querySelectorAll: () => [
+      {
+        decode,
+      },
+    ],
+  } as unknown as ParentNode;
+
+  const readiness = waitForPrintReadiness(root, { timeoutMs: 50 });
+  resolveFonts();
+
+  await expect(readiness).resolves.toEqual({ timedOut: false });
   expect(decode).toHaveBeenCalledTimes(1);
 });
 

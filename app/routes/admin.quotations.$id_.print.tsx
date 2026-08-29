@@ -33,12 +33,12 @@ export default function QuotationPrint() {
   const autoPrintStartedRef = useRef(false);
   const isMountedRef = useRef(true);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
       isMountedRef.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const startPrint = useCallback(async (mode: "manual" | "autoprint") => {
     if (printRequestInFlightRef.current) return;

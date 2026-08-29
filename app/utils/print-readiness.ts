@@ -37,6 +37,10 @@ export async function waitForPrintReadiness(
   options?: PrintReadinessOptions,
 ): Promise<{ timedOut: boolean }> {
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  let timeoutHandle: ReturnType<typeof globalThis.setTimeout> | undefined;
+  const timeout = new Promise<boolean>((resolve) => {
+    timeoutHandle = globalThis.setTimeout(() => resolve(true), Math.max(0, timeoutMs));
+  });
   const readiness = (async () => {
     if (root) {
       await waitForImages(root);
@@ -44,12 +48,12 @@ export async function waitForPrintReadiness(
     await waitForFonts();
   })().catch(() => undefined);
 
-  const timedOut = await Promise.race([
-    readiness.then(() => false),
-    new Promise<boolean>((resolve) => {
-      globalThis.setTimeout(() => resolve(true), Math.max(0, timeoutMs));
-    }),
-  ]);
-
-  return { timedOut };
+  try {
+    const timedOut = await Promise.race([readiness.then(() => false), timeout]);
+    return { timedOut };
+  } finally {
+    if (timeoutHandle !== undefined) {
+      globalThis.clearTimeout(timeoutHandle);
+    }
+  }
 }
