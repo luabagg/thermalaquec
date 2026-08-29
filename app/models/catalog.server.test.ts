@@ -6,11 +6,10 @@ const { prismaMock, txMock } = vi.hoisted(() => {
     quoteCatalogOption: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
     quoteCatalogOptionValue: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
     quoteCatalogVariant: { create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
-    quoteCatalogVariantValue: { createMany: vi.fn(), deleteMany: vi.fn(), count: vi.fn() },
+    quoteCatalogVariantValue: { createMany: vi.fn(), deleteMany: vi.fn() },
   };
   const prismaMock = {
     quoteCatalogItem: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
-    quoteCatalogOption: {}, quoteCatalogOptionValue: {}, quoteCatalogVariant: {}, quoteCatalogVariantValue: {},
     quotationLine: { count: vi.fn() }, catalogNormalizationSourceMap: { count: vi.fn() }, quoteCatalogAlias: { count: vi.fn() },
     $transaction: vi.fn(async (callback: (tx: typeof txMock) => unknown) => callback(txMock)),
   };
@@ -18,13 +17,20 @@ const { prismaMock, txMock } = vi.hoisted(() => {
 });
 vi.mock("~/libs/prisma/client.server", () => ({ default: prismaMock }));
 
-import { archiveCatalogFamily, getCatalogDeletionEligibility, listCatalogSummaries, restoreCatalogFamily, updateCatalogFamilyAggregate } from "./catalog.server";
+import { archiveCatalogFamily, getCatalogDeletionEligibility, getCatalogFamilyDetail, listCatalogSummaries, restoreCatalogFamily, updateCatalogFamilyAggregate } from "./catalog.server";
 
 const input = {
   id: 1, expectedUpdatedAt: "2026-08-29T00:00:00.000Z",
   family: { slug: "boiler", name: "Boiler", nameTemplate: null, descriptionLines: [], defaultUnitPriceCents: null, imageId: null },
   options: [], variants: [],
 };
+const existing = (options: Array<{ id: number; values: Array<{ id: number }> }> = [], variants: Array<{ id: number }> = []) => ({ options, variants });
+
+function prepareUpdate(record = existing()) {
+  prismaMock.quoteCatalogItem.findUnique.mockResolvedValueOnce(record);
+  txMock.quoteCatalogItem.updateMany.mockResolvedValueOnce({ count: 1 });
+  txMock.quoteCatalogItem.findUnique.mockResolvedValueOnce({ id: 1 });
+}
 
 describe("catalog aggregate model", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -38,39 +44,56 @@ describe("catalog aggregate model", () => {
     }));
   });
 
-  it("returns stale before reading or mutating children when its parent version cannot be claimed", async () => {
+  it("returns stale before mutating children when its parent version cannot be claimed", async () => {
+    prismaMock.quoteCatalogItem.findUnique.mockResolvedValueOnce(existing());
     txMock.quoteCatalogItem.updateMany.mockResolvedValueOnce({ count: 0 });
     await expect(updateCatalogFamilyAggregate(input)).resolves.toEqual({ ok: false, error: "stale" });
-    expect(txMock.quoteCatalogItem.findUnique).not.toHaveBeenCalled();
+    expect(txMock.quoteCatalogOption.create).not.toHaveBeenCalled();
   });
 
   it("updates unchanged child IDs rather than recreating them", async () => {
-    txMock.quoteCatalogItem.updateMany.mockResolvedValueOnce({ count: 1 });
-    txMock.quoteCatalogItem.findUnique.mockResolvedValueOnce({ options: [{ id: 2, values: [{ id: 3 }] }], variants: [] }).mockResolvedValueOnce({ id: 1 });
+    prepareUpdate(existing([{ id: 2, values: [{ id: 3 }] }]));
     txMock.quoteCatalogOption.update.mockResolvedValueOnce({ id: 2 });
     txMock.quoteCatalogOptionValue.update.mockResolvedValueOnce({ id: 3 });
-    txMock.quoteCatalogVariantValue.count.mockResolvedValueOnce(0);
     await updateCatalogFamilyAggregate({ ...input, options: [{ id: 2, clientKey: "o", name: "Size", slug: "size", placement: "TITLE", sortOrder: 0, values: [{ id: 3, clientKey: "v", label: "Large", slug: "large", titleFragment: null, descriptionLines: [], sortOrder: 0 }] }] });
     expect(txMock.quoteCatalogOption.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 2 } }));
     expect(txMock.quoteCatalogOptionValue.update).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 3 } }));
     expect(txMock.quoteCatalogOption.create).not.toHaveBeenCalled();
-    expect(txMock.quoteCatalogOptionValue.create).not.toHaveBeenCalled();
   });
 
-  it("deletes explicitly omitted variants before their now-unreferenced values", async () => {
-    txMock.quoteCatalogItem.updateMany.mockResolvedValueOnce({ count: 1 });
-    txMock.quoteCatalogItem.findUnique.mockResolvedValueOnce({ options: [{ id: 2, values: [{ id: 3 }] }], variants: [{ id: 4 }] }).mockResolvedValueOnce({ id: 1 });
-    txMock.quoteCatalogVariantValue.count.mockResolvedValueOnce(0);
-    await updateCatalogFamilyAggregate(input);
-    expect(txMock.quoteCatalogVariant.deleteMany).toHaveBeenCalledWith({ where: { catalogItemId: 1, id: { notIn: [] } } });
-    expect(txMock.quoteCatalogOptionValue.deleteMany).toHaveBeenCalledWith({ where: { optionId: { in: [2] } } });
+  it("deletes values omitted from a retained option after variants and before options", async () => {
+    prepareUpdate(existing([{ id: 2, values: [{ id: 3 }, { id: 5 }] }], [{ id: 4 }]));
+    txMock.quoteCatalogOption.update.mockResolvedValueOnce({ id: 2 });
+    txMock.quoteCatalogOptionValue.update.mockResolvedValueOnce({ id: 3 });
+    await updateCatalogFamilyAggregate({ ...input, options: [{ id: 2, clientKey: "o", name: "Size", slug: "size", placement: "TITLE", sortOrder: 0, values: [{ id: 3, clientKey: "v", label: "Large", slug: "large", titleFragment: null, descriptionLines: [], sortOrder: 0 }] }] });
+    expect(txMock.quoteCatalogOptionValue.deleteMany).toHaveBeenCalledWith({ where: { id: { in: [5] } } });
+    expect(txMock.quoteCatalogVariant.deleteMany.mock.invocationCallOrder[0]).toBeLessThan(txMock.quoteCatalogOptionValue.deleteMany.mock.invocationCallOrder[0]);
+    expect(txMock.quoteCatalogOptionValue.deleteMany.mock.invocationCallOrder[0]).toBeLessThan(txMock.quoteCatalogOption.deleteMany.mock.invocationCallOrder[0]);
   });
 
-  it("rejects implicit orphaning when a retained variant references a removed value", async () => {
-    txMock.quoteCatalogItem.updateMany.mockResolvedValueOnce({ count: 1 });
-    txMock.quoteCatalogItem.findUnique.mockResolvedValueOnce({ options: [{ id: 2, values: [{ id: 3 }] }], variants: [{ id: 4 }] });
-    await expect(updateCatalogFamilyAggregate({ ...input, variants: [{ id: 4, clientKey: "variant", valueClientKeys: ["removed"], sku: null, active: true, nameOverride: null, descriptionLinesOverride: null, unitPriceCents: null, imageId: null }] })).resolves.toMatchObject({ ok: false, error: "invalid" });
-    expect(txMock.quoteCatalogOptionValue.deleteMany).not.toHaveBeenCalled();
+  it("rejects invalid aggregate IDs and nesting before the parent claim or child mutations", async () => {
+    prismaMock.quoteCatalogItem.findUnique.mockResolvedValueOnce(existing([{ id: 2, values: [{ id: 3 }] }, { id: 9, values: [] }]));
+    const result = await updateCatalogFamilyAggregate({ ...input, options: [{ id: 2, clientKey: "parent", name: "Other", slug: "other", placement: "TITLE", sortOrder: 0, values: [] }, { id: 9, clientKey: "wrong-parent", name: "Size", slug: "size", placement: "TITLE", sortOrder: 1, values: [{ id: 3, clientKey: "v", label: "Large", slug: "large", titleFragment: null, descriptionLines: [], sortOrder: 0 }] }] });
+    expect(result).toMatchObject({ ok: false, error: "invalid" });
+    expect(txMock.quoteCatalogItem.updateMany).not.toHaveBeenCalled();
+    expect(txMock.quoteCatalogOption.update).not.toHaveBeenCalled();
+    expect(txMock.quoteCatalogOptionValue.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects a retained variant that references an unknown removed value before mutation", async () => {
+    prismaMock.quoteCatalogItem.findUnique.mockResolvedValueOnce(existing([{ id: 2, values: [{ id: 3 }] }], [{ id: 4 }]));
+    const result = await updateCatalogFamilyAggregate({ ...input, variants: [{ id: 4, clientKey: "variant", valueClientKeys: ["removed"], sku: null, active: true, nameOverride: null, descriptionLinesOverride: null, unitPriceCents: null, imageId: null }] });
+    expect(result).toMatchObject({ ok: false, error: "invalid" });
+    expect(txMock.quoteCatalogItem.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("includes ordered aliases and normalization provenance in family detail", async () => {
+    prismaMock.quoteCatalogItem.findUnique.mockResolvedValueOnce(null);
+    await getCatalogFamilyDetail(1);
+    expect(prismaMock.quoteCatalogItem.findUnique).toHaveBeenCalledWith(expect.objectContaining({ include: expect.objectContaining({
+      aliases: expect.objectContaining({ orderBy: { id: "asc" } }),
+      sourceMaps: expect.anything(), canonicalMaps: expect.anything(),
+    }) }));
   });
 
   it("archives and restores only when the expected version matches", async () => {
@@ -82,10 +105,10 @@ describe("catalog aggregate model", () => {
     expect(prismaMock.quoteCatalogItem.updateMany).toHaveBeenNthCalledWith(2, expect.objectContaining({ data: { archivedAt: null } }));
   });
 
-  it("blocks hard deletion eligibility for quotation and normalization provenance", async () => {
-    prismaMock.quotationLine.count.mockResolvedValueOnce(1);
-    prismaMock.catalogNormalizationSourceMap.count.mockResolvedValueOnce(1).mockResolvedValueOnce(1);
-    prismaMock.quoteCatalogAlias.count.mockResolvedValueOnce(1);
-    await expect(getCatalogDeletionEligibility(1)).resolves.toMatchObject({ eligible: false, quotationLines: 1, sourceMaps: 1, aliases: 1, generatedFamilies: 1 });
+  it("uses explicit source and canonical maps, not aliases, for deletion eligibility", async () => {
+    prismaMock.quotationLine.count.mockResolvedValueOnce(0);
+    prismaMock.catalogNormalizationSourceMap.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
+    prismaMock.quoteCatalogAlias.count.mockResolvedValueOnce(3);
+    await expect(getCatalogDeletionEligibility(1)).resolves.toEqual({ eligible: true, quotationLines: 0, sourceMaps: 0, canonicalMaps: 0, aliases: 3 });
   });
 });

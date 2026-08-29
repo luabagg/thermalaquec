@@ -69,6 +69,18 @@ const catalogDetailInclude = {
     orderBy: { id: "asc" as const },
     include: { values: { select: { optionValueId: true } } },
   },
+  aliases: {
+    orderBy: { id: "asc" as const },
+    select: { id: true, originalName: true, normalizedKey: true, sourceSlug: true, sourceMetadata: true },
+  },
+  sourceMaps: {
+    orderBy: { id: "asc" as const },
+    select: { id: true, runId: true, canonicalCatalogItemId: true, priceDisposition: true, imageDisposition: true, canonicalUpdatedAt: true },
+  },
+  canonicalMaps: {
+    orderBy: { id: "asc" as const },
+    select: { id: true, runId: true, sourceCatalogItemId: true, priceDisposition: true, imageDisposition: true, canonicalUpdatedAt: true },
+  },
 } satisfies Prisma.QuoteCatalogItemInclude;
 
 export type CatalogMutationResult =
@@ -110,40 +122,81 @@ export async function createCatalogFamily(family: CatalogAggregateInput["family"
   return getCatalogFamilyDetail(item.id);
 }
 
+class InvalidAggregateError extends Error {
+  constructor(readonly fields: Record<string, string>) { super("Invalid catalog aggregate"); }
+}
+
+type ValidatedAggregate = {
+  optionIds: Set<number>;
+  omittedValueIds: number[];
+  submittedOptionIds: Set<number>;
+  submittedValueIds: Set<number>;
+  valueIdByClientKey: Map<string, number | undefined>;
+};
+
+async function validateAggregate(input: CatalogAggregateInput): Promise<ValidatedAggregate | CatalogMutationResult> {
+  const existing = await prisma.quoteCatalogItem.findUnique({ where: { id: input.id }, include: catalogDetailInclude });
+  if (!existing) return { ok: false, error: "not_found" };
+
+  const optionIds = new Set(existing.options.map((option) => option.id));
+  const valueById = new Map(existing.options.flatMap((option) => option.values.map((value) => [value.id, { optionId: option.id }] as const)));
+  const variantIds = new Set(existing.variants.map((variant) => variant.id));
+  const submittedOptionIds = new Set(input.options.flatMap((option) => option.id === undefined ? [] : [option.id]));
+  const submittedValueIds = new Set(input.options.flatMap((option) => option.values.flatMap((value) => value.id === undefined ? [] : [value.id])));
+  const valueIdByClientKey = new Map<string, number | undefined>();
+
+  for (const option of input.options) {
+    if (option.id !== undefined && !optionIds.has(option.id)) return invalid({ id: "Child does not belong to this catalog family" });
+    for (const value of option.values) {
+      if (valueIdByClientKey.has(value.clientKey)) return invalid({ options: "Duplicate value client key" });
+      if (value.id !== undefined) {
+        const existingValue = valueById.get(value.id);
+        if (!existingValue || existingValue.optionId !== option.id) return invalid({ options: "Value does not belong to its submitted option" });
+      }
+      valueIdByClientKey.set(value.clientKey, value.id);
+    }
+  }
+  if (input.variants.some((variant) => variant.id !== undefined && !variantIds.has(variant.id))) return invalid({ id: "Child does not belong to this catalog family" });
+  for (const variant of input.variants) {
+    if (variant.valueClientKeys.some((key) => !valueIdByClientKey.has(key)) || new Set(variant.valueClientKeys).size !== variant.valueClientKeys.length) {
+      return invalid({ variants: "Variant references an unknown or duplicate value" });
+    }
+  }
+
+  const omittedValueIds = [...valueById.keys()].filter((id) => !submittedValueIds.has(id));
+  const retainedVariantIds = new Set(input.variants.flatMap((variant) => variant.id === undefined ? [] : [variant.id]));
+  for (const variant of existing.variants) {
+    if (!retainedVariantIds.has(variant.id)) continue;
+    const submitted = input.variants.find((candidate) => candidate.id === variant.id)!;
+    const referencedIds = submitted.valueClientKeys.map((key) => valueIdByClientKey.get(key));
+    if (referencedIds.some((id) => id !== undefined && omittedValueIds.includes(id))) return invalid({ options: "Cannot remove values referenced by retained variants" });
+  }
+  return { optionIds, omittedValueIds, submittedOptionIds, submittedValueIds, valueIdByClientKey };
+}
+
 export async function updateCatalogFamilyAggregate(input: CatalogAggregateInput): Promise<CatalogMutationResult> {
   const expectedUpdatedAt = new Date(input.expectedUpdatedAt);
   if (Number.isNaN(expectedUpdatedAt.valueOf())) return { ok: false, error: "invalid", fields: { expectedUpdatedAt: "Invalid timestamp" } };
+  const validated = await validateAggregate(input);
+  if ("ok" in validated) return validated;
 
-  return prisma.$transaction<CatalogMutationResult>(async (tx) => {
-    // This is intentionally the first mutation: it claims the parent version before child writes.
-    const claimed = await tx.quoteCatalogItem.updateMany({
-      where: { id: input.id, updatedAt: expectedUpdatedAt },
-      data: familyData(input.family),
-    });
-    if (claimed.count === 0) return { ok: false, error: "stale" };
+  try {
+    return await prisma.$transaction<CatalogMutationResult>(async (tx) => {
+      // This is intentionally the first mutation: it claims the parent version before child writes.
+      const claimed = await tx.quoteCatalogItem.updateMany({
+        where: { id: input.id, updatedAt: expectedUpdatedAt },
+        data: familyData(input.family),
+      });
+      if (claimed.count === 0) return { ok: false, error: "stale" };
 
-    const existing = await tx.quoteCatalogItem.findUnique({ where: { id: input.id }, include: catalogDetailInclude });
-    if (!existing) return { ok: false, error: "not_found" };
-    const optionIds = new Set(existing.options.map((option) => option.id));
-    const valueIds = new Set(existing.options.flatMap((option) => option.values.map((value) => value.id)));
-    const variantIds = new Set(existing.variants.map((variant) => variant.id));
-    if (input.options.some((option) => option.id !== undefined && !optionIds.has(option.id)) ||
-      input.options.some((option) => option.values.some((value) => value.id !== undefined && !valueIds.has(value.id))) ||
-      input.variants.some((variant) => variant.id !== undefined && !variantIds.has(variant.id))) {
-      return invalid({ id: "Child does not belong to this catalog family" });
-    }
-
-    const valueIdByClientKey = new Map<string, number>();
-    const submittedOptionIds = new Set<number>();
-    const submittedValueIds = new Set<number>();
-    for (const option of input.options) {
+      const { omittedValueIds, submittedOptionIds, submittedValueIds, valueIdByClientKey } = validated;
+      for (const option of input.options) {
       const data = { name: option.name.trim(), slug: option.slug.trim(), placement: option.placement, sortOrder: option.sortOrder };
       const saved = option.id === undefined
         ? await tx.quoteCatalogOption.create({ data: { ...data, catalogItemId: input.id } })
         : await tx.quoteCatalogOption.update({ where: { id: option.id }, data });
       submittedOptionIds.add(saved.id);
       for (const value of option.values) {
-        if (valueIdByClientKey.has(value.clientKey)) return invalid({ options: "Duplicate value client key" });
         const valueData = { label: value.label.trim(), slug: value.slug.trim(), titleFragment: value.titleFragment?.trim() || null, descriptionLines: value.descriptionLines, sortOrder: value.sortOrder };
         const savedValue = value.id === undefined
           ? await tx.quoteCatalogOptionValue.create({ data: { ...valueData, optionId: saved.id } })
@@ -157,7 +210,7 @@ export async function updateCatalogFamilyAggregate(input: CatalogAggregateInput)
     for (const variant of input.variants) {
       const valueIdsForVariant = variant.valueClientKeys.map((key) => valueIdByClientKey.get(key));
       if (valueIdsForVariant.some((id) => id === undefined) || new Set(valueIdsForVariant).size !== valueIdsForVariant.length) {
-        return invalid({ variants: "Variant references an unknown or duplicate value" });
+        throw new InvalidAggregateError({ variants: "Variant references an unknown or duplicate value" });
       }
       const data = { key: catalogVariantKey(valueIdsForVariant as number[]), sku: variant.sku?.trim() || null, active: variant.active, nameOverride: variant.nameOverride?.trim() || null, descriptionLinesOverride: variant.descriptionLinesOverride ?? Prisma.JsonNull, unitPriceCents: variant.unitPriceCents, imageId: variant.imageId };
       const saved = variant.id === undefined
@@ -170,12 +223,15 @@ export async function updateCatalogFamilyAggregate(input: CatalogAggregateInput)
 
     // Remove variants before checking/deleting values, so explicitly removed variants release their values.
     await tx.quoteCatalogVariant.deleteMany({ where: { catalogItemId: input.id, id: { notIn: [...submittedVariantIds] } } });
-    const retainedReferences = await tx.quoteCatalogVariantValue.count({ where: { optionValueId: { in: [...valueIds].filter((id) => !submittedValueIds.has(id)) } } });
-    if (retainedReferences) return invalid({ options: "Cannot remove values referenced by retained variants" });
-    await tx.quoteCatalogOptionValue.deleteMany({ where: { optionId: { in: [...optionIds].filter((id) => !submittedOptionIds.has(id)) } } });
+    // Omitted values include values under options that remain in the aggregate.
+    if (omittedValueIds.length) await tx.quoteCatalogOptionValue.deleteMany({ where: { id: { in: omittedValueIds } } });
     await tx.quoteCatalogOption.deleteMany({ where: { catalogItemId: input.id, id: { notIn: [...submittedOptionIds] } } });
     return { ok: true, item: await tx.quoteCatalogItem.findUnique({ where: { id: input.id }, include: catalogDetailInclude }) };
-  });
+    });
+  } catch (error) {
+    if (error instanceof InvalidAggregateError) return invalid(error.fields);
+    throw error;
+  }
 }
 
 export async function archiveCatalogFamily(id: number, expectedUpdatedAt: string): Promise<CatalogMutationResult> {
@@ -191,13 +247,14 @@ async function updateLifecycle(id: number, expected: string, data: { archivedAt:
 }
 
 export async function getCatalogDeletionEligibility(id: number) {
-  const [quotationLines, sourceMaps, aliases, generatedFamilies] = await Promise.all([
+  const [quotationLines, sourceMaps, canonicalMaps, aliases] = await Promise.all([
     prisma.quotationLine.count({ where: { catalogItemId: id } }),
-    prisma.catalogNormalizationSourceMap.count({ where: { OR: [{ sourceCatalogItemId: id }, { canonicalCatalogItemId: id }] } }),
-    prisma.quoteCatalogAlias.count({ where: { catalogItemId: id, sourceMetadata: { not: Prisma.DbNull } } }),
+    prisma.catalogNormalizationSourceMap.count({ where: { sourceCatalogItemId: id } }),
     prisma.catalogNormalizationSourceMap.count({ where: { canonicalCatalogItemId: id } }),
+    prisma.quoteCatalogAlias.count({ where: { catalogItemId: id } }),
   ]);
-  return { eligible: quotationLines + sourceMaps + aliases + generatedFamilies === 0, quotationLines, sourceMaps, aliases, generatedFamilies };
+  // Aliases are editor data, not normalization provenance; maps are the authoritative record.
+  return { eligible: quotationLines + sourceMaps + canonicalMaps === 0, quotationLines, sourceMaps, canonicalMaps, aliases };
 }
 
 export async function deleteCatalogFamily(id: number, expectedUpdatedAt: string): Promise<CatalogMutationResult> {
