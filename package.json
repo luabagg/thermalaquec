@@ -51,6 +51,7 @@
     "react-intersection-observer": "^9.16.0",
     "react-number-format": "^5.4.4",
     "react-whatsapp-widget": "^2.2.0",
+    "sharp": "^0.35.4",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7"

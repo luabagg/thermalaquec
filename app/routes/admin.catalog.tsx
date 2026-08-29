@@ -166,9 +166,9 @@ export default function AdminCatalog() {
         {items.map((item) => (
           <li key={item.id} className="px-4 py-3">
             <div className="flex gap-3">
-              {item.Image?.location ? (
+              {item.Image ? (
                 <img
-                  src={item.Image.location}
+                  src={item.Image.thumbnail ?? item.Image.location}
                   alt=""
                   className="h-16 w-16 shrink-0 rounded border border-border object-cover"
                 />

@@ -64,6 +64,7 @@ model ProductSpec {
 model Image {
   id               Int                @id @default(autoincrement())
   location         String             @unique @db.VarChar(250)
+  thumbnail        String?            @db.VarChar(250)
   Product          Product[]
   Showcase         Showcase[]
   QuoteCatalogItem QuoteCatalogItem[]

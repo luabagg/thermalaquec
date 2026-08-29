@@ -68,7 +68,7 @@ function lineToDraft(line: {
   unitPriceCents: number;
   catalogItemId: number | null;
   imageId: number | null;
-  Image: { location: string; thumbnail?: string | null } | null;
+  Image: { location: string; thumbnail: string | null } | null;
 }): DraftLine {
   return {
     id: line.id,
@@ -415,7 +415,7 @@ export default function QuotationBuilder() {
         catalogItemId: item.id,
         imageId: item.imageId ?? null,
         imageUrl: item.Image?.location ?? null,
-        imageThumbnail: null,
+        imageThumbnail: item.Image?.thumbnail ?? null,
       },
     ]);
     setCatalogSelection("");

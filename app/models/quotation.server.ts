@@ -4,7 +4,7 @@ import prisma from "~/libs/prisma/client.server";
 
 export type QuotationWithRelations = Quotation & {
   client: QuoteClient;
-  lines: (QuotationLine & { Image: { id: number; location: string; thumbnail?: string | null } | null })[];
+  lines: (QuotationLine & { Image: { id: number; location: string; thumbnail: string | null } | null })[];
   paymentOptions: (QuotationPaymentOption & { clientKey?: string })[];
 };
 
@@ -119,6 +119,7 @@ const quotationEditorSelect = {
       Image: {
         select: {
           location: true,
+          thumbnail: true,
         },
       },
     },
@@ -145,6 +146,7 @@ const quoteCatalogEditorSelect = {
   Image: {
     select: {
       location: true,
+      thumbnail: true,
     },
   },
 } satisfies Prisma.QuoteCatalogItemSelect;

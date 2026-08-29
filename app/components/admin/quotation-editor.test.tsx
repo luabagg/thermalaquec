@@ -29,8 +29,11 @@ test("document and print keys use stable row keys and thumbnail fallback", () =>
   expect(doc).toContain("thumbnailUrl ?? line.imageUrl");
   expect(doc).toContain("clientKey ?? `${opt.label}-${opt.amountCents}`");
 
+  const catalog = read("app/routes/admin.catalog.tsx");
+  expect(catalog).toContain("item.Image.thumbnail ?? item.Image.location");
+
   const printRoute = read("app/routes/admin.quotations.$id_.print.tsx");
   expect(printRoute).toContain("clientKey: String(line.id)");
-  expect(printRoute).toContain("thumbnailUrl: line.Image?.thumbnail ?? null");
+  expect(printRoute).toContain("thumbnailUrl: line.Image?.thumbnail ?? line.Image?.location ?? null");
   expect(printRoute).toContain("clientKey: String(option.id)");
 });

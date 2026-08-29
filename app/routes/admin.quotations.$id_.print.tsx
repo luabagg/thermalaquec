@@ -84,7 +84,7 @@ export default function QuotationPrint() {
             ...line,
             clientKey: String(line.id),
             imageUrl: line.Image?.location ?? null,
-            thumbnailUrl: line.Image?.thumbnail ?? null,
+            thumbnailUrl: line.Image?.thumbnail ?? line.Image?.location ?? null,
           }))}
           paymentOptions={quotation.paymentOptions.map((option) => ({
             ...option,

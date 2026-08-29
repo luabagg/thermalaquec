@@ -7,12 +7,13 @@ export async function putPublicObject(
   pathname: string,
   body: File | Buffer | Blob | ArrayBuffer,
   contentType?: string,
+  options?: { cacheControl?: string; upsert?: boolean },
 ) {
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase.storage.from(QUOTE_STORAGE_BUCKET).upload(pathname, body, {
     contentType,
-    upsert: false,
-    cacheControl: "3600",
+    upsert: options?.upsert ?? false,
+    cacheControl: options?.cacheControl ?? "3600",
   });
 
   if (error) {

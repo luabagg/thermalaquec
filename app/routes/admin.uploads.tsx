@@ -13,5 +13,5 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: "Arquivo obrigatório" }, { status: 400 });
   }
   const image = await createImageFromUpload(file, folder);
-  return json({ id: image.id, location: image.location });
+  return json({ id: image.id, location: image.location, thumbnail: image.thumbnail });
 };
