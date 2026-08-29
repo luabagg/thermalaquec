@@ -91,11 +91,209 @@ const quotationDetailInclude = {
   paymentOptions: { orderBy: { sortOrder: "asc" as const } },
 };
 
+const quotationEditorSelect = {
+  id: true,
+  title: true,
+  issuedAt: true,
+  status: true,
+  notes: true,
+  client: {
+    select: {
+      id: true,
+      name: true,
+      location: true,
+      document: true,
+    },
+  },
+  lines: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      id: true,
+      sortOrder: true,
+      name: true,
+      quantity: true,
+      descriptionLines: true,
+      unitPriceCents: true,
+      catalogItemId: true,
+      imageId: true,
+      Image: {
+        select: {
+          location: true,
+        },
+      },
+    },
+  },
+  paymentOptions: {
+    orderBy: { sortOrder: "asc" as const },
+    select: {
+      id: true,
+      sortOrder: true,
+      label: true,
+      amountCents: true,
+      detail: true,
+    },
+  },
+} satisfies Prisma.QuotationSelect;
+
+const quoteCatalogEditorSelect = {
+  id: true,
+  slug: true,
+  name: true,
+  descriptionLines: true,
+  defaultUnitPriceCents: true,
+  imageId: true,
+  Image: {
+    select: {
+      location: true,
+    },
+  },
+} satisfies Prisma.QuoteCatalogItemSelect;
+
+function normalizeEditorLine(
+  quotationId: number,
+  line: {
+    name: string;
+    quantity: number;
+    descriptionLines: string[];
+    unitPriceCents: number;
+    catalogItemId?: number | null;
+    imageId?: number | null;
+  },
+  sortOrder: number,
+) {
+  return {
+    quotationId,
+    sortOrder,
+    name: line.name.trim(),
+    quantity: Math.max(1, line.quantity),
+    descriptionLines: line.descriptionLines,
+    unitPriceCents: Math.max(0, line.unitPriceCents),
+    catalogItemId: line.catalogItemId ?? null,
+    imageId: line.imageId ?? null,
+  };
+}
+
+function normalizeEditorPaymentOption(
+  quotationId: number,
+  option: { label: string; amountCents: number; detail?: string | null },
+  sortOrder: number,
+) {
+  return {
+    quotationId,
+    sortOrder,
+    label: option.label.trim(),
+    amountCents: Math.max(0, option.amountCents),
+    detail: option.detail?.trim() || null,
+  };
+}
+
 async function findOwnedQuotation(id: number, ownerUserId: string) {
   return prisma.quotation.findFirst({
     where: { id, ownerUserId },
     select: { id: true, clientId: true },
   });
+}
+
+export type QuotationEditorSaveInput = {
+  quotationId: number;
+  ownerUserId: string;
+  revision: number;
+  intent: "save" | "save-print" | "autosave";
+  title: string;
+  issuedAt?: Date;
+  status: Quotation["status"];
+  location: string | null;
+  document: string | null;
+  notes: string | null;
+  lines: Array<{
+    name: string;
+    quantity: number;
+    descriptionLines: string[];
+    unitPriceCents: number;
+    catalogItemId?: number | null;
+    imageId?: number | null;
+  }>;
+  paymentOptions: Array<{ label: string; amountCents: number; detail?: string | null }>;
+};
+
+export type QuotationEditorSaveResult =
+  | { ok: true; quotationId: number; revision: number; redirectTo?: string }
+  | { ok: false; status: number; error: string };
+
+export async function saveQuotation(input: QuotationEditorSaveInput): Promise<QuotationEditorSaveResult> {
+  if (input.intent !== "save" && input.intent !== "save-print" && input.intent !== "autosave") {
+    return { ok: false, status: 400, error: "Unknown intent" };
+  }
+
+  const normalizedTitle = input.title.trim();
+  const result = await prisma.$transaction(async (tx) => {
+    const owned = await tx.quotation.findFirst({
+      where: { id: input.quotationId, ownerUserId: input.ownerUserId },
+      select: { id: true, clientId: true },
+    });
+    if (!owned) return null;
+
+    await tx.quoteClient.update({
+      where: { id: owned.clientId },
+      data: {
+        location: input.location?.trim() || null,
+        document: input.document?.trim() || null,
+      },
+    });
+
+    await tx.quotation.update({
+      where: { id: input.quotationId },
+      data: {
+        title: normalizedTitle,
+        issuedAt: input.issuedAt,
+        status: input.status,
+        notes: input.notes,
+      },
+    });
+
+    await tx.quotationLine.deleteMany({ where: { quotationId: input.quotationId } });
+    if (input.lines.length > 0) {
+      await tx.quotationLine.createMany({
+        data: input.lines.map((line, index) => normalizeEditorLine(input.quotationId, line, index)),
+      });
+    }
+
+    await tx.quotationPaymentOption.deleteMany({ where: { quotationId: input.quotationId } });
+    if (input.paymentOptions.length > 0) {
+      await tx.quotationPaymentOption.createMany({
+        data: input.paymentOptions.map((option, index) =>
+          normalizeEditorPaymentOption(input.quotationId, option, index),
+        ),
+      });
+    }
+
+    return { quotationId: input.quotationId, revision: input.revision };
+  });
+
+  if (!result) {
+    return { ok: false, status: 404, error: "Not found" };
+  }
+
+  return {
+    ok: true,
+    quotationId: result.quotationId,
+    revision: result.revision,
+    ...(input.intent === "save-print" ? { redirectTo: `/admin/quotations/${input.quotationId}/print?autoprint=1` } : {}),
+  };
+}
+
+export async function loadQuotationEditorData(ownerUserId: string, quotationId: number) {
+  const quotationPromise = prisma.quotation.findFirst({
+    where: { id: quotationId, ownerUserId },
+    select: quotationEditorSelect,
+  });
+  const catalogPromise = prisma.quoteCatalogItem.findMany({
+    orderBy: { name: "asc" },
+    select: quoteCatalogEditorSelect,
+  });
+
+  const [quotation, catalog] = await Promise.all([quotationPromise, catalogPromise]);
+  return { quotation, catalog };
 }
 
 export async function listQuotations(ownerUserId: string) {
