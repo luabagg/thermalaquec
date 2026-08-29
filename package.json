@@ -19,6 +19,8 @@
     "catalogParse": "node scripts/canva-catalog/parse-catalog.mjs && node scripts/canva-catalog/review-catalog.mjs",
     "catalogNormalizeExport": "tsx scripts/catalog-normalization/export.ts",
     "catalogNormalizeValidate": "tsx scripts/catalog-normalization/validate.ts",
+    "catalogNormalizeApply": "tsx scripts/catalog-normalization/apply.ts",
+    "catalogNormalizeRevert": "tsx scripts/catalog-normalization/revert.ts",
     "supabaseTypes": "eval $(grep '^SUPABASE_ID' .env) && supabase gen types typescript --project-id ${SUPABASE_ID} > app/libs/supabase/database.types.ts",
     "envPull": "vercel env pull .env"
   },

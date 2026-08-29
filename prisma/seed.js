@@ -16,6 +16,43 @@ function readJson(file) {
   return JSON.parse(fs.readFileSync(full, "utf8"));
 }
 
+function normalizeCatalogAlias(value) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\b(litros?|lts?)\b/g, "l")
+    .replace(/\s+/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+async function upsertCatalogProduct(product) {
+  const slug = product.id;
+  const data = {
+    name: product.name,
+    descriptionLines: product.descriptionLines ?? [],
+    defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
+  };
+
+  const bySlug = await prisma.quoteCatalogItem.findUnique({ where: { slug } });
+  if (bySlug) {
+    await prisma.quoteCatalogItem.update({ where: { slug }, data });
+    return;
+  }
+
+  const byAlias = await prisma.quoteCatalogAlias.findUnique({
+    where: { normalizedKey: normalizeCatalogAlias(product.name) },
+    select: { catalogItemId: true },
+  });
+  if (byAlias) {
+    await prisma.quoteCatalogItem.update({ where: { id: byAlias.catalogItemId }, data });
+    return;
+  }
+
+  await prisma.quoteCatalogItem.create({ data: { slug, ...data } });
+}
+
 async function main() {
   const products = readJson("catalog.products.json") || [];
   const clients = readJson("catalog.clients.json") || [];
@@ -46,21 +83,7 @@ async function main() {
   }
 
   for (const product of products) {
-    const slug = product.id;
-    await prisma.quoteCatalogItem.upsert({
-      where: { slug },
-      create: {
-        slug,
-        name: product.name,
-        descriptionLines: product.descriptionLines ?? [],
-        defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
-      },
-      update: {
-        name: product.name,
-        descriptionLines: product.descriptionLines ?? [],
-        defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
-      },
-    });
+    await upsertCatalogProduct(product);
   }
 
   console.log("Seed done.");

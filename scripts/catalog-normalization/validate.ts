@@ -49,6 +49,7 @@ if (!sourceResult.ok || !proposalResult.ok) {
       familyCount: proposalResult.value.families.length,
       sourceCount: proposalResult.value.families.reduce((count, family) => count + family.sources.length, 0),
       runId: result.runId,
+      status: result.status,
     }));
   }
 }
