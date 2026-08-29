@@ -12,6 +12,7 @@ declare module "@remix-run/node" {
 export default defineConfig({
   plugins: [
     remix({
+      ignoredRouteFiles: ["**/*.test.*"],
       presets: [vercelPreset()],
       future: {
         v3_fetcherPersist: true,

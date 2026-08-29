@@ -1,4 +1,4 @@
-import { StrictMode, act } from "react";
+import { StrictMode, act, type AnchorHTMLAttributes, type ButtonHTMLAttributes } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, test, vi } from "vitest";
 
@@ -28,13 +28,14 @@ vi.mock("~/utils/print-readiness", () => ({
   waitForPrintReadiness: waitForPrintReadinessMock,
 }));
 vi.mock("~/components/ui/button", () => ({
-  Button: ({ asChild, children, ...props }: any) => (asChild ? children : <button {...props}>{children}</button>),
+  Button: ({ asChild, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) =>
+    asChild ? children : <button {...props}>{children}</button>,
 }));
 vi.mock("~/components/admin/QuotationDocument", () => ({
   QuotationDocument: () => <div className="quote-stage" />,
 }));
 vi.mock("@remix-run/react", () => ({
-  Link: ({ to, children }: any) => <a href={to}>{children}</a>,
+  Link: ({ to, children }: AnchorHTMLAttributes<HTMLAnchorElement> & { to: string }) => <a href={to}>{children}</a>,
   useLoaderData: () => loaderData,
   useSearchParams: () => [searchParamsMock, vi.fn()],
 }));
@@ -231,7 +232,7 @@ type MiniWindow = {
   document: MiniDocument;
   navigator: { userAgent: string };
   location: { href: string };
-  history: { replaceState: (...args: any[]) => void };
+  history: { replaceState: (...args: unknown[]) => void };
   print: ReturnType<typeof vi.fn>;
   addEventListener: () => void;
   removeEventListener: () => void;
@@ -346,7 +347,7 @@ test("autoprint under StrictMode prints once and clears preparing state", async 
   const { default: QuotationPrint } = await import("./admin.quotations.$id_.print");
   const container = document.createElement("div");
   document.body.appendChild(container);
-  const root = createRoot(container as any);
+  const root = createRoot(container as unknown as Element);
 
   await act(async () => {
     root.render(
@@ -356,7 +357,7 @@ test("autoprint under StrictMode prints once and clears preparing state", async 
     );
   });
 
-  const button = container.querySelector("button") as any;
+  const button = container.querySelector("button") as MiniElement | null;
   expect(button?.textContent).toBe("Preparando...");
   expect(window.print).not.toHaveBeenCalled();
 

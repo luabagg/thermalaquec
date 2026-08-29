@@ -8,7 +8,8 @@ afterEach(() => {
 
 test("formatBRL caches a single Intl.NumberFormat instance and preserves output", async () => {
   const RealNumberFormat = Intl.NumberFormat;
-  const numberFormatSpy = vi.spyOn(Intl, "NumberFormat").mockImplementation(((...args: any[]) => new RealNumberFormat(...args)) as typeof Intl.NumberFormat);
+  const numberFormatSpy = vi.spyOn(Intl, "NumberFormat").mockImplementation(((locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) =>
+    new RealNumberFormat(locales, options)) as typeof Intl.NumberFormat);
 
   const { formatBRL } = await import("./quotation");
   const referenceFormatter = new RealNumberFormat("pt-BR", brlFormatterOptions);
