@@ -82,9 +82,14 @@ export default function QuotationPrint() {
           client={quotation.client}
           lines={quotation.lines.map((line) => ({
             ...line,
+            clientKey: String(line.id),
             imageUrl: line.Image?.location ?? null,
+            thumbnailUrl: line.Image?.thumbnail ?? null,
           }))}
-          paymentOptions={quotation.paymentOptions}
+          paymentOptions={quotation.paymentOptions.map((option) => ({
+            ...option,
+            clientKey: String(option.id),
+          }))}
           notes={quotation.notes}
           rep={rep}
           printMode

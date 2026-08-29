@@ -11,10 +11,12 @@ type QuotationDocumentProps = {
   client: Pick<QuoteClient, "name" | "location" | "document">;
   lines: Array<
     Pick<QuotationLine, "name" | "quantity" | "descriptionLines" | "unitPriceCents"> & {
+      clientKey?: string;
       imageUrl?: string | null;
+      thumbnailUrl?: string | null;
     }
   >;
-  paymentOptions: Array<Pick<QuotationPaymentOption, "label" | "amountCents" | "detail">>;
+  paymentOptions: Array<Pick<QuotationPaymentOption, "label" | "amountCents" | "detail"> & { clientKey?: string }>;
   notes: string | null;
   rep: QuoteRepProfile;
   /** Dedicated print page: no screen chrome, print stylesheet applies. */
@@ -109,9 +111,10 @@ export const QuotationDocument = memo(function QuotationDocument({
         {lines.map((line, index) => {
           const bullets = descLines(line.descriptionLines);
           const lineTotal = line.quantity * line.unitPriceCents;
-          const hasPhoto = Boolean(line.imageUrl);
+          const imageSrc = line.thumbnailUrl ?? line.imageUrl;
+          const hasPhoto = Boolean(imageSrc);
           return (
-            <li key={`${line.name}-${index}`} className="quote-doc__line">
+            <li key={line.clientKey ?? `${line.name}-${line.quantity}-${line.unitPriceCents}`} className="quote-doc__line">
               <div className="quote-doc__line-main">
                 <span className="quote-doc__line-num">{index + 1}</span>
                 <div
@@ -132,9 +135,7 @@ export const QuotationDocument = memo(function QuotationDocument({
                   ) : (
                     <span className="quote-doc__line-desc-empty" />
                   )}
-                  {hasPhoto ? (
-                    <img className="quote-doc__line-photo" src={line.imageUrl ?? ""} alt="" />
-                  ) : null}
+                  {hasPhoto ? <img className="quote-doc__line-photo" src={imageSrc ?? ""} alt="" /> : null}
                 </div>
               </div>
               {lineTotal > 0 ? (
@@ -165,8 +166,8 @@ export const QuotationDocument = memo(function QuotationDocument({
         <section className="quote-doc__payments">
           <h2>formas de pagamento</h2>
           <ul>
-            {paymentOptions.map((opt, i) => (
-              <li key={`${opt.label}-${i}`}>
+            {paymentOptions.map((opt) => (
+              <li key={opt.clientKey ?? `${opt.label}-${opt.amountCents}`}>
                 <span className="quote-doc__pay-label">{opt.label}</span>
                 <span className="quote-doc__pay-amount">{formatBRL(opt.amountCents)}</span>
                 {opt.detail ? <span className="quote-doc__pay-detail">{opt.detail}</span> : null}

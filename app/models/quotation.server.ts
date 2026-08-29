@@ -4,8 +4,8 @@ import prisma from "~/libs/prisma/client.server";
 
 export type QuotationWithRelations = Quotation & {
   client: QuoteClient;
-  lines: (QuotationLine & { Image: { id: number; location: string } | null })[];
-  paymentOptions: QuotationPaymentOption[];
+  lines: (QuotationLine & { Image: { id: number; location: string; thumbnail?: string | null } | null })[];
+  paymentOptions: (QuotationPaymentOption & { clientKey?: string })[];
 };
 
 export async function listQuoteClients() {
