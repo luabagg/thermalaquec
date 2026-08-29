@@ -1,7 +1,7 @@
 # Quotation Catalog Normalization and Variants Design
 
 **Date:** 2026-08-29
-**Status:** Proposed
+**Status:** Approved
 **Supersedes:** `docs/superpowers/plans/2026-08-13-catalog-product-variations.md`
 
 ## Goal
@@ -121,10 +121,20 @@ The existing slug stays unique and stable. Archived items are excluded from the 
 `CatalogNormalizationRun`
 
 - status and algorithm/prompt version;
-- source snapshot JSON;
+- source snapshot JSON and SHA-256 digest;
 - validated proposal JSON;
 - result summary JSON;
 - timestamps, including an optional reverted timestamp.
+
+`CatalogNormalizationSourceMap`
+
+- immutable normalization run relation;
+- unique source catalog item relation;
+- generated canonical family relation;
+- selected-value snapshot and complete pre-normalization source-state snapshot;
+- original quotation-line IDs whose catalog reference was remapped.
+
+Aliases support future name resolution; this source-map ledger separately provides exact apply/revert provenance.
 
 `QuotationLine`
 
@@ -149,7 +159,7 @@ The implementing agent classifies the entire export without a mandatory human re
 5. creating explicit variants where prices, images, SKUs, availability, or valid combinations differ;
 6. preserving every original row as an alias and source mapping.
 
-The agent writes an ignored local proposal artifact. The repository contains its JSON Schema and deterministic validator, but not customer data or the generated catalog dump.
+The export command writes `data/catalog-normalization/source.json`; the agent writes `data/catalog-normalization/proposal.json`. Both are ignored. The proposal carries `schemaVersion`, `sourceSnapshotDigest`, and `algorithmVersion`. The repository contains their JSON Schema and deterministic validator, but not customer data or generated catalog dumps. Validation rejects a proposal whose digest does not match the current export, making retries against stale inputs impossible.
 
 ### Validation
 
@@ -162,7 +172,8 @@ Before application, the validator rejects a proposal unless:
 - selected values belong to the same family;
 - prices are non-negative integers or null;
 - names, slugs, descriptions, and templates satisfy length and placeholder rules;
-- every source price/image difference is either represented by a variant or explicitly accepted as a parent fallback.
+- each family declares the source row establishing parent price/image fallback;
+- every other source price/image is either represented by a variant or carries an explicit `useParentFallback` disposition in its source mapping.
 
 Validation is deterministic even though categorization is agent-driven.
 
@@ -172,11 +183,12 @@ Application runs in one database transaction:
 
 1. record the normalization run and source snapshot;
 2. create canonical families, options, values, variants, and aliases;
-3. remap existing `QuotationLine.catalogItemId` references to the canonical family without changing line snapshots;
-4. archive replaced flat rows rather than hard-delete them;
-5. record the result summary.
+3. create an immutable source-map ledger;
+4. remap existing `QuotationLine.catalogItemId` references to the canonical family without changing line snapshots;
+5. archive replaced flat rows rather than hard-delete them;
+6. record the result summary.
 
-A run can be reverted while its archived source rows still exist. Reversion restores source rows and their quotation-line references and archives the generated families. This provides a coarse recovery path for a badly categorized batch; individual mistakes are corrected in Catalog.
+A run can be reverted while its archived source rows still exist and its generated families have not received post-run quotation references or Catalog edits. The eligibility check returns affected record counts and blocks ambiguous reversion. Safe reversion restores source rows and their recorded quotation-line references and archives generated families. There is no forced ambiguous revert; administrators instead correct individual families or restore source rows manually. Apply and revert are idempotent by run ID.
 
 Future imports first resolve exact alias keys, then create unmatched flat products for a later normalization run. They must not silently fuzzy-merge into existing families.
 
@@ -223,9 +235,9 @@ Hard deletion is allowed only for records with no quotation-line references and 
 
 The catalog loader returns active families with ordered options, values, variants, and images. To avoid payload growth, the picker initially lists compact family summaries and loads full configuration when a configurable family is selected.
 
-Simple products continue to add immediately. Configurable products open an option picker. The shared pure resolver validates completeness and combination availability and produces the editable draft line.
+Simple products continue to add immediately. Configurable products open an option picker. Both flows call a dedicated authenticated server action that loads the active catalog family, runs the shared pure resolver, and returns generated draft fields plus an immutable readable selection snapshot. The response also carries a seven-day HMAC-signed resolution token containing the catalog item ID and snapshot; the browser never establishes or mutates a trusted snapshot by itself.
 
-The save action accepts the selection snapshot alongside the existing line fields. Server-side code revalidates catalog selections when adding them, but subsequent manual edits to the generated line remain valid and do not cause catalog re-resolution.
+For new resolved lines, the ordinary quotation save verifies the signed token and persists its snapshot alongside the editable line fields. For existing submitted line IDs, it preserves the snapshot already stored in the database and ignores client replacement attempts. It does not re-resolve historical selections. Subsequent manual edits to generated names, descriptions, prices, and images remain valid, and later Catalog changes cannot invalidate an already-created draft line.
 
 ## Legacy Product Removal
 
