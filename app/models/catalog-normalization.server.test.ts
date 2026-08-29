@@ -7,7 +7,7 @@ const { prismaMock, txMock } = vi.hoisted(() => {
     quoteCatalogOptionValue: { create: vi.fn() },
     quoteCatalogVariant: { create: vi.fn() },
     quoteCatalogVariantValue: { createMany: vi.fn() },
-    quoteCatalogAlias: { create: vi.fn() },
+    quoteCatalogAlias: { create: vi.fn(), deleteMany: vi.fn() },
     catalogNormalizationRun: { findUnique: vi.fn(), updateMany: vi.fn(), update: vi.fn() },
     catalogNormalizationSourceMap: { create: vi.fn() },
     quotationLine: { findMany: vi.fn(), updateMany: vi.fn() },
@@ -200,6 +200,13 @@ describe("catalog normalization apply", () => {
       where: { id: { in: [90] }, catalogItemId: 1 },
       data: { catalogItemId: 50 },
     });
+    const remapData = txMock.quotationLine.updateMany.mock.calls[0]?.[0].data;
+    expect(Object.keys(remapData)).toEqual(["catalogItemId"]);
+    expect(remapData).not.toHaveProperty("name");
+    expect(remapData).not.toHaveProperty("descriptionLines");
+    expect(remapData).not.toHaveProperty("unitPriceCents");
+    expect(remapData).not.toHaveProperty("imageId");
+    expect(remapData).not.toHaveProperty("catalogSelectionSnapshot");
     expect(txMock.catalogNormalizationSourceMap.create).toHaveBeenCalledWith(expect.objectContaining({
       data: expect.objectContaining({
         sourceCatalogItemId: 1,
@@ -311,6 +318,7 @@ describe("catalog normalization revert", () => {
     txMock.quoteCatalogItem.updateMany
       .mockResolvedValueOnce({ count: 1 })
       .mockResolvedValueOnce({ count: 1 });
+    txMock.quoteCatalogAlias.deleteMany.mockResolvedValueOnce({ count: 1 });
     txMock.catalogNormalizationRun.update.mockResolvedValueOnce({});
 
     const revertResult = { ok: true as const, runId: validatedRunId, status: "REVERTED" as const, restoredLineCount: 1, restoredSourceCount: 1, archivedFamilyCount: 1 };
@@ -318,6 +326,9 @@ describe("catalog normalization revert", () => {
     expect(txMock.quotationLine.updateMany).toHaveBeenCalledWith({
       where: { id: { in: [90] }, catalogItemId: 50 },
       data: { catalogItemId: 1 },
+    });
+    expect(txMock.quoteCatalogAlias.deleteMany).toHaveBeenCalledWith({
+      where: { catalogItemId: { in: [50] } },
     });
     expect(txMock.quoteCatalogItem.updateMany).toHaveBeenCalledWith({
       where: { id: 1, archivedAt: { not: null } },
@@ -342,6 +353,25 @@ describe("catalog normalization revert", () => {
     });
     await expect(revertCatalogNormalizationRun(validatedRunId)).resolves.toEqual(revertResult);
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks safe revert when a recorded quotation line was deleted after apply", async () => {
+    prismaMock.catalogNormalizationRun.findUnique.mockResolvedValue(appliedRun);
+    prismaMock.quotationLine.findMany.mockResolvedValue([]);
+    prismaMock.quoteCatalogItem.findMany
+      .mockResolvedValueOnce([canonicalFamily])
+      .mockResolvedValueOnce([archivedSource])
+      .mockResolvedValueOnce([canonicalFamily])
+      .mockResolvedValueOnce([archivedSource]);
+
+    expect(await getCatalogNormalizationRevertEligibility(validatedRunId)).toEqual({
+      eligible: false,
+      postRunQuotationLineCount: 1,
+      editedFamilyCount: 0,
+    });
+    await expect(revertCatalogNormalizationRun(validatedRunId)).resolves.toEqual({ ok: false, error: "unsafe_revert" });
+    expect(prismaMock.$transaction).not.toHaveBeenCalled();
+    expect(txMock.quoteCatalogAlias.deleteMany).not.toHaveBeenCalled();
   });
 
   it("detects edited generated families", async () => {

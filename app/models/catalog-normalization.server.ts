@@ -454,6 +454,11 @@ async function evaluateRevertSafety(tx: TxClient, sourceMaps: SourceMapRecord[])
   ]);
 
   const unsafeLineIds = new Set<number>();
+  const returnedLineIds = new Set(lines.map((line) => line.id));
+  for (const recordedLineId of recordedLineIds) {
+    if (!returnedLineIds.has(recordedLineId)) unsafeLineIds.add(recordedLineId);
+  }
+
   const restorableLineIdsByMapId = new Map<number, number[]>();
   for (const line of lines) {
     const expected = expectedLineById.get(line.id);
@@ -566,6 +571,10 @@ export async function revertCatalogNormalizationRun(runId: number): Promise<Cata
         if (restored.count !== 1) throw new Error("Source row changed during revert");
         restoredSourceCount += 1;
       }
+
+      await tx.quoteCatalogAlias.deleteMany({
+        where: { catalogItemId: { in: [...safety.canonicalUpdatedAtById.keys()] } },
+      });
 
       let archivedFamilyCount = 0;
       for (const [canonicalId, canonicalUpdatedAt] of safety.canonicalUpdatedAtById) {
