@@ -202,9 +202,7 @@ export default function QuotationBuilder() {
   const quotationId = quotation.id;
 
   const [pane, setPane] = useState<"edit" | "preview">("edit");
-  const [isLg, setIsLg] = useState<boolean>(() =>
-    typeof window === "undefined" ? false : window.matchMedia("(min-width: 1024px)").matches,
-  );
+  const [isLg, setIsLg] = useState(false);
   const [title, setTitle] = useState(quotation.title);
   const [issuedAt, setIssuedAt] = useState(issuedValue);
   const [status, setStatus] = useState(quotation.status);

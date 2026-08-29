@@ -34,3 +34,8 @@
 ## Residual concerns
 - The preview deferment is implemented client-side; runtime behavior under extreme load still depends on React scheduling.
 - Thumbnail data is wired defensively, but the persisted thumbnail field itself is still pending the later image task.
+
+## Follow-up fix evidence
+- Changed `app/routes/admin.quotations.$id.tsx` to seed `isLg` with `false` only, removing the SSR/client hydration mismatch from `window.matchMedia` in render state initialization.
+- Re-ran `npm test -- 'app/routes/admin.quotations.$id.test.tsx' 'app/components/admin/quotation-editor.test.tsx'` → passed.
+- Re-ran `yarn typecheck` → passed.
