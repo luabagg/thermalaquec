@@ -9,3 +9,7 @@ node_modules
 # Local quotation extracts (client PII / full Canva dumps) — seed from disk, never commit
 data/quotations/**
 !data/quotations/README.md
+
+# Local agent catalog normalization artifacts
+/data/catalog-normalization/*
+!/data/catalog-normalization/.gitkeep
