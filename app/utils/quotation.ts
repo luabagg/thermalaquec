@@ -6,8 +6,10 @@ export function quotationTotalCents(lines: Array<{ quantity: number; unitPriceCe
   return lines.reduce((sum, line) => sum + lineTotalCents(line), 0);
 }
 
+const brlFormatter = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+
 export function formatBRL(cents: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100);
+  return brlFormatter.format(cents / 100);
 }
 
 export function parseBRLToCents(value: string): number | null {
