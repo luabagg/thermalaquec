@@ -1,7 +1,7 @@
+import sharp from "sharp";
 import { afterEach, expect, test, vi } from "vitest";
 
-const { prismaMock, putPublicObjectMock, sharpMock } = vi.hoisted(() => {
-  let sharpCallIndex = 0;
+const { prismaMock, putPublicObjectMock } = vi.hoisted(() => {
   const putPublicObjectMock = vi.fn(async (pathname: string) => ({
     url: `https://cdn.test/${pathname}`,
     pathname,
@@ -14,25 +14,9 @@ const { prismaMock, putPublicObjectMock, sharpMock } = vi.hoisted(() => {
       })),
     },
   };
-  const sharpMock = vi.fn(() => {
-    const index = sharpCallIndex++;
-    const chain: {
-      rotate: ReturnType<typeof vi.fn>;
-      resize: ReturnType<typeof vi.fn>;
-      webp: ReturnType<typeof vi.fn>;
-      toBuffer: ReturnType<typeof vi.fn>;
-    } & Record<string, unknown> = {
-      rotate: vi.fn(() => chain),
-      resize: vi.fn(() => chain),
-      webp: vi.fn(() => chain),
-      toBuffer: vi.fn(async () => Buffer.from(index === 0 ? "print" : "thumb")),
-    };
-    return chain;
-  });
-  return { prismaMock, putPublicObjectMock, sharpMock };
+  return { prismaMock, putPublicObjectMock };
 });
 
-vi.mock("sharp", () => ({ default: sharpMock }));
 vi.mock("~/libs/prisma/client.server", () => ({ default: prismaMock }));
 vi.mock("~/libs/supabase/storage.server", () => ({ putPublicObject: putPublicObjectMock }));
 
@@ -40,71 +24,73 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-test("rejects GIF uploads at the boundary", async () => {
+async function expectUploadError(file: File, message: string) {
   const { createImageFromUpload } = await import("./image.server");
-  const file = new File([Buffer.from("gif")], "photo.gif", { type: "image/gif" });
-
   try {
     await createImageFromUpload(file, "quotes");
-    throw new Error("expected createImageFromUpload to reject GIF uploads");
+    throw new Error("expected upload to fail");
   } catch (error) {
     expect(error).toBeInstanceOf(Response);
     expect((error as Response).status).toBe(400);
-    await expect((error as Response).text()).resolves.toBe("GIF não suportado");
+    await expect((error as Response).text()).resolves.toBe(message);
   }
+  expect(putPublicObjectMock).not.toHaveBeenCalled();
+  expect(prismaMock.image.create).not.toHaveBeenCalled();
+}
+
+test("rejects GIF uploads declared by MIME type", async () => {
+  await expectUploadError(
+    new File([Buffer.from("gif")], "photo.gif", { type: "image/gif" }),
+    "GIF não suportado",
+  );
+});
+
+test("rejects actual GIF bytes even when MIME-spoofed as PNG", async () => {
+  const gif = Buffer.from("R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==", "base64");
+  await expectUploadError(new File([gif], "photo.png", { type: "image/png" }), "GIF não suportado");
+});
+
+test("returns a controlled 400 for malformed image bytes", async () => {
+  await expectUploadError(
+    new File([Buffer.from("not-an-image")], "photo.png", { type: "image/png" }),
+    "Arquivo de imagem inválido",
+  );
+});
+
+test("returns a controlled 400 for unsupported image bytes", async () => {
+  const svg = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
+  await expectUploadError(
+    new File([svg], "photo.png", { type: "image/png" }),
+    "Tipo de imagem não suportado",
+  );
 });
 
 test("generates WebP print and thumbnail derivatives with immutable caching", async () => {
   const { createImageFromUpload } = await import("./image.server");
-  const file = new File([Buffer.from("image-bytes")], "photo.png", { type: "image/png" });
-  const result = await createImageFromUpload(file, "catalog");
-
-  expect(sharpMock).toHaveBeenCalledTimes(2);
-  const firstSharp = sharpMock.mock.results[0].value as {
-    rotate: ReturnType<typeof vi.fn>;
-    resize: ReturnType<typeof vi.fn>;
-    webp: ReturnType<typeof vi.fn>;
-    toBuffer: ReturnType<typeof vi.fn>;
-  };
-  const secondSharp = sharpMock.mock.results[1].value as typeof firstSharp;
-
-  expect(firstSharp.rotate).toHaveBeenCalledTimes(1);
-  expect(firstSharp.resize).toHaveBeenCalledWith({
-    width: 1600,
-    height: 1600,
-    fit: "inside",
-    withoutEnlargement: true,
-  });
-  expect(firstSharp.webp).toHaveBeenCalledWith({ quality: 82 });
-  expect(firstSharp.toBuffer).toHaveBeenCalledTimes(1);
-
-  expect(secondSharp.rotate).toHaveBeenCalledTimes(1);
-  expect(secondSharp.resize).toHaveBeenCalledWith({
-    width: 320,
-    height: 320,
-    fit: "inside",
-    withoutEnlargement: true,
-  });
-  expect(secondSharp.webp).toHaveBeenCalledWith({ quality: 82 });
-  expect(secondSharp.toBuffer).toHaveBeenCalledTimes(1);
+  const png = await sharp({
+    create: { width: 640, height: 480, channels: 3, background: "#ff0000" },
+  })
+    .png()
+    .toBuffer();
+  const result = await createImageFromUpload(new File([png], "photo.png", { type: "image/png" }), "catalog");
 
   expect(putPublicObjectMock).toHaveBeenCalledTimes(2);
   const [printPath, printBody, printType, printOptions] = putPublicObjectMock.mock.calls[0] as unknown as [
     string,
     Buffer,
-    string | undefined,
-    { cacheControl?: string } | undefined,
+    string,
+    { cacheControl: string },
   ];
   const [thumbPath, thumbBody, thumbType, thumbOptions] = putPublicObjectMock.mock.calls[1] as unknown as [
     string,
     Buffer,
-    string | undefined,
-    { cacheControl?: string } | undefined,
+    string,
+    { cacheControl: string },
   ];
   expect(printPath).toMatch(/^catalog\/.*\.webp$/);
   expect(thumbPath).toMatch(/^catalog\/.*-thumb\.webp$/);
-  expect(printBody).toBeInstanceOf(Buffer);
-  expect(thumbBody).toBeInstanceOf(Buffer);
+  await expect(sharp(printBody).metadata()).resolves.toMatchObject({ format: "webp", width: 640, height: 480 });
+  await expect(sharp(thumbBody).metadata()).resolves.toMatchObject({ format: "webp", width: 320, height: 240 });
   expect(printType).toBe("image/webp");
   expect(thumbType).toBe("image/webp");
   expect(printOptions).toEqual({ cacheControl: "31536000, immutable" });

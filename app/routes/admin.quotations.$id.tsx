@@ -11,8 +11,15 @@ import { Label } from "~/components/ui/label";
 import { cn } from "~/lib/utils";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
-import { saveQuotation, getQuotation, listCatalogItems } from "~/models/quotation.server";
+import { loadQuotationEditorData, saveQuotation } from "~/models/quotation.server";
 import { parseBRLToCents } from "~/utils/quotation";
+import { updateEditorRow } from "~/utils/quotation-editor-state";
+import {
+  beginRevisionSave,
+  completeRevisionSave,
+  initialRevisionState,
+  markRevisionEdited,
+} from "~/utils/quotation-revision";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
 import type { ShouldRevalidateFunctionArgs } from "@remix-run/react";
@@ -26,9 +33,8 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { user } = await requireAdmin(request);
   const id = Number(params.id);
   if (!Number.isFinite(id)) throw redirect("/admin/quotations");
-  const quotation = await getQuotation(id, user.id);
+  const { quotation, catalog } = await loadQuotationEditorData(user.id, id);
   if (!quotation) throw new Response("Not found", { status: 404 });
-  const catalog = await listCatalogItems();
   return json({ quotation, catalog, rep: resolveQuoteRep(user.email) });
 };
 
@@ -221,12 +227,8 @@ export default function QuotationBuilder() {
   const formRef = useRef<HTMLFormElement>(null);
   const saveFetcher = useFetcher<typeof action>();
   const saveFetcherRef = useRef(saveFetcher);
-  const dirtyRef = useRef(false);
+  const revisionStateRef = useRef(initialRevisionState());
   const ignoreDirtyUntilRef = useRef(1);
-  const draftRevisionRef = useRef(0);
-  const requestRevisionRef = useRef(0);
-  const pendingSubmissionRef = useRef<{ requestRevision: number; draftRevision: number } | null>(null);
-  const handledRequestRevisionRef = useRef(0);
   const lineUploadingKeyRef = useRef<string | null>(null);
   saveFetcherRef.current = saveFetcher;
   lineUploadingKeyRef.current = lineUploadingKey;
@@ -243,9 +245,7 @@ export default function QuotationBuilder() {
 
   useEffect(() => {
     ignoreDirtyUntilRef.current = 1;
-    dirtyRef.current = false;
-    draftRevisionRef.current = 0;
-    pendingSubmissionRef.current = null;
+    revisionStateRef.current = initialRevisionState();
     setAutosaveHint(null);
     setTitle(quotation.title);
     setIssuedAt(new Date(quotation.issuedAt).toISOString().slice(0, 10));
@@ -273,8 +273,7 @@ export default function QuotationBuilder() {
       ignoreDirtyUntilRef.current -= 1;
       return;
     }
-    dirtyRef.current = true;
-    draftRevisionRef.current += 1;
+    revisionStateRef.current = markRevisionEdited(revisionStateRef.current);
     setActionError(null);
     setAutosaveHint(null);
   }, [title, issuedAt, status, location, document, notes, lines, payments]);
@@ -285,24 +284,17 @@ export default function QuotationBuilder() {
       | { ok: false; status: number; error: string; revision: number }
       | undefined;
     if (saveFetcher.state !== "idle" || !data) return;
-    const pending = pendingSubmissionRef.current;
-    if (!pending || data.revision !== pending.requestRevision || handledRequestRevisionRef.current === data.revision) {
-      return;
-    }
-    pendingSubmissionRef.current = null;
-    if (draftRevisionRef.current !== pending.draftRevision) {
-      return;
-    }
-    handledRequestRevisionRef.current = data.revision;
-    if (!data.ok) {
-      setActionError(data.error);
+    const completion = completeRevisionSave(revisionStateRef.current, data);
+    revisionStateRef.current = completion.state;
+    if (completion.effect.type === "ignored" || completion.effect.type === "dirty-preserved") return;
+    if (completion.effect.type === "error") {
+      setActionError(completion.effect.message);
       return;
     }
 
-    dirtyRef.current = false;
     setActionError(null);
-    if (data.redirectTo) {
-      navigate(data.redirectTo);
+    if (completion.effect.type === "navigate") {
+      navigate(completion.effect.to);
       return;
     }
     setAutosaveHint(
@@ -317,7 +309,7 @@ export default function QuotationBuilder() {
     const id = window.setInterval(() => {
       if (status !== "draft") return;
       const fetcher = saveFetcherRef.current;
-      if (!dirtyRef.current || !formRef.current) return;
+      if (!revisionStateRef.current.dirty || !formRef.current) return;
       if (fetcher.state !== "idle" || lineUploadingKeyRef.current !== null) return;
       submitQuotation("autosave");
     }, AUTOSAVE_EVERY_MS);
@@ -329,14 +321,12 @@ export default function QuotationBuilder() {
     const fetcher = saveFetcherRef.current;
     if (!form || fetcher.state !== "idle" || lineUploadingKeyRef.current !== null) return;
 
-    const requestRevision = requestRevisionRef.current + 1;
-    const draftRevision = draftRevisionRef.current;
-    requestRevisionRef.current = requestRevision;
-    pendingSubmissionRef.current = { requestRevision, draftRevision };
+    const begun = beginRevisionSave(revisionStateRef.current);
+    revisionStateRef.current = begun.state;
 
     const body = new FormData(form);
     body.set("intent", intent);
-    body.set("revision", String(requestRevision));
+    body.set("revision", String(begun.requestRevision));
     fetcher.submit(body, { method: "post" });
     setActionError(null);
   }
@@ -350,8 +340,7 @@ export default function QuotationBuilder() {
 
   const updateLine = useCallback((clientKey: string, patch: Partial<DraftLine>) => {
     setLines((prev) =>
-      prev.map((line) => {
-        if (line.clientKey !== clientKey) return line;
+      updateEditorRow(prev, clientKey, (line) => {
         const next = { ...line, ...patch };
         if (patch.priceInput !== undefined) {
           next.unitPriceCents = parseBRLToCents(patch.priceInput) ?? line.unitPriceCents;
@@ -363,8 +352,7 @@ export default function QuotationBuilder() {
 
   const updatePayment = useCallback((clientKey: string, patch: Partial<DraftPayment>) => {
     setPayments((prev) =>
-      prev.map((payment) => {
-        if (payment.clientKey !== clientKey) return payment;
+      updateEditorRow(prev, clientKey, (payment) => {
         const next = { ...payment, ...patch };
         if (patch.amountInput !== undefined) {
           next.amountCents = parseBRLToCents(patch.amountInput) ?? payment.amountCents;

@@ -1,39 +1,46 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-
+import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
 
-const root = resolve(process.cwd());
-const read = (path: string) => readFileSync(resolve(root, path), "utf8");
+import { QuotationDocument } from "./QuotationDocument";
+import { updateEditorRow } from "~/utils/quotation-editor-state";
 
-test("quotation editor rows are memoized", () => {
-  const rows = read("app/components/admin/QuotationEditorRows.tsx");
-  expect(rows).toContain("export const QuotationEditorLineRow = memo");
-  expect(rows).toContain("export const QuotationEditorPaymentRow = memo");
+const documentProps = {
+  title: "Quote",
+  issuedAt: "2026-08-29T12:00:00.000Z",
+  client: { name: "Client", location: null, document: null },
+  lines: [
+    {
+      clientKey: "line-1",
+      name: "Boiler",
+      quantity: 1,
+      descriptionLines: [],
+      unitPriceCents: 100,
+      imageUrl: "https://cdn.test/print.webp",
+      thumbnailUrl: "https://cdn.test/thumb.webp",
+    },
+  ],
+  paymentOptions: [],
+  notes: null,
+  rep: { brandPerson: "Rep", phone: "1", city: "City", email: "rep@example.com" },
+};
+
+test("QuotationDocument uses the thumbnail on screen and print asset in print mode", () => {
+  const screen = renderToStaticMarkup(<QuotationDocument {...documentProps} />);
+  const print = renderToStaticMarkup(<QuotationDocument {...documentProps} printMode />);
+
+  expect(screen).toContain('src="https://cdn.test/thumb.webp"');
+  expect(screen).not.toContain('src="https://cdn.test/print.webp"');
+  expect(print).toContain('src="https://cdn.test/print.webp"');
+  expect(print).not.toContain('src="https://cdn.test/thumb.webp"');
 });
 
-test("quotation preview is deferred and editor route avoids time-based debounce", () => {
-  const preview = read("app/components/admin/QuotationPreview.tsx");
-  expect(preview).toContain("useDeferredValue");
+test("updating one editor row preserves unaffected row identity for memoized rendering", () => {
+  const first = { clientKey: "first", name: "Boiler" };
+  const unaffected = { clientKey: "second", name: "Pump" };
 
-  const route = read("app/routes/admin.quotations.$id.tsx");
-  expect(route).not.toContain("useDebouncedValue");
-  expect(route).not.toContain("120");
-  expect(route).toContain("QuotationPreview");
-  expect(route).toContain("useCallback");
-});
+  const next = updateEditorRow([first, unaffected], "first", (row) => ({ ...row, name: "New boiler" }));
 
-test("document and print keys use stable row keys and thumbnail fallback", () => {
-  const doc = read("app/components/admin/QuotationDocument.tsx");
-  expect(doc).toContain("clientKey ?? `${line.name}-${line.quantity}-${line.unitPriceCents}`");
-  expect(doc).toContain("thumbnailUrl ?? line.imageUrl");
-  expect(doc).toContain("clientKey ?? `${opt.label}-${opt.amountCents}`");
-
-  const catalog = read("app/routes/admin.catalog.tsx");
-  expect(catalog).toContain("item.Image.thumbnail ?? item.Image.location");
-
-  const printRoute = read("app/routes/admin.quotations.$id_.print.tsx");
-  expect(printRoute).toContain("clientKey: String(line.id)");
-  expect(printRoute).toContain("thumbnailUrl: line.Image?.thumbnail ?? line.Image?.location ?? null");
-  expect(printRoute).toContain("clientKey: String(option.id)");
+  expect(next[0]).not.toBe(first);
+  expect(next[0].name).toBe("New boiler");
+  expect(next[1]).toBe(unaffected);
 });

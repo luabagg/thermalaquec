@@ -1,8 +1,9 @@
 import { expect, test, vi } from "vitest";
 
-const { requireAdminMock, saveQuotationMock } = vi.hoisted(() => ({
+const { requireAdminMock, saveQuotationMock, loadQuotationEditorDataMock } = vi.hoisted(() => ({
   requireAdminMock: vi.fn(),
   saveQuotationMock: vi.fn(),
+  loadQuotationEditorDataMock: vi.fn(),
 }));
 
 vi.mock("~/utils/require-admin.server", () => ({
@@ -11,8 +12,7 @@ vi.mock("~/utils/require-admin.server", () => ({
 
 vi.mock("~/models/quotation.server", () => ({
   saveQuotation: saveQuotationMock,
-  getQuotation: vi.fn(),
-  listCatalogItems: vi.fn(),
+  loadQuotationEditorData: loadQuotationEditorDataMock,
 }));
 
 function buildRequest(form: FormData) {
@@ -21,6 +21,30 @@ function buildRequest(form: FormData) {
     body: form,
   });
 }
+
+test("loader delegates the concurrent narrow load and preserves not-found behavior", async () => {
+  requireAdminMock.mockResolvedValue({ user: { id: "user-1", email: "rep@example.com" } });
+  loadQuotationEditorDataMock.mockResolvedValueOnce({
+    quotation: { id: 42, title: "Quote" },
+    catalog: [{ id: 7, name: "Boiler" }],
+  });
+
+  const { loader } = await import("./admin.quotations.$id");
+  const args = {
+    request: new Request("http://localhost/admin/quotations/42"),
+    params: { id: "42" },
+  } as never;
+  const response = await loader(args);
+
+  expect(loadQuotationEditorDataMock).toHaveBeenCalledWith("user-1", 42);
+  await expect(response.json()).resolves.toMatchObject({
+    quotation: { id: 42, title: "Quote" },
+    catalog: [{ id: 7, name: "Boiler" }],
+  });
+
+  loadQuotationEditorDataMock.mockResolvedValueOnce({ quotation: null, catalog: [] });
+  await expect(loader(args)).rejects.toMatchObject({ status: 404 });
+});
 
 test("action returns JSON for save and forwards the revision token", async () => {
   requireAdminMock.mockResolvedValueOnce({ user: { id: "user-1", email: "rep@example.com" } });

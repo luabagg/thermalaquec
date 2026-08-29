@@ -111,7 +111,9 @@ export const QuotationDocument = memo(function QuotationDocument({
         {lines.map((line, index) => {
           const bullets = descLines(line.descriptionLines);
           const lineTotal = line.quantity * line.unitPriceCents;
-          const imageSrc = line.thumbnailUrl ?? line.imageUrl;
+          const imageSrc = printMode
+            ? line.imageUrl ?? line.thumbnailUrl
+            : line.thumbnailUrl ?? line.imageUrl;
           const hasPhoto = Boolean(imageSrc);
           return (
             <li key={line.clientKey ?? `${line.name}-${line.quantity}-${line.unitPriceCents}`} className="quote-doc__line">

@@ -28,10 +28,24 @@ export async function createImageFromUpload(file: File, folder: "quotes" | "cata
 
   const base = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const source = Buffer.from(await file.arrayBuffer());
-  const [locationBuffer, thumbnailBuffer] = await Promise.all([
-    toWebpDerivative(source, 1600),
-    toWebpDerivative(source, 320),
-  ]);
+  let locationBuffer: Buffer;
+  let thumbnailBuffer: Buffer;
+  try {
+    const metadata = await sharp(source).metadata();
+    if (metadata.format === "gif") {
+      throw new Response("GIF não suportado", { status: 400 });
+    }
+    if (!metadata.format || !SUPPORTED.has(`image/${metadata.format}`)) {
+      throw new Response("Tipo de imagem não suportado", { status: 400 });
+    }
+    [locationBuffer, thumbnailBuffer] = await Promise.all([
+      toWebpDerivative(source, 1600),
+      toWebpDerivative(source, 320),
+    ]);
+  } catch (error) {
+    if (error instanceof Response) throw error;
+    throw new Response("Arquivo de imagem inválido", { status: 400 });
+  }
   const [uploaded, thumbnail] = await Promise.all([
     putPublicObject(`${base}.webp`, locationBuffer, "image/webp", { cacheControl: GENERATED_CACHE_CONTROL }),
     putPublicObject(`${base}-thumb.webp`, thumbnailBuffer, "image/webp", {
