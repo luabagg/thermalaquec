@@ -140,3 +140,9 @@ Task 6: complete (commits f180c08..07cfdba, review clean)
   - `npx prisma migrate status` — read-only check reached the configured PostgreSQL database and reported five migrations total with `20260829170000_normalized_quote_catalog` and `20260829190000_remove_legacy_products` pending; Prisma exited 1 because the database is not up to date. No migration was applied.
   - `git diff --check` — PASS.
 - Operational residual: the configured remote database has not received the normalized schema/direct legacy-removal migrations, no remote export/proposal/apply was performed, and no disposable database/manual browser rehearsal was available. The pre-existing `.tool-versions` modification remains preserved and outside this task.
+
+### Task 11 final documentation fix
+
+- Corrected the final checklist to distinguish editable catalog aggregates from displayed aliases and intentionally immutable normalization provenance.
+- Marked Task 11's documentation commit step complete based on commit `6919db9`.
+- `git diff --check` and focused textual assertions passed; the pre-existing `.tool-versions` change remains untouched.

@@ -1630,7 +1630,7 @@ Expected:
 - non-empty legacy migration fails with the preflight instruction;
 - after acknowledged preflight clears rows and writes an audit artifact, the legacy migration succeeds.
 
-- [ ] **Step 7: Commit documentation**
+- [x] **Step 7: Commit documentation**
 
 ```bash
 git add docs/catalog-normalization.md data/quotations/README.md docs/superpowers/plans/2026-08-29-quotation-catalog-normalization.md
@@ -1644,7 +1644,7 @@ Binding fresh-app override: the legacy preflight/acknowledgement requirement is 
 - [ ] Every original active flat catalog row maps exactly once in the applied run ledger. *(Requires a deliberate validated apply against the target database.)*
 - [x] Agent proposals cannot apply against a stale source digest. *(Contract and model tests.)*
 - [x] Price and image differences have machine-verifiable dispositions. *(Contract validation tests.)*
-- [x] Catalog families, options, values, variants, aliases, and provenance are editable. *(Model and route tests.)*
+- [x] Catalog families, options, values, and variants are editable; aliases and immutable normalization provenance are displayed for review. *(Model and route tests.)*
 - [x] Archived families disappear from new quote selection without changing saved quotes. *(Model/picker/snapshot tests.)*
 - [x] Configurable details are absent from the initial quotation loader payload. *(Compact-query tests.)*
 - [x] The server, not the browser, creates trusted selection snapshots. *(Resolve/token/quotation tests.)*
