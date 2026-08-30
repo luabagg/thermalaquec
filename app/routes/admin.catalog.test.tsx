@@ -1,3 +1,5 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { expect, test, vi } from "vitest";
 
 const {
@@ -60,9 +62,7 @@ test("archives with optimistic concurrency and reports stale edits", async () =>
   archiveCatalogFamilyMock.mockResolvedValueOnce({ ok: false, error: "stale" });
 
   const { action } = await import("./admin.catalog");
-  const response = await action(
-    actionArgs({ intent: "archive", id: "1", expectedUpdatedAt: "2026-08-29T00:00:00.000Z" }),
-  );
+  const response = await action(actionArgs({ intent: "archive", id: "1", expectedUpdatedAt: "2026-08-29T00:00:00.000Z" }));
 
   expect(response.status).toBe(409);
   await expect(response.json()).resolves.toEqual({
@@ -75,9 +75,7 @@ test("creates a new catalog family", async () => {
   createCatalogFamilyMock.mockResolvedValueOnce({ id: 9 });
 
   const { action } = await import("./admin.catalog");
-  const response = await action(
-    actionArgs({ intent: "create", name: "Boiler", price: "1.234,56", description: "Line one\nLine two" }),
-  );
+  const response = await action(actionArgs({ intent: "create", name: "Boiler", price: "1.234,56", description: "Line one\nLine two" }));
 
   expect(response.status).toBe(200);
   expect(createCatalogFamilyMock).toHaveBeenCalledWith(
@@ -85,7 +83,7 @@ test("creates a new catalog family", async () => {
       name: "Boiler",
       descriptionLines: ["Line one", "Line two"],
       defaultUnitPriceCents: 123456,
-    }),
+    })
   );
 });
 
@@ -94,9 +92,7 @@ test("restores an archived family", async () => {
   restoreCatalogFamilyMock.mockResolvedValueOnce({ ok: true, item: { id: 1 } });
 
   const { action } = await import("./admin.catalog");
-  const response = await action(
-    actionArgs({ intent: "restore", id: "1", expectedUpdatedAt: "2026-08-29T00:00:00.000Z" }),
-  );
+  const response = await action(actionArgs({ intent: "restore", id: "1", expectedUpdatedAt: "2026-08-29T00:00:00.000Z" }));
 
   expect(response.status).toBe(200);
   expect(restoreCatalogFamilyMock).toHaveBeenCalledWith(1, "2026-08-29T00:00:00.000Z");
@@ -107,9 +103,7 @@ test("rejects delete when family is referenced", async () => {
   deleteCatalogFamilyMock.mockResolvedValueOnce({ ok: false, error: "referenced" });
 
   const { action } = await import("./admin.catalog");
-  const response = await action(
-    actionArgs({ intent: "delete", id: "1", expectedUpdatedAt: "2026-08-29T00:00:00.000Z" }),
-  );
+  const response = await action(actionArgs({ intent: "delete", id: "1", expectedUpdatedAt: "2026-08-29T00:00:00.000Z" }));
 
   expect(response.status).toBe(409);
   await expect(response.json()).resolves.toMatchObject({ error: expect.stringContaining("referenciado") });
@@ -138,7 +132,7 @@ test("set-image routes through aggregate optimistic concurrency", async () => {
       catalogItemId: "1",
       imageId: "42",
       expectedUpdatedAt: "2026-08-29T00:00:00.000Z",
-    }),
+    })
   );
 
   expect(response.status).toBe(200);
@@ -147,8 +141,43 @@ test("set-image routes through aggregate optimistic concurrency", async () => {
       id: 1,
       expectedUpdatedAt: "2026-08-29T00:00:00.000Z",
       family: expect.objectContaining({ imageId: 42 }),
-    }),
+    })
   );
+});
+
+test("catalog list renders alias counts", async () => {
+  const route = await import("./admin.catalog");
+  const router = createMemoryRouter([{ id: "catalog-list", path: "/admin/catalog", element: <route.default /> }], {
+    initialEntries: ["/admin/catalog"],
+    hydrationData: {
+      loaderData: {
+        "catalog-list": {
+          status: "active",
+          search: "",
+          eligibility: [{ id: 1, eligible: true, quotationLines: 0, sourceMaps: 0, canonicalMaps: 0, aliases: 4 }],
+          items: [
+            {
+              id: 1,
+              slug: "boiler",
+              name: "Boiler",
+              nameTemplate: null,
+              defaultUnitPriceCents: null,
+              imageId: null,
+              archivedAt: null,
+              updatedAt: "2026-08-29T00:00:00.000Z",
+              Image: null,
+              _count: { options: 2, variants: 3, aliases: 4 },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  const markup = renderToStaticMarkup(<RouterProvider router={router} />);
+  consoleError.mockRestore();
+  expect(markup).toContain("2 opções · 3 combinações · 4 aliases");
 });
 
 test("loader defaults status to active and empty search", async () => {

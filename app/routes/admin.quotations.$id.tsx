@@ -47,9 +47,27 @@ type DraftLine = {
   priceInput: string;
   unitPriceCents: number;
   catalogItemId: number | null;
+  catalogResolutionToken: string | null;
   imageId: number | null;
   imageUrl: string | null;
   imageThumbnail: string | null;
+};
+
+type CatalogPickerFamily = {
+  id: number;
+  options: Array<{
+    id: number;
+    name: string;
+    values: Array<{ id: number; label: string }>;
+  }>;
+};
+
+type CatalogResolvedDraft = {
+  name: string;
+  descriptionLines: string[];
+  unitPriceCents: number | null;
+  imageId: number | null;
+  catalogResolutionToken: string;
 };
 
 type DraftPayment = {
@@ -85,6 +103,7 @@ function lineToDraft(line: {
     priceInput: centsToInput(line.unitPriceCents),
     unitPriceCents: line.unitPriceCents,
     catalogItemId: line.catalogItemId,
+    catalogResolutionToken: null,
     imageId: line.imageId,
     imageUrl: line.Image?.location ?? null,
     imageThumbnail: line.Image?.thumbnail ?? null,
@@ -121,16 +140,22 @@ function parseLinesFromForm(form: FormData) {
       .filter(Boolean);
     const priceRaw = String(form.get(`line.${i}.price`) || "0");
     const unitPriceCents = parseBRLToCents(priceRaw) ?? 0;
+    const idRaw = form.get(`line.${i}.id`);
+    const lineId = idRaw ? Number(idRaw) : null;
     const catalogRaw = form.get(`line.${i}.catalogItemId`);
     const catalogItemId = catalogRaw ? Number(catalogRaw) : null;
+    const tokenRaw = form.get(`line.${i}.catalogResolutionToken`);
+    const catalogResolutionToken = tokenRaw ? String(tokenRaw) : null;
     const imageRaw = form.get(`line.${i}.imageId`);
     const imageId = imageRaw ? Number(imageRaw) : null;
     lines.push({
+      ...(Number.isFinite(lineId as number) ? { id: lineId as number } : {}),
       name,
       quantity,
       descriptionLines,
       unitPriceCents,
       catalogItemId: Number.isFinite(catalogItemId as number) ? catalogItemId : null,
+      catalogResolutionToken,
       imageId: Number.isFinite(imageId as number) ? imageId : null,
     });
   }
@@ -220,6 +245,10 @@ export default function QuotationBuilder() {
     quotation.paymentOptions.map(paymentToDraft),
   );
   const [catalogSelection, setCatalogSelection] = useState("");
+  const [catalogFamily, setCatalogFamily] = useState<CatalogPickerFamily | null>(null);
+  const [catalogValueIds, setCatalogValueIds] = useState<Record<number, number>>({});
+  const [catalogPickerBusy, setCatalogPickerBusy] = useState(false);
+  const [catalogPickerError, setCatalogPickerError] = useState<string | null>(null);
   const [lineUploadErrors, setLineUploadErrors] = useState<Record<string, string>>({});
   const [lineUploadingKey, setLineUploadingKey] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -267,6 +296,37 @@ export default function QuotationBuilder() {
     quotation.status,
     quotation.title,
   ]);
+
+  useEffect(() => {
+    if (!catalogSelection) {
+      setCatalogFamily(null);
+      setCatalogValueIds({});
+      return;
+    }
+    const controller = new AbortController();
+    setCatalogPickerBusy(true);
+    setCatalogPickerError(null);
+    setCatalogFamily(null);
+    setCatalogValueIds({});
+    fetch(`/admin/catalog/${catalogSelection}/resolve`, {
+      credentials: "same-origin",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("catalog_detail_failed");
+        return response.json() as Promise<{ family: CatalogPickerFamily }>;
+      })
+      .then(({ family }) => setCatalogFamily(family))
+      .catch((error: unknown) => {
+        if ((error as { name?: string }).name !== "AbortError") {
+          setCatalogPickerError("Não foi possível carregar as opções deste produto.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCatalogPickerBusy(false);
+      });
+    return () => controller.abort();
+  }, [catalogSelection]);
 
   useEffect(() => {
     if (ignoreDirtyUntilRef.current > 0) {
@@ -375,6 +435,7 @@ export default function QuotationBuilder() {
         priceInput: "0,00",
         unitPriceCents: 0,
         catalogItemId: null,
+        catalogResolutionToken: null,
         imageId: null,
         imageUrl: null,
         imageThumbnail: null,
@@ -382,32 +443,47 @@ export default function QuotationBuilder() {
     ]);
   }, []);
 
-  const addFromCatalog = useCallback(() => {
-    if (!catalogSelection) return;
-    const item = catalog.find((c) => String(c.id) === catalogSelection);
+  const addFromCatalog = useCallback(async () => {
+    if (!catalogSelection || !catalogFamily) return;
+    const item = catalog.find((candidate) => String(candidate.id) === catalogSelection);
     if (!item) return;
-    const clientKey = newClientKey();
-    const desc = Array.isArray(item.descriptionLines)
-      ? (item.descriptionLines as string[]).join("\n")
-      : "";
-    setLines((prev) => [
-      ...prev,
-      {
-        id: null,
-        clientKey,
-        name: item.name,
-        quantity: 1,
-        description: desc,
-        priceInput: centsToInput(item.defaultUnitPriceCents ?? 0),
-        unitPriceCents: item.defaultUnitPriceCents ?? 0,
-        catalogItemId: item.id,
-        imageId: item.imageId ?? null,
-        imageUrl: item.Image?.location ?? null,
-        imageThumbnail: item.Image?.thumbnail ?? null,
-      },
-    ]);
-    setCatalogSelection("");
-  }, [catalog, catalogSelection]);
+    setCatalogPickerBusy(true);
+    setCatalogPickerError(null);
+    try {
+      const response = await fetch(`/admin/catalog/${catalogSelection}/resolve`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedValueIds: catalogFamily.options.map((option) => catalogValueIds[option.id]) }),
+      });
+      const data = (await response.json()) as { draft?: CatalogResolvedDraft; error?: string };
+      if (!response.ok || !data.draft) throw new Error(data.error ?? "catalog_resolution_failed");
+      const draft = data.draft;
+      const clientKey = newClientKey();
+      setLines((prev) => [
+        ...prev,
+        {
+          id: null,
+          clientKey,
+          name: draft.name,
+          quantity: 1,
+          description: draft.descriptionLines.join("\n"),
+          priceInput: centsToInput(draft.unitPriceCents ?? 0),
+          unitPriceCents: draft.unitPriceCents ?? 0,
+          catalogItemId: item.id,
+          catalogResolutionToken: draft.catalogResolutionToken,
+          imageId: draft.imageId,
+          imageUrl: draft.imageId === item.imageId ? item.Image?.location ?? null : null,
+          imageThumbnail: draft.imageId === item.imageId ? item.Image?.thumbnail ?? null : null,
+        },
+      ]);
+      setCatalogSelection("");
+    } catch {
+      setCatalogPickerError("Não foi possível resolver esta seleção do catálogo.");
+    } finally {
+      setCatalogPickerBusy(false);
+    }
+  }, [catalog, catalogFamily, catalogSelection, catalogValueIds]);
 
   const removeLine = useCallback((clientKey: string) => {
     setLines((prev) => prev.filter((line) => line.clientKey !== clientKey));
@@ -628,11 +704,12 @@ export default function QuotationBuilder() {
                 + Linha avulsa
               </Button>
             </div>
-            <div className="flex gap-2">
+            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
               <select
+                aria-label="Produto do catálogo"
                 value={catalogSelection}
                 onChange={(e) => setCatalogSelection(e.target.value)}
-                className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm"
+                className="h-9 min-w-0 rounded-md border border-input bg-background px-2 text-sm"
               >
                 <option value="" disabled>
                   Do catálogo…
@@ -647,11 +724,35 @@ export default function QuotationBuilder() {
                 type="button"
                 size="sm"
                 className="shrink-0"
-                disabled={catalog.length === 0 || !catalogSelection}
+                disabled={
+                  catalog.length === 0 ||
+                  !catalogFamily ||
+                  catalogPickerBusy ||
+                  catalogFamily.options.some((option) => !catalogValueIds[option.id])
+                }
                 onClick={addFromCatalog}
               >
-                Adicionar
+                {catalogPickerBusy ? "Carregando…" : "Adicionar"}
               </Button>
+              {catalogFamily?.options.map((option) => (
+                <label key={option.id} className="grid gap-1 text-sm">
+                  <span>{option.name}</span>
+                  <select
+                    aria-label={option.name}
+                    value={catalogValueIds[option.id] ?? ""}
+                    onChange={(event) =>
+                      setCatalogValueIds((current) => ({ ...current, [option.id]: Number(event.target.value) }))
+                    }
+                    className="h-9 rounded-md border border-input bg-background px-2"
+                  >
+                    <option value="" disabled>Selecione…</option>
+                    {option.values.map((value) => (
+                      <option key={value.id} value={value.id}>{value.label}</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              {catalogPickerError ? <p className="text-sm text-destructive sm:col-span-2">{catalogPickerError}</p> : null}
             </div>
             {lines.map((line, i) => (
               <QuotationEditorLineRow

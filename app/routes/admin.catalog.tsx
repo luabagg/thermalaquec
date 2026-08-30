@@ -329,7 +329,7 @@ export default function AdminCatalog() {
                     </p>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {item._count.options} opções · {item._count.variants} combinações
+                    {item._count.options} opções · {item._count.variants} combinações · {item._count.aliases} aliases
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <Button asChild variant="outline" size="sm">

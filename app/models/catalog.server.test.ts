@@ -40,7 +40,9 @@ describe("catalog aggregate model", () => {
     await listCatalogSummaries({ status: "active", search: "boiler" });
     expect(prismaMock.quoteCatalogItem.findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { archivedAt: null, name: { contains: "boiler", mode: "insensitive" } },
-      select: expect.not.objectContaining({ options: expect.anything(), variants: expect.anything() }),
+      select: expect.objectContaining({
+        _count: { select: { options: true, variants: true, aliases: true } },
+      }),
     }));
   });
 

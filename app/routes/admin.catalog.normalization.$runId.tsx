@@ -6,6 +6,7 @@ import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import {
   getCatalogNormalizationRevertEligibility,
+  getCatalogNormalizationRunSummary,
   revertCatalogNormalizationRun,
 } from "~/models/catalog-normalization.server";
 import { requireAdmin } from "~/utils/require-admin.server";
@@ -18,13 +19,17 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const runId = Number(params.runId);
   if (!Number.isFinite(runId)) throw new Response("Not Found", { status: 404 });
 
-  const eligibility = await getCatalogNormalizationRevertEligibility(runId);
+  const [summary, eligibility] = await Promise.all([
+    getCatalogNormalizationRunSummary(runId),
+    getCatalogNormalizationRevertEligibility(runId),
+  ]);
+  if (!summary) throw new Response("Not Found", { status: 404 });
   if ("error" in eligibility) {
     if (eligibility.error === "not_found") throw new Response("Not Found", { status: 404 });
     throw new Response("Execução indisponível", { status: 400 });
   }
 
-  return json({ runId, eligibility });
+  return json({ runId, summary, eligibility });
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
@@ -60,7 +65,7 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
 };
 
 export default function AdminCatalogNormalizationRun() {
-  const { runId, eligibility } = useLoaderData<typeof loader>();
+  const { runId, summary, eligibility } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
   return (
@@ -78,6 +83,23 @@ export default function AdminCatalogNormalizationRun() {
         </p>
         <h1 className="font-display mt-1 text-3xl font-bold">Execução de normalização #{runId}</h1>
       </div>
+
+      <section className="grid gap-2 border border-border p-4 text-sm">
+        <h2 className="text-lg font-semibold">Resumo da execução</h2>
+        <p><strong>Status:</strong> {summary.status}</p>
+        <p><strong>Criada em:</strong> {new Date(summary.createdAt).toLocaleString("pt-BR")}</p>
+        {summary.appliedAt ? <p><strong>Aplicada em:</strong> {new Date(summary.appliedAt).toLocaleString("pt-BR")}</p> : null}
+        {summary.revertedAt ? <p><strong>Revertida em:</strong> {new Date(summary.revertedAt).toLocaleString("pt-BR")}</p> : null}
+        {summary.result && typeof summary.result === "object" && !Array.isArray(summary.result) ? (
+          <dl className="grid grid-cols-2 gap-1">
+            {Object.entries(summary.result).map(([label, value]) => (
+              typeof value === "number" || typeof value === "string" ? (
+                <div key={label} className="contents"><dt>{label}</dt><dd>{String(value)}</dd></div>
+              ) : null
+            ))}
+          </dl>
+        ) : null}
+      </section>
 
       <section className="grid gap-3 border border-border p-4 text-sm">
         <h2 className="text-lg font-semibold">Elegibilidade de reversão</h2>

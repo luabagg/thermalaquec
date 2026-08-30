@@ -65,6 +65,8 @@ test("action returns JSON for save and forwards the revision token", async () =>
   form.set("line.0.quantity", "2");
   form.set("line.0.description", "Install");
   form.set("line.0.price", "123,45");
+  form.set("line.0.catalogItemId", "7");
+  form.set("line.0.catalogResolutionToken", "server-signed-token");
   form.set("paymentCount", "1");
   form.set("pay.0.label", " Cash ");
   form.set("pay.0.amount", "999,00");
@@ -91,7 +93,8 @@ test("action returns JSON for save and forwards the revision token", async () =>
         quantity: 2,
         descriptionLines: ["Install"],
         unitPriceCents: 12345,
-        catalogItemId: null,
+        catalogItemId: 7,
+        catalogResolutionToken: "server-signed-token",
         imageId: null,
       },
     ],

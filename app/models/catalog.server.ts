@@ -56,7 +56,7 @@ const catalogSummarySelect = {
   archivedAt: true,
   updatedAt: true,
   Image: { select: { location: true, thumbnail: true } },
-  _count: { select: { options: true, variants: true } },
+  _count: { select: { options: true, variants: true, aliases: true } },
 } satisfies Prisma.QuoteCatalogItemSelect;
 
 const catalogDetailInclude = {
@@ -263,10 +263,3 @@ export async function deleteCatalogFamily(id: number, expectedUpdatedAt: string)
   const deleted = await prisma.quoteCatalogItem.deleteMany({ where: { id, updatedAt: new Date(expectedUpdatedAt) } });
   return deleted.count ? { ok: true, item: null } : { ok: false, error: "stale" };
 }
-
-// Compatibility exports for existing quotation call sites during the catalog migration.
-export async function listCatalogItems() { return prisma.quoteCatalogItem.findMany({ orderBy: { name: "asc" }, include: { Image: true } }); }
-export async function getCatalogItem(id: number) { return prisma.quoteCatalogItem.findUnique({ where: { id } }); }
-export async function createCatalogItem(data: { slug: string; name: string; descriptionLines?: string[]; defaultUnitPriceCents?: number | null }) { return prisma.quoteCatalogItem.create({ data: { slug: data.slug, name: data.name.trim(), descriptionLines: data.descriptionLines ?? [], defaultUnitPriceCents: data.defaultUnitPriceCents ?? null } }); }
-export async function updateCatalogItem(id: number, data: { name: string; descriptionLines?: string[]; defaultUnitPriceCents?: number | null }) { return prisma.quoteCatalogItem.update({ where: { id }, data: { name: data.name.trim(), descriptionLines: data.descriptionLines ?? [], defaultUnitPriceCents: data.defaultUnitPriceCents ?? null } }); }
-export async function setCatalogItemImage(catalogItemId: number, imageId: number | null) { return prisma.quoteCatalogItem.update({ where: { id: catalogItemId }, data: { imageId }, include: { Image: true } }); }

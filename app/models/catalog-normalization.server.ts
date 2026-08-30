@@ -492,6 +492,20 @@ async function evaluateRevertSafety(tx: TxClient, sourceMaps: SourceMapRecord[])
   return { eligibility, restorableLineIdsByMapId, canonicalUpdatedAtById };
 }
 
+export async function getCatalogNormalizationRunSummary(runId: number) {
+  return prisma.catalogNormalizationRun.findUnique({
+    where: { id: runId },
+    select: {
+      id: true,
+      status: true,
+      result: true,
+      createdAt: true,
+      appliedAt: true,
+      revertedAt: true,
+    },
+  });
+}
+
 export async function getCatalogNormalizationRevertEligibility(runId: number): Promise<CatalogNormalizationRevertEligibility | { eligible: false; error: "not_found" | "invalid_status" }> {
   const run = await prisma.catalogNormalizationRun.findUnique({
     where: { id: runId },
