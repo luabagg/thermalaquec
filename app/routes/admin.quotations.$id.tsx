@@ -2,6 +2,10 @@ import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunctio
 import { json, redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect, useMemo, useRef, useState, type FormEvent, useCallback } from "react";
+import {
+  CatalogVariationPicker,
+  type CatalogPickerAddedDraft,
+} from "~/components/admin/CatalogVariationPicker";
 import { QuotationEditorLineRow, QuotationEditorPaymentRow } from "~/components/admin/QuotationEditorRows";
 import { QuotationPreview } from "~/components/admin/QuotationPreview";
 import { Button } from "~/components/ui/button";
@@ -51,23 +55,6 @@ type DraftLine = {
   imageId: number | null;
   imageUrl: string | null;
   imageThumbnail: string | null;
-};
-
-type CatalogPickerFamily = {
-  id: number;
-  options: Array<{
-    id: number;
-    name: string;
-    values: Array<{ id: number; label: string }>;
-  }>;
-};
-
-type CatalogResolvedDraft = {
-  name: string;
-  descriptionLines: string[];
-  unitPriceCents: number | null;
-  imageId: number | null;
-  catalogResolutionToken: string;
 };
 
 type DraftPayment = {
@@ -244,11 +231,6 @@ export default function QuotationBuilder() {
   const [payments, setPayments] = useState<DraftPayment[]>(() =>
     quotation.paymentOptions.map(paymentToDraft),
   );
-  const [catalogSelection, setCatalogSelection] = useState("");
-  const [catalogFamily, setCatalogFamily] = useState<CatalogPickerFamily | null>(null);
-  const [catalogValueIds, setCatalogValueIds] = useState<Record<number, number>>({});
-  const [catalogPickerBusy, setCatalogPickerBusy] = useState(false);
-  const [catalogPickerError, setCatalogPickerError] = useState<string | null>(null);
   const [lineUploadErrors, setLineUploadErrors] = useState<Record<string, string>>({});
   const [lineUploadingKey, setLineUploadingKey] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -296,37 +278,6 @@ export default function QuotationBuilder() {
     quotation.status,
     quotation.title,
   ]);
-
-  useEffect(() => {
-    if (!catalogSelection) {
-      setCatalogFamily(null);
-      setCatalogValueIds({});
-      return;
-    }
-    const controller = new AbortController();
-    setCatalogPickerBusy(true);
-    setCatalogPickerError(null);
-    setCatalogFamily(null);
-    setCatalogValueIds({});
-    fetch(`/admin/catalog/${catalogSelection}/resolve`, {
-      credentials: "same-origin",
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("catalog_detail_failed");
-        return response.json() as Promise<{ family: CatalogPickerFamily }>;
-      })
-      .then(({ family }) => setCatalogFamily(family))
-      .catch((error: unknown) => {
-        if ((error as { name?: string }).name !== "AbortError") {
-          setCatalogPickerError("Não foi possível carregar as opções deste produto.");
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setCatalogPickerBusy(false);
-      });
-    return () => controller.abort();
-  }, [catalogSelection]);
 
   useEffect(() => {
     if (ignoreDirtyUntilRef.current > 0) {
@@ -443,47 +394,26 @@ export default function QuotationBuilder() {
     ]);
   }, []);
 
-  const addFromCatalog = useCallback(async () => {
-    if (!catalogSelection || !catalogFamily) return;
-    const item = catalog.find((candidate) => String(candidate.id) === catalogSelection);
-    if (!item) return;
-    setCatalogPickerBusy(true);
-    setCatalogPickerError(null);
-    try {
-      const response = await fetch(`/admin/catalog/${catalogSelection}/resolve`, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedValueIds: catalogFamily.options.map((option) => catalogValueIds[option.id]) }),
-      });
-      const data = (await response.json()) as { draft?: CatalogResolvedDraft; error?: string };
-      if (!response.ok || !data.draft) throw new Error(data.error ?? "catalog_resolution_failed");
-      const draft = data.draft;
-      const clientKey = newClientKey();
-      setLines((prev) => [
-        ...prev,
-        {
-          id: null,
-          clientKey,
-          name: draft.name,
-          quantity: 1,
-          description: draft.descriptionLines.join("\n"),
-          priceInput: centsToInput(draft.unitPriceCents ?? 0),
-          unitPriceCents: draft.unitPriceCents ?? 0,
-          catalogItemId: item.id,
-          catalogResolutionToken: draft.catalogResolutionToken,
-          imageId: draft.imageId,
-          imageUrl: draft.imageId === item.imageId ? item.Image?.location ?? null : null,
-          imageThumbnail: draft.imageId === item.imageId ? item.Image?.thumbnail ?? null : null,
-        },
-      ]);
-      setCatalogSelection("");
-    } catch {
-      setCatalogPickerError("Não foi possível resolver esta seleção do catálogo.");
-    } finally {
-      setCatalogPickerBusy(false);
-    }
-  }, [catalog, catalogFamily, catalogSelection, catalogValueIds]);
+  const addCatalogDraft = useCallback((draft: CatalogPickerAddedDraft) => {
+    const clientKey = newClientKey();
+    setLines((current) => [
+      ...current,
+      {
+        id: null,
+        clientKey,
+        name: draft.name,
+        quantity: 1,
+        description: draft.descriptionLines.join("\n"),
+        priceInput: centsToInput(draft.unitPriceCents ?? 0),
+        unitPriceCents: draft.unitPriceCents ?? 0,
+        catalogItemId: draft.catalogItemId,
+        catalogResolutionToken: draft.catalogResolutionToken,
+        imageId: draft.imageId,
+        imageUrl: draft.imageUrl,
+        imageThumbnail: draft.imageThumbnail,
+      },
+    ]);
+  }, []);
 
   const removeLine = useCallback((clientKey: string) => {
     setLines((prev) => prev.filter((line) => line.clientKey !== clientKey));
@@ -704,56 +634,7 @@ export default function QuotationBuilder() {
                 + Linha avulsa
               </Button>
             </div>
-            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-              <select
-                aria-label="Produto do catálogo"
-                value={catalogSelection}
-                onChange={(e) => setCatalogSelection(e.target.value)}
-                className="h-9 min-w-0 rounded-md border border-input bg-background px-2 text-sm"
-              >
-                <option value="" disabled>
-                  Do catálogo…
-                </option>
-                {catalog.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <Button
-                type="button"
-                size="sm"
-                className="shrink-0"
-                disabled={
-                  catalog.length === 0 ||
-                  !catalogFamily ||
-                  catalogPickerBusy ||
-                  catalogFamily.options.some((option) => !catalogValueIds[option.id])
-                }
-                onClick={addFromCatalog}
-              >
-                {catalogPickerBusy ? "Carregando…" : "Adicionar"}
-              </Button>
-              {catalogFamily?.options.map((option) => (
-                <label key={option.id} className="grid gap-1 text-sm">
-                  <span>{option.name}</span>
-                  <select
-                    aria-label={option.name}
-                    value={catalogValueIds[option.id] ?? ""}
-                    onChange={(event) =>
-                      setCatalogValueIds((current) => ({ ...current, [option.id]: Number(event.target.value) }))
-                    }
-                    className="h-9 rounded-md border border-input bg-background px-2"
-                  >
-                    <option value="" disabled>Selecione…</option>
-                    {option.values.map((value) => (
-                      <option key={value.id} value={value.id}>{value.label}</option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-              {catalogPickerError ? <p className="text-sm text-destructive sm:col-span-2">{catalogPickerError}</p> : null}
-            </div>
+            <CatalogVariationPicker summaries={catalog} onAdd={addCatalogDraft} />
             {lines.map((line, i) => (
               <QuotationEditorLineRow
                 key={line.clientKey}

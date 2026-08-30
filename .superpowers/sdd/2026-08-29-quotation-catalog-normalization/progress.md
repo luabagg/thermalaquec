@@ -80,3 +80,10 @@ Task 6: complete (commits f180c08..07cfdba, review clean)
 - Quotation picker lazily loads family options, resolves simple/configurable selections on the server, and retains the signed token on each new draft line. Archived families are excluded from summaries.
 - Quotation saves validate all existing/server-owned or new/token-backed snapshots before mutating client, header, lines, or payments; invalid selections cannot partially commit. Removed unused flat-catalog compatibility APIs.
 - Coverage: token integrity, resolve authentication/detail/error behavior, strict parsing, active-only catalog loading, trusted snapshot persistence/rejection, route token forwarding, and normalization summary.
+
+## Task 9 completion report
+
+- Replaced the quotation route's inline dropdown and field-copying fallback with `CatalogVariationPicker`.
+- Initial quotation payload now uses active-only compact summaries with counts and no descriptions, options, values, or variants.
+- Simple products resolve immediately through the authenticated server endpoint; configurable families load ordered detail lazily, resolve complete selections server-side, preview generated fields, and add only signed resolved drafts.
+- Added Portuguese unavailable/request errors, retry, cancellation/family changes, and focused compact-query/network/selection tests.

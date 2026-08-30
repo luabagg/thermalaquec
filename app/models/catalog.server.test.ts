@@ -17,7 +17,7 @@ const { prismaMock, txMock } = vi.hoisted(() => {
 });
 vi.mock("~/libs/prisma/client.server", () => ({ default: prismaMock }));
 
-import { archiveCatalogFamily, getCatalogDeletionEligibility, getCatalogFamilyDetail, listCatalogSummaries, restoreCatalogFamily, updateCatalogFamilyAggregate } from "./catalog.server";
+import { archiveCatalogFamily, getCatalogDeletionEligibility, getCatalogFamilyDetail, listActiveCatalogPickerSummaries, listCatalogSummaries, restoreCatalogFamily, updateCatalogFamilyAggregate } from "./catalog.server";
 
 const input = {
   id: 1, expectedUpdatedAt: "2026-08-29T00:00:00.000Z",
@@ -44,6 +44,28 @@ describe("catalog aggregate model", () => {
         _count: { select: { options: true, variants: true, aliases: true } },
       }),
     }));
+  });
+
+  it("lists active quotation picker summaries without detail payloads", async () => {
+    prismaMock.quoteCatalogItem.findMany.mockResolvedValueOnce([]);
+    await listActiveCatalogPickerSummaries();
+    const query = prismaMock.quoteCatalogItem.findMany.mock.calls[0][0];
+    expect(query).toMatchObject({
+      where: { archivedAt: null },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        defaultUnitPriceCents: true,
+        imageId: true,
+        Image: { select: { location: true, thumbnail: true } },
+        _count: { select: { options: true, variants: true } },
+      },
+    });
+    expect(query.select).not.toHaveProperty("descriptionLines");
+    expect(query.select).not.toHaveProperty("options");
+    expect(query.select).not.toHaveProperty("variants");
   });
 
   it("returns stale before mutating children when its parent version cannot be claimed", async () => {

@@ -22,11 +22,20 @@ function buildRequest(form: FormData) {
   });
 }
 
-test("loader delegates the concurrent narrow load and preserves not-found behavior", async () => {
+test("loader delegates the concurrent narrow load and returns compact picker summaries", async () => {
   requireAdminMock.mockResolvedValue({ user: { id: "user-1", email: "rep@example.com" } });
+  const summary = {
+    id: 7,
+    slug: "boiler",
+    name: "Boiler",
+    defaultUnitPriceCents: 1000,
+    imageId: null,
+    Image: null,
+    _count: { options: 2, variants: 1 },
+  };
   loadQuotationEditorDataMock.mockResolvedValueOnce({
     quotation: { id: 42, title: "Quote" },
-    catalog: [{ id: 7, name: "Boiler" }],
+    catalog: [summary],
   });
 
   const { loader } = await import("./admin.quotations.$id");
@@ -39,7 +48,7 @@ test("loader delegates the concurrent narrow load and preserves not-found behavi
   expect(loadQuotationEditorDataMock).toHaveBeenCalledWith("user-1", 42);
   await expect(response.json()).resolves.toMatchObject({
     quotation: { id: 42, title: "Quote" },
-    catalog: [{ id: 7, name: "Boiler" }],
+    catalog: [summary],
   });
 
   loadQuotationEditorDataMock.mockResolvedValueOnce({ quotation: null, catalog: [] });

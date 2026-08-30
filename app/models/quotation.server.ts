@@ -1,6 +1,7 @@
 import type { Prisma, QuoteCatalogItem, QuoteClient, Quotation, QuotationLine, QuotationPaymentOption } from "@prisma/client";
 
 import prisma from "~/libs/prisma/client.server";
+import { listActiveCatalogPickerSummaries } from "~/models/catalog.server";
 import {
   requireCatalogSelectionSecret,
   verifyCatalogSelectionToken,
@@ -96,21 +97,6 @@ const quotationEditorSelect = {
     },
   },
 } satisfies Prisma.QuotationSelect;
-
-const quoteCatalogEditorSelect = {
-  id: true,
-  slug: true,
-  name: true,
-  descriptionLines: true,
-  defaultUnitPriceCents: true,
-  imageId: true,
-  Image: {
-    select: {
-      location: true,
-      thumbnail: true,
-    },
-  },
-} satisfies Prisma.QuoteCatalogItemSelect;
 
 function toSnapshotArray(value: unknown): CatalogSelectionSnapshotEntry[] {
   if (!Array.isArray(value)) return [];
@@ -317,11 +303,7 @@ export async function loadQuotationEditorData(ownerUserId: string, quotationId: 
     where: { id: quotationId, ownerUserId },
     select: quotationEditorSelect,
   });
-  const catalogPromise = prisma.quoteCatalogItem.findMany({
-    where: { archivedAt: null },
-    orderBy: { name: "asc" },
-    select: quoteCatalogEditorSelect,
-  });
+  const catalogPromise = listActiveCatalogPickerSummaries();
 
   const [quotation, catalog] = await Promise.all([quotationPromise, catalogPromise]);
   return { quotation, catalog };

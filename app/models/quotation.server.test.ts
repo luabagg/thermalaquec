@@ -281,12 +281,12 @@ test("loadQuotationEditorData fetches quotation and catalog in parallel with nar
       id: true,
       slug: true,
       name: true,
-      descriptionLines: true,
       defaultUnitPriceCents: true,
       imageId: true,
       Image: {
-        select: { location: true },
+        select: { location: true, thumbnail: true },
       },
+      _count: { select: { options: true, variants: true } },
     },
   });
   expect(catalogQuery).not.toHaveProperty("include");

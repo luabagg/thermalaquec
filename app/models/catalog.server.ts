@@ -59,6 +59,16 @@ const catalogSummarySelect = {
   _count: { select: { options: true, variants: true, aliases: true } },
 } satisfies Prisma.QuoteCatalogItemSelect;
 
+const catalogPickerSummarySelect = {
+  id: true,
+  slug: true,
+  name: true,
+  defaultUnitPriceCents: true,
+  imageId: true,
+  Image: { select: { location: true, thumbnail: true } },
+  _count: { select: { options: true, variants: true } },
+} satisfies Prisma.QuoteCatalogItemSelect;
+
 const catalogDetailInclude = {
   Image: { select: { location: true, thumbnail: true } },
   options: {
@@ -110,6 +120,14 @@ export async function listCatalogSummaries({ status = "active", search }: { stat
     },
     orderBy: { name: "asc" },
     select: catalogSummarySelect,
+  });
+}
+
+export async function listActiveCatalogPickerSummaries() {
+  return prisma.quoteCatalogItem.findMany({
+    where: { archivedAt: null },
+    orderBy: { name: "asc" },
+    select: catalogPickerSummarySelect,
   });
 }
 
