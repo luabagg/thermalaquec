@@ -1,6 +1,12 @@
 import type { Prisma, QuoteCatalogItem, QuoteClient, Quotation, QuotationLine, QuotationPaymentOption } from "@prisma/client";
 
 import prisma from "~/libs/prisma/client.server";
+import { listActiveCatalogPickerSummaries } from "~/models/catalog.server";
+import {
+  requireCatalogSelectionSecret,
+  verifyCatalogSelectionToken,
+} from "~/utils/catalog-selection-token.server";
+import type { CatalogSelectionSnapshotEntry } from "~/utils/catalog-resolver";
 
 export type QuotationWithRelations = Quotation & {
   client: QuoteClient;
@@ -40,51 +46,6 @@ export async function updateQuoteClient(
   });
 }
 
-export async function listCatalogItems() {
-  return prisma.quoteCatalogItem.findMany({
-    orderBy: { name: "asc" },
-    include: { Image: true },
-  });
-}
-
-export async function getCatalogItem(id: number) {
-  return prisma.quoteCatalogItem.findUnique({ where: { id } });
-}
-
-export async function createCatalogItem(data: {
-  slug: string;
-  name: string;
-  descriptionLines?: string[];
-  defaultUnitPriceCents?: number | null;
-}) {
-  return prisma.quoteCatalogItem.create({
-    data: {
-      slug: data.slug,
-      name: data.name.trim(),
-      descriptionLines: data.descriptionLines ?? [],
-      defaultUnitPriceCents: data.defaultUnitPriceCents ?? null,
-    },
-  });
-}
-
-export async function updateCatalogItem(
-  id: number,
-  data: {
-    name: string;
-    descriptionLines?: string[];
-    defaultUnitPriceCents?: number | null;
-  },
-) {
-  return prisma.quoteCatalogItem.update({
-    where: { id },
-    data: {
-      name: data.name.trim(),
-      descriptionLines: data.descriptionLines ?? [],
-      defaultUnitPriceCents: data.defaultUnitPriceCents ?? null,
-    },
-  });
-}
-
 const quotationDetailInclude = {
   client: true,
   lines: { orderBy: { sortOrder: "asc" as const }, include: { Image: true } },
@@ -115,6 +76,7 @@ const quotationEditorSelect = {
       descriptionLines: true,
       unitPriceCents: true,
       catalogItemId: true,
+      catalogSelectionSnapshot: true,
       imageId: true,
       Image: {
         select: {
@@ -136,20 +98,58 @@ const quotationEditorSelect = {
   },
 } satisfies Prisma.QuotationSelect;
 
-const quoteCatalogEditorSelect = {
-  id: true,
-  slug: true,
-  name: true,
-  descriptionLines: true,
-  defaultUnitPriceCents: true,
-  imageId: true,
-  Image: {
-    select: {
-      location: true,
-      thumbnail: true,
-    },
-  },
-} satisfies Prisma.QuoteCatalogItemSelect;
+function toSnapshotArray(value: unknown): CatalogSelectionSnapshotEntry[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const row = entry as Record<string, unknown>;
+      return {
+        optionSlug: String(row.optionSlug ?? ""),
+        optionLabel: String(row.optionLabel ?? ""),
+        valueSlug: String(row.valueSlug ?? ""),
+        valueLabel: String(row.valueLabel ?? ""),
+      };
+    })
+    .filter((entry): entry is CatalogSelectionSnapshotEntry => entry !== null);
+}
+
+type QuotationEditorLineInput = {
+  id?: number | null;
+  name: string;
+  quantity: number;
+  descriptionLines: string[];
+  unitPriceCents: number;
+  catalogItemId?: number | null;
+  catalogResolutionToken?: string | null;
+  imageId?: number | null;
+};
+
+function resolveLineSnapshot(
+  line: QuotationEditorLineInput,
+  existingSnapshots: Map<number, CatalogSelectionSnapshotEntry[]>,
+): CatalogSelectionSnapshotEntry[] | { error: string } {
+  if (line.id != null) {
+    const existing = existingSnapshots.get(line.id);
+    if (existing === undefined) return { error: "Invalid quotation line" };
+    return existing;
+  }
+
+  const token = line.catalogResolutionToken?.trim();
+  if (token) {
+    if (line.catalogItemId == null) return { error: "Invalid catalog selection" };
+    try {
+      const payload = verifyCatalogSelectionToken(token, requireCatalogSelectionSecret());
+      if (payload.catalogItemId !== line.catalogItemId) return { error: "Invalid catalog selection" };
+      return payload.selectionSnapshot;
+    } catch {
+      return { error: "Invalid catalog selection" };
+    }
+  }
+
+  if (line.catalogItemId != null) return { error: "Invalid catalog selection" };
+  return [];
+}
 
 function normalizeEditorLine(
   quotationId: number,
@@ -159,6 +159,7 @@ function normalizeEditorLine(
     descriptionLines: string[];
     unitPriceCents: number;
     catalogItemId?: number | null;
+    catalogSelectionSnapshot: CatalogSelectionSnapshotEntry[];
     imageId?: number | null;
   },
   sortOrder: number,
@@ -171,6 +172,7 @@ function normalizeEditorLine(
     descriptionLines: line.descriptionLines,
     unitPriceCents: Math.max(0, line.unitPriceCents),
     catalogItemId: line.catalogItemId ?? null,
+    catalogSelectionSnapshot: line.catalogSelectionSnapshot,
     imageId: line.imageId ?? null,
   };
 }
@@ -207,14 +209,7 @@ export type QuotationEditorSaveInput = {
   location: string | null;
   document: string | null;
   notes: string | null;
-  lines: Array<{
-    name: string;
-    quantity: number;
-    descriptionLines: string[];
-    unitPriceCents: number;
-    catalogItemId?: number | null;
-    imageId?: number | null;
-  }>;
+  lines: Array<QuotationEditorLineInput>;
   paymentOptions: Array<{ label: string; amountCents: number; detail?: string | null }>;
 };
 
@@ -235,6 +230,21 @@ export async function saveQuotation(input: QuotationEditorSaveInput): Promise<Qu
     });
     if (!owned) return null;
 
+    const existingLines = await tx.quotationLine.findMany({
+      where: { quotationId: input.quotationId },
+      select: { id: true, catalogSelectionSnapshot: true },
+    });
+    const existingSnapshots = new Map(
+      existingLines.map((line) => [line.id, toSnapshotArray(line.catalogSelectionSnapshot)]),
+    );
+
+    const normalizedLines = [];
+    for (const line of input.lines) {
+      const snapshot = resolveLineSnapshot(line, existingSnapshots);
+      if ("error" in snapshot) return { error: snapshot.error } as const;
+      normalizedLines.push({ ...line, catalogSelectionSnapshot: snapshot });
+    }
+
     await tx.quoteClient.update({
       where: { id: owned.clientId },
       data: {
@@ -254,9 +264,9 @@ export async function saveQuotation(input: QuotationEditorSaveInput): Promise<Qu
     });
 
     await tx.quotationLine.deleteMany({ where: { quotationId: input.quotationId } });
-    if (input.lines.length > 0) {
+    if (normalizedLines.length > 0) {
       await tx.quotationLine.createMany({
-        data: input.lines.map((line, index) => normalizeEditorLine(input.quotationId, line, index)),
+        data: normalizedLines.map((line, index) => normalizeEditorLine(input.quotationId, line, index)),
       });
     }
 
@@ -271,6 +281,10 @@ export async function saveQuotation(input: QuotationEditorSaveInput): Promise<Qu
 
     return { quotationId: input.quotationId, revision: input.revision };
   });
+
+  if (result && "error" in result && typeof result.error === "string") {
+    return { ok: false, status: 400, error: result.error };
+  }
 
   if (!result) {
     return { ok: false, status: 404, error: "Not found" };
@@ -289,10 +303,7 @@ export async function loadQuotationEditorData(ownerUserId: string, quotationId: 
     where: { id: quotationId, ownerUserId },
     select: quotationEditorSelect,
   });
-  const catalogPromise = prisma.quoteCatalogItem.findMany({
-    orderBy: { name: "asc" },
-    select: quoteCatalogEditorSelect,
-  });
+  const catalogPromise = listActiveCatalogPickerSummaries();
 
   const [quotation, catalog] = await Promise.all([quotationPromise, catalogPromise]);
   return { quotation, catalog };
@@ -493,14 +504,6 @@ export async function setQuotationLineImageForQuotation(
   if (!line) return null;
   return prisma.quotationLine.update({
     where: { id: lineId },
-    data: { imageId },
-    include: { Image: true },
-  });
-}
-
-export async function setCatalogItemImage(catalogItemId: number, imageId: number | null) {
-  return prisma.quoteCatalogItem.update({
-    where: { id: catalogItemId },
     data: { imageId },
     include: { Image: true },
   });

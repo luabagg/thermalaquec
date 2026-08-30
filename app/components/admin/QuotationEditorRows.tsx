@@ -16,6 +16,7 @@ export type QuotationEditorLine = {
   priceInput: string;
   unitPriceCents: number;
   catalogItemId: number | null;
+  catalogResolutionToken: string | null;
   imageId: number | null;
   imageUrl: string | null;
   imageThumbnail: string | null;
@@ -69,7 +70,9 @@ export const QuotationEditorLineRow = memo(function QuotationEditorLineRow({
           <span className="sr-only">Remover</span>
         </Button>
       </div>
+      <input type="hidden" name={`line.${index}.id`} value={line.id ?? ""} />
       <input type="hidden" name={`line.${index}.catalogItemId`} value={line.catalogItemId ?? ""} />
+      <input type="hidden" name={`line.${index}.catalogResolutionToken`} value={line.catalogResolutionToken ?? ""} />
       <input type="hidden" name={`line.${index}.imageId`} value={line.imageId ?? ""} />
       <Input
         name={`line.${index}.name`}

@@ -2,6 +2,10 @@ import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunctio
 import { json, redirect } from "@remix-run/node";
 import { Form, Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect, useMemo, useRef, useState, type FormEvent, useCallback } from "react";
+import {
+  CatalogVariationPicker,
+  type CatalogPickerAddedDraft,
+} from "~/components/admin/CatalogVariationPicker";
 import { QuotationEditorLineRow, QuotationEditorPaymentRow } from "~/components/admin/QuotationEditorRows";
 import { QuotationPreview } from "~/components/admin/QuotationPreview";
 import { Button } from "~/components/ui/button";
@@ -47,6 +51,7 @@ type DraftLine = {
   priceInput: string;
   unitPriceCents: number;
   catalogItemId: number | null;
+  catalogResolutionToken: string | null;
   imageId: number | null;
   imageUrl: string | null;
   imageThumbnail: string | null;
@@ -85,6 +90,7 @@ function lineToDraft(line: {
     priceInput: centsToInput(line.unitPriceCents),
     unitPriceCents: line.unitPriceCents,
     catalogItemId: line.catalogItemId,
+    catalogResolutionToken: null,
     imageId: line.imageId,
     imageUrl: line.Image?.location ?? null,
     imageThumbnail: line.Image?.thumbnail ?? null,
@@ -121,16 +127,22 @@ function parseLinesFromForm(form: FormData) {
       .filter(Boolean);
     const priceRaw = String(form.get(`line.${i}.price`) || "0");
     const unitPriceCents = parseBRLToCents(priceRaw) ?? 0;
+    const idRaw = form.get(`line.${i}.id`);
+    const lineId = idRaw ? Number(idRaw) : null;
     const catalogRaw = form.get(`line.${i}.catalogItemId`);
     const catalogItemId = catalogRaw ? Number(catalogRaw) : null;
+    const tokenRaw = form.get(`line.${i}.catalogResolutionToken`);
+    const catalogResolutionToken = tokenRaw ? String(tokenRaw) : null;
     const imageRaw = form.get(`line.${i}.imageId`);
     const imageId = imageRaw ? Number(imageRaw) : null;
     lines.push({
+      ...(Number.isFinite(lineId as number) ? { id: lineId as number } : {}),
       name,
       quantity,
       descriptionLines,
       unitPriceCents,
       catalogItemId: Number.isFinite(catalogItemId as number) ? catalogItemId : null,
+      catalogResolutionToken,
       imageId: Number.isFinite(imageId as number) ? imageId : null,
     });
   }
@@ -219,7 +231,6 @@ export default function QuotationBuilder() {
   const [payments, setPayments] = useState<DraftPayment[]>(() =>
     quotation.paymentOptions.map(paymentToDraft),
   );
-  const [catalogSelection, setCatalogSelection] = useState("");
   const [lineUploadErrors, setLineUploadErrors] = useState<Record<string, string>>({});
   const [lineUploadingKey, setLineUploadingKey] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -375,6 +386,7 @@ export default function QuotationBuilder() {
         priceInput: "0,00",
         unitPriceCents: 0,
         catalogItemId: null,
+        catalogResolutionToken: null,
         imageId: null,
         imageUrl: null,
         imageThumbnail: null,
@@ -382,32 +394,26 @@ export default function QuotationBuilder() {
     ]);
   }, []);
 
-  const addFromCatalog = useCallback(() => {
-    if (!catalogSelection) return;
-    const item = catalog.find((c) => String(c.id) === catalogSelection);
-    if (!item) return;
+  const addCatalogDraft = useCallback((draft: CatalogPickerAddedDraft) => {
     const clientKey = newClientKey();
-    const desc = Array.isArray(item.descriptionLines)
-      ? (item.descriptionLines as string[]).join("\n")
-      : "";
-    setLines((prev) => [
-      ...prev,
+    setLines((current) => [
+      ...current,
       {
         id: null,
         clientKey,
-        name: item.name,
+        name: draft.name,
         quantity: 1,
-        description: desc,
-        priceInput: centsToInput(item.defaultUnitPriceCents ?? 0),
-        unitPriceCents: item.defaultUnitPriceCents ?? 0,
-        catalogItemId: item.id,
-        imageId: item.imageId ?? null,
-        imageUrl: item.Image?.location ?? null,
-        imageThumbnail: item.Image?.thumbnail ?? null,
+        description: draft.descriptionLines.join("\n"),
+        priceInput: centsToInput(draft.unitPriceCents ?? 0),
+        unitPriceCents: draft.unitPriceCents ?? 0,
+        catalogItemId: draft.catalogItemId,
+        catalogResolutionToken: draft.catalogResolutionToken,
+        imageId: draft.imageId,
+        imageUrl: draft.imageUrl,
+        imageThumbnail: draft.imageThumbnail,
       },
     ]);
-    setCatalogSelection("");
-  }, [catalog, catalogSelection]);
+  }, []);
 
   const removeLine = useCallback((clientKey: string) => {
     setLines((prev) => prev.filter((line) => line.clientKey !== clientKey));
@@ -628,31 +634,7 @@ export default function QuotationBuilder() {
                 + Linha avulsa
               </Button>
             </div>
-            <div className="flex gap-2">
-              <select
-                value={catalogSelection}
-                onChange={(e) => setCatalogSelection(e.target.value)}
-                className="h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm"
-              >
-                <option value="" disabled>
-                  Do catálogo…
-                </option>
-                {catalog.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <Button
-                type="button"
-                size="sm"
-                className="shrink-0"
-                disabled={catalog.length === 0 || !catalogSelection}
-                onClick={addFromCatalog}
-              >
-                Adicionar
-              </Button>
-            </div>
+            <CatalogVariationPicker summaries={catalog} onAdd={addCatalogDraft} />
             {lines.map((line, i) => (
               <QuotationEditorLineRow
                 key={line.clientKey}

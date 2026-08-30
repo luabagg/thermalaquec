@@ -1,40 +1,57 @@
-# Quotation catalog (Phase 1)
+# Local quotation extraction data
 
 Extracted from Canva folder **budgets** (`FAFOUXOmKmU`).
 
-**Not committed.** Catalog JSON + `raw/` stay on disk only (see root `.gitignore`). Seed with `yarn prismaSeed` after regenerating locally.
+**Do not commit generated files.** Catalog JSON, client data, and `raw/` remain local through the root `.gitignore`. Marketing products in `app/data/products.ts` are separate and are not generated from these files.
 
-## Files (local)
+## Local files
 
 | Path | Purpose |
-|------|---------|
-| `raw/designs.json` | All design ids/titles in the folder |
-| `raw/contents/{id}.txt` | Raw `get-design-content` dumps (sensitive) |
-| `catalog.products.json` | Deduped quotation products |
-| `catalog.clients.json` | Deduped clients (PII — do not push) |
-| `catalog.meta.json` | Extraction metadata |
+| --- | --- |
+| `raw/designs.json` | Canva design IDs/titles in the folder. |
+| `raw/contents/{id}.txt` | Raw `get-design-content` dumps; sensitive. |
+| `catalog.products.json` | Parsed flat quotation-catalog products. |
+| `catalog.clients.json` | Parsed clients; contains PII. |
+| `catalog.meta.json` | Extraction metadata. |
 
-## Coverage
+Full quotation text dumps live in `raw/contents/`. Skip `Contrato *` designs. A full historical dump was approximately 253 content files, but treat that as an observation rather than a correctness guarantee.
 
-Full quote text dumps live in `raw/contents/`. Skip `Contrato *` designs (not orçamentos).
+## Parse and seed a fresh environment
+
+Review the target database and deploy its migration chain deliberately before seeding. Never use local customer extracts against an unintended environment.
 
 ```bash
-node scripts/canva-catalog/fetch-contents.mjs   # what's still missing
-yarn catalogParse                              # rebuild products + clients
-yarn prismaSeed                                # load into Supabase
+node scripts/canva-catalog/fetch-contents.mjs
+yarn catalogParse
+yarn prismaSeed
 ```
 
-After a full dump you should see ~253 content files (254 inventory − contrato(s)).
+The seed upserts `QuoteCatalogItem` by exact stable slug and imports clients. It has no legacy Prisma-product, alias, or fuzzy fallback. Review product names and prices before seeding; images are assigned later through Catalog administration.
+
+## Normalize flat quotation products
+
+Seeding does not consolidate existing duplicate flat rows. Normalization is a separate explicit workflow:
+
+```bash
+yarn catalogNormalizeExport
+# An agent reads data/catalog-normalization/source.json and writes proposal.json.
+yarn catalogNormalizeValidate
+yarn catalogNormalizeApply --run <validated-run-id>
+```
+
+`validation.json` is not proof of apply. Duplication is removed from active selection only after the validated run reports `APPLIED`. See [`docs/catalog-normalization.md`](../../docs/catalog-normalization.md) for backup, proposal, correction, revert, and recovery procedures.
 
 ## Review checklist
 
-- [ ] Spot-check product names vs Grupos de produtos
-- [ ] Merge obvious aliases (Warma 100w / 110w, etc.) if desired
-- [ ] Confirm or null unit prices
-- [ ] Fill `imagePath` later via admin upload (Phase 2)
+- [ ] Confirm the command target is an intended fresh/disposable environment.
+- [ ] Spot-check parsed product names against source quotations.
+- [ ] Confirm or clear unit prices.
+- [ ] Keep client PII and source dumps uncommitted.
+- [ ] Assign images through `/admin/catalog` after seed.
+- [ ] Back up and review every normalization proposal before apply.
 
 ## Notes
 
-- Canva content API returns flat text only — no images, fragile field order.
-- Payment totals differ from list totals in Canva; not stored in catalog.
-- Marketing site products (`app/data/products.ts`) stay separate.
+- Canva content API output is flat text only; field order is fragile and images are not included.
+- Payment totals can differ from product-list totals and are not catalog fields.
+- Static public marketing routes continue to use `app/data/products.ts`.

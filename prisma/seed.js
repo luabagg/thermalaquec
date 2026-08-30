@@ -16,6 +16,23 @@ function readJson(file) {
   return JSON.parse(fs.readFileSync(full, "utf8"));
 }
 
+async function upsertCatalogProduct(product) {
+  await prisma.quoteCatalogItem.upsert({
+    where: { slug: product.id },
+    update: {
+      name: product.name,
+      descriptionLines: product.descriptionLines ?? [],
+      defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
+    },
+    create: {
+      slug: product.id,
+      name: product.name,
+      descriptionLines: product.descriptionLines ?? [],
+      defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
+    },
+  });
+}
+
 async function main() {
   const products = readJson("catalog.products.json") || [];
   const clients = readJson("catalog.clients.json") || [];
@@ -46,21 +63,7 @@ async function main() {
   }
 
   for (const product of products) {
-    const slug = product.id;
-    await prisma.quoteCatalogItem.upsert({
-      where: { slug },
-      create: {
-        slug,
-        name: product.name,
-        descriptionLines: product.descriptionLines ?? [],
-        defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
-      },
-      update: {
-        name: product.name,
-        descriptionLines: product.descriptionLines ?? [],
-        defaultUnitPriceCents: product.defaultUnitPriceCents ?? null,
-      },
-    });
+    await upsertCatalogProduct(product);
   }
 
   console.log("Seed done.");

@@ -10,6 +10,7 @@ const { prismaMock, txMock } = vi.hoisted(() => {
       update: vi.fn(),
     },
     quotationLine: {
+      findMany: vi.fn(),
       deleteMany: vi.fn(),
       createMany: vi.fn(),
     },
@@ -56,6 +57,14 @@ test("saveQuotation atomically updates the owned quotation and returns a minimal
   txMock.quotation.findFirst.mockResolvedValueOnce({ id: 42, clientId: 7 });
   txMock.quoteClient.update.mockResolvedValueOnce({ id: 7 });
   txMock.quotation.update.mockResolvedValueOnce({ id: 42 });
+  txMock.quotationLine.findMany.mockResolvedValueOnce([
+    {
+      id: 90,
+      catalogSelectionSnapshot: [
+        { optionSlug: "capacity", optionLabel: "Capacidade", valueSlug: "400-l", valueLabel: "400 L" },
+      ],
+    },
+  ]);
   txMock.quotationLine.deleteMany.mockResolvedValueOnce({ count: 2 });
   txMock.quotationLine.createMany.mockResolvedValueOnce({ count: 2 });
   txMock.quotationPaymentOption.deleteMany.mockResolvedValueOnce({ count: 1 });
@@ -75,6 +84,7 @@ test("saveQuotation atomically updates the owned quotation and returns a minimal
     notes: "  line one  ",
     lines: [
       {
+        id: 90,
         name: "  Boiler  ",
         quantity: 0,
         descriptionLines: ["Install"],
@@ -136,6 +146,9 @@ test("saveQuotation atomically updates the owned quotation and returns a minimal
         descriptionLines: ["Install"],
         unitPriceCents: 0,
         catalogItemId: 99,
+        catalogSelectionSnapshot: [
+          { optionSlug: "capacity", optionLabel: "Capacidade", valueSlug: "400-l", valueLabel: "400 L" },
+        ],
         imageId: 11,
       },
       {
@@ -146,6 +159,7 @@ test("saveQuotation atomically updates the owned quotation and returns a minimal
         descriptionLines: [],
         unitPriceCents: 4500,
         catalogItemId: null,
+        catalogSelectionSnapshot: [],
         imageId: null,
       },
     ],
@@ -240,9 +254,10 @@ test("loadQuotationEditorData fetches quotation and catalog in parallel with nar
           descriptionLines: true,
           unitPriceCents: true,
           catalogItemId: true,
+          catalogSelectionSnapshot: true,
           imageId: true,
           Image: {
-            select: { location: true },
+            select: { location: true, thumbnail: true },
           },
         },
       },
@@ -260,20 +275,161 @@ test("loadQuotationEditorData fetches quotation and catalog in parallel with nar
   });
   expect(quotationQuery).not.toHaveProperty("include");
   expect(catalogQuery).toMatchObject({
+    where: { archivedAt: null },
     orderBy: { name: "asc" },
     select: {
       id: true,
       slug: true,
       name: true,
-      descriptionLines: true,
       defaultUnitPriceCents: true,
       imageId: true,
       Image: {
-        select: { location: true },
+        select: { location: true, thumbnail: true },
       },
+      _count: { select: { options: true, variants: true } },
     },
   });
   expect(catalogQuery).not.toHaveProperty("include");
 
   await expect(promise).resolves.toEqual({ quotation, catalog });
+});
+
+vi.mock("~/utils/catalog-selection-token.server", () => ({
+  requireCatalogSelectionSecret: vi.fn(() => "test-secret"),
+  verifyCatalogSelectionToken: vi.fn(),
+}));
+
+test("saveQuotation persists trusted token snapshot for new catalog lines", async () => {
+  const { verifyCatalogSelectionToken } = await import("~/utils/catalog-selection-token.server");
+  const { saveQuotation } = await import("./quotation.server");
+
+  vi.mocked(verifyCatalogSelectionToken).mockReturnValueOnce({
+    version: 1,
+    catalogItemId: 10,
+    issuedAt: "2026-08-29T00:00:00.000Z",
+    selectionSnapshot: [
+      { optionSlug: "capacity", optionLabel: "Capacidade", valueSlug: "400-l", valueLabel: "400 L" },
+    ],
+  });
+
+  txMock.quotation.findFirst.mockResolvedValueOnce({ id: 42, clientId: 7 });
+  txMock.quoteClient.update.mockResolvedValueOnce({ id: 7 });
+  txMock.quotation.update.mockResolvedValueOnce({ id: 42 });
+  txMock.quotationLine.findMany.mockResolvedValueOnce([]);
+  txMock.quotationLine.deleteMany.mockResolvedValueOnce({ count: 0 });
+  txMock.quotationLine.createMany.mockResolvedValueOnce({ count: 1 });
+  txMock.quotationPaymentOption.deleteMany.mockResolvedValueOnce({ count: 0 });
+
+  const result = await saveQuotation({
+    quotationId: 42,
+    ownerUserId: "user-1",
+    revision: 19,
+    intent: "save",
+    title: "Quote",
+    status: "draft",
+    location: null,
+    document: null,
+    notes: null,
+    lines: [
+      {
+        name: "Boiler",
+        quantity: 1,
+        descriptionLines: ["Install"],
+        unitPriceCents: 1000,
+        catalogItemId: 10,
+        catalogResolutionToken: "signed-token",
+        imageId: null,
+      },
+    ],
+    paymentOptions: [],
+  });
+
+  expect(result).toEqual({ ok: true, quotationId: 42, revision: 19 });
+  expect(txMock.quotationLine.createMany).toHaveBeenCalledWith({
+    data: [
+      expect.objectContaining({
+        name: "Boiler",
+        catalogItemId: 10,
+        catalogSelectionSnapshot: [
+          { optionSlug: "capacity", optionLabel: "Capacidade", valueSlug: "400-l", valueLabel: "400 L" },
+        ],
+      }),
+    ],
+  });
+});
+
+test("saveQuotation rejects new catalog lines without a valid token", async () => {
+  const { saveQuotation } = await import("./quotation.server");
+
+  txMock.quotation.findFirst.mockResolvedValueOnce({ id: 42, clientId: 7 });
+  txMock.quoteClient.update.mockResolvedValueOnce({ id: 7 });
+  txMock.quotation.update.mockResolvedValueOnce({ id: 42 });
+  txMock.quotationLine.findMany.mockResolvedValueOnce([]);
+
+  const result = await saveQuotation({
+    quotationId: 42,
+    ownerUserId: "user-1",
+    revision: 20,
+    intent: "save",
+    title: "Quote",
+    status: "draft",
+    location: null,
+    document: null,
+    notes: null,
+    lines: [
+      {
+        name: "Boiler",
+        quantity: 1,
+        descriptionLines: [],
+        unitPriceCents: 1000,
+        catalogItemId: 10,
+        imageId: null,
+      },
+    ],
+    paymentOptions: [],
+  });
+
+  expect(result).toEqual({ ok: false, status: 400, error: "Invalid catalog selection" });
+  expect(txMock.quoteClient.update).not.toHaveBeenCalled();
+  expect(txMock.quotation.update).not.toHaveBeenCalled();
+  expect(txMock.quotationLine.deleteMany).not.toHaveBeenCalled();
+});
+
+test.each([
+  ["tampered", () => { throw new Error("invalid_catalog_selection_token"); }],
+  ["expired", () => { throw new Error("expired_catalog_selection_token"); }],
+  ["catalog ID mismatch", () => ({ version: 1 as const, catalogItemId: 11, issuedAt: "2026-08-29T00:00:00.000Z", selectionSnapshot: [] })],
+])("saveQuotation rejects a %s token before every mutation", async (_case, verification) => {
+  const { verifyCatalogSelectionToken } = await import("~/utils/catalog-selection-token.server");
+  const { saveQuotation } = await import("./quotation.server");
+  vi.mocked(verifyCatalogSelectionToken).mockImplementationOnce(verification as never);
+  txMock.quotation.findFirst.mockResolvedValueOnce({ id: 42, clientId: 7 });
+  txMock.quotationLine.findMany.mockResolvedValueOnce([]);
+
+  const result = await saveQuotation({
+    quotationId: 42,
+    ownerUserId: "user-1",
+    revision: 21,
+    intent: "save",
+    title: "Untouched on failure",
+    status: "draft",
+    location: "Untouched",
+    document: null,
+    notes: null,
+    lines: [{
+      name: "Boiler",
+      quantity: 1,
+      descriptionLines: [],
+      unitPriceCents: 1000,
+      catalogItemId: 10,
+      catalogResolutionToken: "untrusted-token",
+    }],
+    paymentOptions: [],
+  });
+
+  expect(result).toEqual({ ok: false, status: 400, error: "Invalid catalog selection" });
+  expect(txMock.quoteClient.update).not.toHaveBeenCalled();
+  expect(txMock.quotation.update).not.toHaveBeenCalled();
+  expect(txMock.quotationLine.deleteMany).not.toHaveBeenCalled();
+  expect(txMock.quotationPaymentOption.deleteMany).not.toHaveBeenCalled();
 });

@@ -8,90 +8,13 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Category {
-  id          Int        @id @default(autoincrement())
-  created_at  DateTime   @default(now())
-  name        String     @unique @db.VarChar(100)
-  description String?
-  parentId    Int?
-  parent      Category?  @relation("ParentCategory", fields: [parentId], references: [id])
-  children    Category[] @relation("ParentCategory")
-  product     Product[]
-
-  @@index([name])
-}
-
-model Brand {
-  id         Int       @id @default(autoincrement())
-  created_at DateTime  @default(now())
-  name       String    @unique @db.VarChar(100)
-  Product    Product[]
-
-  @@index([name])
-}
-
-model Product {
-  id               Int               @id @default(autoincrement())
-  created_at       DateTime          @default(now())
-  name             String            @db.VarChar(100)
-  model            String?           @db.VarChar(100)
-  shortDescription String?           @db.VarChar(250)
-  description      String?
-  visible          Boolean           @default(true)
-  viewCount        Int               @default(0)
-  brandId          Int?
-  categoryId       Int?
-  imageId          Int?
-  Brand            Brand?            @relation(fields: [brandId], references: [id])
-  Category         Category?         @relation(fields: [categoryId], references: [id])
-  Image            Image?            @relation(fields: [imageId], references: [id])
-  ProductSpec      ProductSpec[]
-  ShowcaseProduct  ShowcaseProduct[]
-
-  @@index([name, visible])
-  @@index([viewCount])
-}
-
-model ProductSpec {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  name       String   @db.VarChar(100)
-  value      String   @db.VarChar(100)
-  product_id Int
-  product    Product  @relation(fields: [product_id], references: [id])
-}
-
 model Image {
-  id               Int                @id @default(autoincrement())
-  location         String             @unique @db.VarChar(250)
-  thumbnail        String?            @db.VarChar(250)
-  Product          Product[]
-  Showcase         Showcase[]
-  QuoteCatalogItem QuoteCatalogItem[]
-  QuotationLine    QuotationLine[]
-}
-
-model ShowcaseProduct {
-  id         Int      @id @default(autoincrement())
-  showcaseId Int
-  productId  Int
-  product    Product  @relation(fields: [productId], references: [id])
-  showcase   Showcase @relation(fields: [showcaseId], references: [id])
-}
-
-model Showcase {
-  id              Int               @id @default(autoincrement())
-  created_at      DateTime          @default(now())
-  name            String            @unique @db.VarChar(100)
-  description     String?
-  visible         Boolean           @default(true)
-  viewCount       Int               @default(0)
-  imageId         Int?
-  Image           Image?            @relation(fields: [imageId], references: [id])
-  ShowcaseProduct ShowcaseProduct[]
-
-  @@index([name, visible])
-  @@index([viewCount])
+  id                  Int                   @id @default(autoincrement())
+  location            String                @unique @db.VarChar(250)
+  thumbnail           String?               @db.VarChar(250)
+  QuoteCatalogItem    QuoteCatalogItem[]
+  QuoteCatalogVariant QuoteCatalogVariant[]
+  QuotationLine       QuotationLine[]
 }
 
 // --- Quotation domain (separate from marketing Product) ---
@@ -101,31 +24,102 @@ enum QuotationStatus {
   final
 }
 
+enum CatalogOptionPlacement {
+  TITLE
+  DESCRIPTION
+}
+
 model QuoteClient {
-  id         Int         @id @default(autoincrement())
-  createdAt  DateTime    @default(now()) @map("created_at")
-  name       String      @db.VarChar(150)
-  location   String?     @db.VarChar(150)
-  document   String?     @db.VarChar(20)
-  Quotation  Quotation[]
+  id        Int         @id @default(autoincrement())
+  createdAt DateTime    @default(now()) @map("created_at")
+  name      String      @db.VarChar(150)
+  location  String?     @db.VarChar(150)
+  document  String?     @db.VarChar(20)
+  Quotation Quotation[]
 
   @@index([name])
   @@map("quote_clients")
 }
 
 model QuoteCatalogItem {
-  id                    Int              @id @default(autoincrement())
-  createdAt             DateTime         @default(now()) @map("created_at")
-  slug                  String           @unique @db.VarChar(100)
-  name                  String           @db.VarChar(200)
-  descriptionLines      Json             @default("[]") @map("description_lines")
-  defaultUnitPriceCents Int?             @map("default_unit_price_cents")
-  imageId               Int?             @map("image_id")
-  Image                 Image?           @relation(fields: [imageId], references: [id])
+  id                    Int                             @id @default(autoincrement())
+  createdAt             DateTime                        @default(now()) @map("created_at")
+  updatedAt             DateTime                        @updatedAt @map("updated_at")
+  archivedAt            DateTime?                       @map("archived_at")
+  slug                  String                          @unique @db.VarChar(100)
+  name                  String                          @db.VarChar(200)
+  nameTemplate          String?                         @map("name_template") @db.VarChar(300)
+  descriptionLines      Json                            @default("[]") @map("description_lines")
+  defaultUnitPriceCents Int?                            @map("default_unit_price_cents")
+  imageId               Int?                            @map("image_id")
+  Image                 Image?                          @relation(fields: [imageId], references: [id])
   QuotationLine         QuotationLine[]
+  options               QuoteCatalogOption[]
+  variants              QuoteCatalogVariant[]
 
-  @@index([name])
+  @@index([archivedAt, name])
   @@map("quote_catalog_items")
+}
+
+model QuoteCatalogOption {
+  id            Int                       @id @default(autoincrement())
+  catalogItemId Int                       @map("catalog_item_id")
+  name          String                    @db.VarChar(100)
+  slug          String                    @db.VarChar(80)
+  placement     CatalogOptionPlacement
+  sortOrder     Int                       @default(0) @map("sort_order")
+  catalogItem   QuoteCatalogItem          @relation(fields: [catalogItemId], references: [id], onDelete: Cascade)
+  values        QuoteCatalogOptionValue[]
+
+  @@unique([catalogItemId, slug])
+  @@index([catalogItemId, sortOrder])
+  @@map("quote_catalog_options")
+}
+
+model QuoteCatalogOptionValue {
+  id               Int                        @id @default(autoincrement())
+  optionId         Int                        @map("option_id")
+  label            String                     @db.VarChar(100)
+  slug             String                     @db.VarChar(80)
+  titleFragment    String?                    @map("title_fragment") @db.VarChar(150)
+  descriptionLines Json                       @default("[]") @map("description_lines")
+  sortOrder        Int                        @default(0) @map("sort_order")
+  option           QuoteCatalogOption         @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  variantValues    QuoteCatalogVariantValue[]
+
+  @@unique([optionId, slug])
+  @@index([optionId, sortOrder])
+  @@map("quote_catalog_option_values")
+}
+
+model QuoteCatalogVariant {
+  id                       Int                        @id @default(autoincrement())
+  catalogItemId            Int                        @map("catalog_item_id")
+  key                      String                     @db.VarChar(300)
+  sku                      String?                    @unique @db.VarChar(100)
+  active                   Boolean                    @default(true)
+  nameOverride             String?                    @map("name_override") @db.VarChar(300)
+  descriptionLinesOverride Json?                      @map("description_lines_override")
+  unitPriceCents           Int?                       @map("unit_price_cents")
+  imageId                  Int?                       @map("image_id")
+  catalogItem              QuoteCatalogItem           @relation(fields: [catalogItemId], references: [id], onDelete: Cascade)
+  Image                    Image?                     @relation(fields: [imageId], references: [id])
+  values                   QuoteCatalogVariantValue[]
+
+  @@unique([catalogItemId, key])
+  @@index([catalogItemId, active])
+  @@map("quote_catalog_variants")
+}
+
+model QuoteCatalogVariantValue {
+  variantId     Int                     @map("variant_id")
+  optionValueId Int                     @map("option_value_id")
+  variant       QuoteCatalogVariant     @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  optionValue   QuoteCatalogOptionValue @relation(fields: [optionValueId], references: [id], onDelete: Restrict)
+
+  @@id([variantId, optionValueId])
+  @@index([optionValueId])
+  @@map("quote_catalog_variant_values")
 }
 
 model Quotation {
@@ -149,18 +143,19 @@ model Quotation {
 }
 
 model QuotationLine {
-  id               Int               @id @default(autoincrement())
-  sortOrder        Int               @default(0) @map("sort_order")
-  name             String            @db.VarChar(200)
-  quantity         Int               @default(1)
-  descriptionLines Json              @default("[]") @map("description_lines")
-  unitPriceCents   Int               @map("unit_price_cents")
-  quotationId      Int               @map("quotation_id")
-  catalogItemId    Int?              @map("catalog_item_id")
-  imageId          Int?              @map("image_id")
-  quotation        Quotation         @relation(fields: [quotationId], references: [id], onDelete: Cascade)
-  catalogItem      QuoteCatalogItem? @relation(fields: [catalogItemId], references: [id])
-  Image            Image?            @relation(fields: [imageId], references: [id])
+  id                       Int               @id @default(autoincrement())
+  sortOrder                Int               @default(0) @map("sort_order")
+  name                     String            @db.VarChar(200)
+  quantity                 Int               @default(1)
+  descriptionLines         Json              @default("[]") @map("description_lines")
+  catalogSelectionSnapshot Json              @default("[]") @map("catalog_selection_snapshot")
+  unitPriceCents           Int               @map("unit_price_cents")
+  quotationId              Int               @map("quotation_id")
+  catalogItemId            Int?              @map("catalog_item_id")
+  imageId                  Int?              @map("image_id")
+  quotation                Quotation         @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  catalogItem              QuoteCatalogItem? @relation(fields: [catalogItemId], references: [id])
+  Image                    Image?            @relation(fields: [imageId], references: [id])
 
   @@index([quotationId])
   @@map("quotation_lines")

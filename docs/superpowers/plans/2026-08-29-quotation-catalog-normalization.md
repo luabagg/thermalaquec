@@ -1545,7 +1545,9 @@ git commit -m "chore(catalog): remove guarded legacy products"
 - Consumes: all commands and user flows from Tasks 1–10.
 - Produces: operational procedure and recorded verification evidence.
 
-- [ ] **Step 1: Write the operator runbook with exact commands**
+Binding override: this is a fresh undeployed app. Task 10's legacy preflight, acknowledgement, audit, and compatibility requirements below are superseded by direct removal. Database rehearsal still requires an explicitly disposable `TEST_DATABASE_URL`.
+
+- [x] **Step 1: Write the operator runbook with exact commands**
 
 Document this safe sequence:
 
@@ -1603,7 +1605,7 @@ Record observations in the implementation handoff, not in committed client data.
 6. Change the Catalog family.
 7. Reload and print again; confirm saved line fields and snapshot did not change.
 
-- [ ] **Step 5: Run the full verification suite**
+- [x] **Step 5: Run the full verification suite**
 
 Run:
 
@@ -1628,7 +1630,7 @@ Expected:
 - non-empty legacy migration fails with the preflight instruction;
 - after acknowledged preflight clears rows and writes an audit artifact, the legacy migration succeeds.
 
-- [ ] **Step 7: Commit documentation**
+- [x] **Step 7: Commit documentation**
 
 ```bash
 git add docs/catalog-normalization.md data/quotations/README.md docs/superpowers/plans/2026-08-29-quotation-catalog-normalization.md
@@ -1637,15 +1639,17 @@ git commit -m "docs(catalog): add normalization runbook"
 
 ## Final Acceptance Checklist
 
-- [ ] Every original active flat catalog row maps exactly once in the applied run ledger.
-- [ ] Agent proposals cannot apply against a stale source digest.
-- [ ] Price and image differences have machine-verifiable dispositions.
-- [ ] Catalog families, options, values, variants, aliases, and provenance are editable.
-- [ ] Archived families disappear from new quote selection without changing saved quotes.
-- [ ] Configurable details are absent from the initial quotation loader payload.
-- [ ] The server, not the browser, creates trusted selection snapshots.
-- [ ] Existing quote lines remain editable and never re-resolve after Catalog changes.
-- [ ] Apply and safe revert are idempotent; ambiguous revert is blocked.
-- [ ] Legacy tables cannot be dropped while non-empty without explicit acknowledged clearing.
-- [ ] Static marketing products and public product routes remain unchanged.
-- [ ] Unit, route, model, migration, typecheck, lint, and build verification pass.
+Binding fresh-app override: the legacy preflight/acknowledgement requirement is superseded. The direct legacy-table removal migration is implemented but has not been executed in this workflow. Code-level checks below are marked only where automated evidence exists; remote apply and disposable-database/manual checks remain open.
+
+- [ ] Every original active flat catalog row maps exactly once in the applied run ledger. *(Requires a deliberate validated apply against the target database.)*
+- [x] Agent proposals cannot apply against a stale source digest. *(Contract and model tests.)*
+- [x] Price and image differences have machine-verifiable dispositions. *(Contract validation tests.)*
+- [x] Catalog families, options, values, and variants are editable; aliases and immutable normalization provenance are displayed for review. *(Model and route tests.)*
+- [x] Archived families disappear from new quote selection without changing saved quotes. *(Model/picker/snapshot tests.)*
+- [x] Configurable details are absent from the initial quotation loader payload. *(Compact-query tests.)*
+- [x] The server, not the browser, creates trusted selection snapshots. *(Resolve/token/quotation tests.)*
+- [x] Existing quote lines remain editable and never re-resolve after Catalog changes. *(Trusted snapshot tests.)*
+- [x] Apply and safe revert are idempotent; ambiguous revert is blocked. *(Normalization model tests; database rehearsal remains open.)*
+- [ ] Legacy tables cannot be dropped while non-empty without explicit acknowledged clearing. *(Superseded by the binding fresh-app direct-removal ruling.)*
+- [x] Static marketing products and public product routes remain unchanged. *(Static-route guard tests.)*
+- [ ] Unit, route, model, migration, typecheck, lint, and build verification pass. *(Code verification may be checked after Task 11 commands; disposable migration rehearsal remains open.)*
