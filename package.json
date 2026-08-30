@@ -17,11 +17,9 @@
     "prismaMigrate": "npx prisma migrate dev",
     "prismaSeed": "npx prisma db seed",
     "catalogParse": "node scripts/canva-catalog/parse-catalog.mjs && node scripts/canva-catalog/review-catalog.mjs",
-    "catalogNormalizeExport": "tsx scripts/catalog-normalization/export.ts",
-    "catalogNormalizeValidate": "tsx scripts/catalog-normalization/validate.ts",
-    "catalogNormalizeApply": "tsx scripts/catalog-normalization/apply.ts",
-    "catalogNormalizeRevert": "tsx scripts/catalog-normalization/revert.ts",
-    "envPull": "vercel env pull .env"
+    "envPull": "vercel env pull .env",
+    "catalogBuildFamilies": "node scripts/catalog/build-families.mjs",
+    "catalogApply": "tsx scripts/catalog/apply.ts"
   },
   "dependencies": {
     "@prisma/client": "6.3.0",

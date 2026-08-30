@@ -13,3 +13,7 @@ data/quotations/**
 # Local agent catalog normalization artifacts
 /data/catalog-normalization/*
 !/data/catalog-normalization/.gitkeep
+
+# Derived catalog build output
+data/catalog/dropped.json
+data/catalog/review-payload.json

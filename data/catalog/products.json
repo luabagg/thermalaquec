@@ -1,0 +1,3387 @@
+[
+  {
+    "id": 1,
+    "slug": "acumulador-250l",
+    "name": "Acumulador 250L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 800000,
+    "imageId": null
+  },
+  {
+    "id": 2,
+    "slug": "acumulador-misturador-100l",
+    "name": "Acumulador misturador 100L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 3,
+    "slug": "acumulador-misturador-180l",
+    "name": "Acumulador misturador 180L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 4,
+    "slug": "aquecedor-a-gas-36wh-home-branco",
+    "name": "Aquecedor a gás 36WH Home branco",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 5,
+    "slug": "aquecedor-a-gas-instantaneo",
+    "name": "Aquecedor a gás instantâneo",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 6,
+    "slug": "aquecedor-a-gas-rinnai",
+    "name": "Aquecedor a gás Rinnai",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 7,
+    "slug": "aquecedor-a-gas-rinnai-reu-2402-fec1",
+    "name": "Aquecedor a gás Rinnai - REU-2402 FEC1",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 8,
+    "slug": "aquecedor-a-gas-rinnai-15-litros",
+    "name": "Aquecedor a gás Rinnai 15 litros",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 9,
+    "slug": "aquecedor-a-gas-rinnai-e21-feh",
+    "name": "Aquecedor a Gás Rinnai E21 FEH",
+    "descriptionLines": [
+      "Exaustão Forçada",
+      "Faixas de ajuste de temperatura (Standard 32°~50° e Top 35°~60°)Compatível com acessório Wi-fi",
+      "Trocador de calor Coil-less",
+      "Chama auto-modulante"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 10,
+    "slug": "aquecedor-a-gas-rinnai-e21-feh-21-litros",
+    "name": "Aquecedor a Gás Rinnai E21 FEH 21 Litros",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 11,
+    "slug": "aquecedor-de-agua-a-gas-komeco-ko-33d-prime-glp-wi-fi-cor-branco",
+    "name": "Aquecedor de água a gás Komeco Ko 33d Prime - Glp (wi-fi) Cor Branco",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 12,
+    "slug": "aquecedor-digital-reu33di-rinnaai",
+    "name": "Aquecedor digital REU33Di Rinnaai",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 13,
+    "slug": "aquecedor-eletrico-convector-1000w",
+    "name": "Aquecedor Elétrico Convector 1000W",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 14,
+    "slug": "aquecedor-eletrico-convector-1500w",
+    "name": "Aquecedor Elétrico Convector 1500W",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 15,
+    "slug": "aquecedor-eletrico-convector-2000w",
+    "name": "Aquecedor Elétrico Convector 2000W",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 16,
+    "slug": "aquecedor-komeco-20-litros",
+    "name": "Aquecedor Komeco 20 litros",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 17,
+    "slug": "boiler-1000l-alta-pressao-inox-316",
+    "name": "Boiler 1000L alta pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 18,
+    "slug": "boiler-1000l-altapressao-inox-304",
+    "name": "Boiler 1000L altapressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 19,
+    "slug": "boiler-1000l-baixa-pressao-aco-316",
+    "name": "Boiler 1000L baixa pressão aço 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 20,
+    "slug": "boiler-1000l-baixa-pressao-inox-304",
+    "name": "Boiler 1000L baixa pressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 21,
+    "slug": "boiler-1000l-baixa-pressao-inox-316",
+    "name": "Boiler 1000L baixa pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 22,
+    "slug": "boiler-1000l-baixa-pressao-inox-316l",
+    "name": "Boiler 1000L baixa pressão inox 316L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 23,
+    "slug": "boiler-100l-baixa-pressao-inox-316l",
+    "name": "Boiler 100L baixa pressão inox 316L",
+    "descriptionLines": [
+      "Pressão máxima 5 mca",
+      "Corpo interno revestido em aço inox 316",
+      "LRevestimento externo em alumínio e tampas em fibra de vidro"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 24,
+    "slug": "boiler-2000l-alta-pressao-inox-316",
+    "name": "Boiler 2000L alta pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 25,
+    "slug": "boiler-300l-alta-pressao-inox-316-de-nivel",
+    "name": "Boiler 300L alta pressão inox 316 de nível",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 26,
+    "slug": "boiler-300l-baixa-pressao-ppr-3",
+    "name": "Boiler 300L baixa pressão PPR-3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 27,
+    "slug": "boiler-4000l-alta-pressao-inox-316",
+    "name": "Boiler 4000L alta pressão inox 316",
+    "descriptionLines": [
+      "Pressão máxima 40 mca",
+      "Corpo interno revestido em aço inox 316",
+      "Revestimento externo em alumínio e tampas em fibra de vidro"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 28,
+    "slug": "boiler-400l-alta-pressao-inox-304",
+    "name": "Boiler 400L alta pressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 29,
+    "slug": "boiler-400l-alta-pressao-inox-316",
+    "name": "Boiler 400L alta pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 30,
+    "slug": "boiler-400l-baixa-pressao-inox-304",
+    "name": "Boiler 400L baixa pressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 31,
+    "slug": "boiler-400l-baixa-pressao-inox-316",
+    "name": "Boiler 400L baixa pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 32,
+    "slug": "boiler-400l-baixa-pressao-inox-316-de-nivel",
+    "name": "Boiler 400L baixa pressão inox 316 de nível",
+    "descriptionLines": [
+      "Pressão máxima 5 mca",
+      "Corpo interno revestido em aço inox 316",
+      "Revestimento externo em alumínio e tampas em fibra de vidro"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 33,
+    "slug": "boiler-400l-baixa-pressao-inox-444",
+    "name": "Boiler 400L baixa pressão inox 444",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 34,
+    "slug": "boiler-400l-baixa-pressao-ppr-3",
+    "name": "Boiler 400L baixa pressão PPR-3",
+    "descriptionLines": [
+      "Alta eficiência e atóxico",
+      "Resistente a corrosão",
+      "Corpo interno revestido PPR-3",
+      "Revestimento externo em alumínio"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 35,
+    "slug": "boiler-400l-baixa-pressao-ppr-3-de-nivel",
+    "name": "Boiler 400L baixa pressão PPR-3 de nível",
+    "descriptionLines": [
+      "Alta eficiência e atóxico",
+      "Resistente a corrosão",
+      "Corpo interno revestido PPR-3",
+      "Revestimento externo em alumínio"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 36,
+    "slug": "boiler-5000l",
+    "name": "Boiler 5000L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 37,
+    "slug": "boiler-5000l-alta-pressao-inox-316",
+    "name": "Boiler 5000L alta pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 38,
+    "slug": "boiler-5000l-baixa-pressao-inox-304",
+    "name": "Boiler 5000L baixa pressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 39,
+    "slug": "boiler-500l-alta-pressao-inox-316",
+    "name": "Boiler 500L alta pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 40,
+    "slug": "boiler-500l-baixa-pressao-inox-304",
+    "name": "Boiler 500L baixa pressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 41,
+    "slug": "boiler-500l-baixa-pressao-inox-444",
+    "name": "Boiler 500L baixa pressão inox 444",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 42,
+    "slug": "boiler-500l-baixa-pressao-ppr-3",
+    "name": "Boiler 500L baixa pressão PPR-3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 43,
+    "slug": "boiler-500l-baixa-pressao-ppr-3-de-nivel",
+    "name": "Boiler 500L baixa pressão PPR-3 de nível",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 44,
+    "slug": "boiler-600-baixa-pressao-ppr-3",
+    "name": "Boiler 600 baixa pressão PPR-3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 45,
+    "slug": "boiler-600l-baixa-pressao-inox-304",
+    "name": "Boiler 600L baixa pressão inox 304",
+    "descriptionLines": [
+      "Pressão máxima 5 mca",
+      "Corpo interno revestido em aço inox 304",
+      "Revestimento externo em alumínio e tampas em fibra de vidro"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 46,
+    "slug": "boiler-600l-baixa-pressao-inox-316",
+    "name": "Boiler 600L baixa pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 47,
+    "slug": "boiler-600l-baixa-pressao-inox-444",
+    "name": "Boiler 600L baixa pressão inox 444",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 48,
+    "slug": "boiler-600l-baixa-pressao-ppr-3",
+    "name": "Boiler 600L baixa pressão PPR-3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 49,
+    "slug": "boiler-600l-baixa-pressao-ppr-3-de-nivel",
+    "name": "Boiler 600L baixa pressão PPR-3 de nível",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 50,
+    "slug": "boiler-800l-baixa-pressao-inox-304",
+    "name": "Boiler 800L baixa pressão inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 51,
+    "slug": "boiler-800l-baixa-pressao-inox-444",
+    "name": "Boiler 800L baixa pressão inox 444",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 52,
+    "slug": "boiler-alta-pressao-4-0kgf-inox-304",
+    "name": "Boiler alta pressão 4.0kgf inox 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 53,
+    "slug": "boiler-alta-pressao-inox-316l",
+    "name": "Boiler alta pressão inox 316L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 54,
+    "slug": "boiler-baixa-pressao-inox-316",
+    "name": "Boiler baixa pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 55,
+    "slug": "boiler-baixa-pressao-ppr-3-400l",
+    "name": "Boiler baixa pressão PPR-3 - 400L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 375800,
+    "imageId": null
+  },
+  {
+    "id": 56,
+    "slug": "boiler-baixa-pressao-ppr-3-500l",
+    "name": "Boiler baixa pressão PPR-3 - 500L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 421500,
+    "imageId": null
+  },
+  {
+    "id": 57,
+    "slug": "boiler-baixa-pressao-ppr-3-600l",
+    "name": "Boiler baixa pressão PPR-3 - 600L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 484000,
+    "imageId": null
+  },
+  {
+    "id": 58,
+    "slug": "boiler-de-alta-pressao-4-000-litros",
+    "name": "Boiler de alta pressão 4.000 litros",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 59,
+    "slug": "boiler-de-alta-pressao-sob-medida-4-000-litros",
+    "name": "Boiler de alta pressão sob medida 4.000 litros",
+    "descriptionLines": [
+      "Capacidade de 4",
+      "000 litrosCorpo interno revestido em aço inox 316LRevestimento externo em alumínio e tampas em fibra de vidro"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 60,
+    "slug": "boiler-preparado-2000l-alta-pressao-inox-316",
+    "name": "Boiler preparado 2000L alta pressão inox 316",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 61,
+    "slug": "boiler-vertical-2000l-beretta",
+    "name": "Boiler vertical 2000L Beretta",
+    "descriptionLines": [
+      "Alta pressão - 6kgf",
+      "Capacidade de 2000 litros",
+      "Espuma removível"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 62,
+    "slug": "bomba-1-2-cv",
+    "name": "Bomba 1/2 cv",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 63,
+    "slug": "bomba-1-2-cv-de-alta-temperatura",
+    "name": "Bomba 1/2 cv de alta temperatura",
+    "descriptionLines": [
+      "Corpo em bronze",
+      "Temperatura de até 110°"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 64,
+    "slug": "bomba-1-2-cv-texius",
+    "name": "Bomba 1/2 cv Texius",
+    "descriptionLines": [
+      "Modelo: Max Heat Full InverterPotência térmica: 60",
+      "000 BTUsTensão: 220V MonofásicoControle eletrônico com display digitalEstrutura: gabinete resistente às intempéries, ideal para áreas externasTemperatura: 15C a 43C Com pré filtroBaixo ruídoAlta vazão"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 65,
+    "slug": "bomba-350w",
+    "name": "Bomba 350w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 66,
+    "slug": "bomba-centrifuga-komeco-evvolution-evvo-170",
+    "name": "Bomba Centrífuga Komeco Evvolution Evvo 170",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 67,
+    "slug": "bomba-de-650m-lado-da-geradora",
+    "name": "Bomba de 650m³ lado da geradora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 68,
+    "slug": "bomba-de-650m-lado-da-piscina",
+    "name": "Bomba de 650m³ lado da piscina",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 69,
+    "slug": "bomba-de-alta-temperatura-lado-geradora",
+    "name": "Bomba de alta temperatura lado geradora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 70,
+    "slug": "bomba-de-calor-aquecimento-de-piscina",
+    "name": "Bomba de calor * aquecimento de piscina",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 71,
+    "slug": "bomba-de-calor-075qc-g1-inverter",
+    "name": "Bomba de calor 075QC G1 Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 72,
+    "slug": "bomba-de-calor-25-000-btus",
+    "name": "Bomba de calor 25.000 BTUs",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 73,
+    "slug": "bomba-de-calor-28qg-inverter",
+    "name": "Bomba de calor 28QG Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 74,
+    "slug": "bomba-de-calor-32qg-inverter",
+    "name": "Bomba de calor 32QG Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 75,
+    "slug": "bomba-de-calor-45qg-inverter",
+    "name": "Bomba de calor 45QG Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 76,
+    "slug": "bomba-de-calor-central-kobc-100-55-graus-trifasica",
+    "name": "Bomba de calor Central KOBC-100 55 graus trifásica",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 77,
+    "slug": "bomba-de-calor-connect-komeco-inverter",
+    "name": "Bomba de Calor Connect Komeco Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 78,
+    "slug": "bomba-de-calor-full-inverter-heliodin-wi-fi",
+    "name": "Bomba de calor full inverter Heliodin Wi-Fi",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 79,
+    "slug": "bomba-de-calor-full-inverter-th-max",
+    "name": "Bomba de calor Full Inverter TH Max",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 80,
+    "slug": "bomba-de-calor-full-inverter-thermomax",
+    "name": "Bomba de calor Full Inverter Thermomax",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 81,
+    "slug": "bomba-de-calor-inverter",
+    "name": "Bomba de Calor Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 82,
+    "slug": "bomba-de-calor-inverter-65-graus",
+    "name": "Bomba de calor Inverter 65 graus",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 83,
+    "slug": "bomba-de-calor-inverter-ecl-180-60-graus",
+    "name": "Bomba de calor Inverter Ecl 180 60 graus",
+    "descriptionLines": [
+      "Monofásico 22022kw de potência",
+      "Condensador suzuki Eficiência A+++Peso 186kg"
+    ],
+    "defaultUnitPriceCents": 14666000,
+    "imageId": null
+  },
+  {
+    "id": 84,
+    "slug": "bomba-de-calor-inverter-komeco",
+    "name": "Bomba de calor Inverter Komeco",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 85,
+    "slug": "bomba-de-calor-inverter-komeco-60-graus",
+    "name": "Bomba de calor Inverter Komeco 60 graus",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 86,
+    "slug": "bomba-de-calor-inverter-komeco-trifasica-380v-55-graus",
+    "name": "Bomba de calor Inverter Komeco Trifásica 380v 55 graus",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 87,
+    "slug": "bomba-de-calor-inverter-termomax",
+    "name": "Bomba de calor Inverter Termomax",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 88,
+    "slug": "bomba-de-calor-inverter-trifasica-380v-55graus",
+    "name": "Bomba de calor Inverter Trifásica 380v 55graus",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 89,
+    "slug": "bomba-de-calor-kobc-qc100s-28kw",
+    "name": "Bomba de calor KOBC Qc100s 28kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 90,
+    "slug": "bomba-de-calor-qc726-22kw",
+    "name": "Bomba de calor Qc726 22kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 91,
+    "slug": "bomba-de-calor-qc726-28kw",
+    "name": "Bomba de calor Qc726 28kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 92,
+    "slug": "bomba-de-calor-rinnai-heat-pump-inverter",
+    "name": "Bomba de calor Rinnai Heat Pump Inverter",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 93,
+    "slug": "bomba-de-circulacao-1-2-cv",
+    "name": "Bomba de circulação 1/2 cv",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 94,
+    "slug": "bomba-de-circulacao-270w",
+    "name": "Bomba de circulação 270w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 95,
+    "slug": "bomba-de-circulacao-warma-110w",
+    "name": "Bomba de circulação Warma 110w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 96,
+    "slug": "bomba-de-circulacao-warma-270w",
+    "name": "Bomba de circulação Warma 270w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 97,
+    "slug": "bomba-de-circulacao-warma-350w",
+    "name": "Bomba de circulação Warma 350w",
+    "descriptionLines": [
+      "Corpo em ferro",
+      "Baixa densidade de ruídos10 bar de pressão de trabalho",
+      "Temperatura de -10° a 110°Alta vazão"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 98,
+    "slug": "bomba-periferica",
+    "name": "Bomba periférica",
+    "descriptionLines": [
+      "0,5 CV"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 99,
+    "slug": "bomba-periferica-amanco",
+    "name": "Bomba periférica Amanco",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 100,
+    "slug": "bomba-pressurizadora-com-inversor-de-frequencia-inv-450",
+    "name": "Bomba Pressurizadora com Inversor de Frequência Inv-450",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 101,
+    "slug": "bomba-smart-texus-100w",
+    "name": "Bomba Smart Texus 100w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 102,
+    "slug": "bomba-texius",
+    "name": "Bomba TEXIUS",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 103,
+    "slug": "bomba-texius-1-2-cv",
+    "name": "Bomba Texius 1/2 cv",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 104,
+    "slug": "bomba-texius-3-4-cv",
+    "name": "Bomba Texius 3/4 cv",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 105,
+    "slug": "bomba-texius-tbh-pool",
+    "name": "Bomba Texius TBH-POOL",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 106,
+    "slug": "bomba-warma-100w",
+    "name": "Bomba Warma 100w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 107,
+    "slug": "bomba-warma-100w-bronze",
+    "name": "Bomba Warma 100w bronze",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 108,
+    "slug": "bomba-warma-100w-ferro",
+    "name": "Bomba Warma 100w ferro",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 109,
+    "slug": "bomba-warma-110w",
+    "name": "Bomba Warma 110w",
+    "descriptionLines": [
+      "Corpo em bronze",
+      "Baixa densidade de ruídos10 bar de pressão de trabalho",
+      "Temperatura de -10° a 110°"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 110,
+    "slug": "bomba-warma-110w-bronze",
+    "name": "Bomba Warma 110w bronze",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 111,
+    "slug": "bomba-warma-110w-ferro",
+    "name": "Bomba Warma 110w ferro",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 112,
+    "slug": "bomba-warma-250w-ferro",
+    "name": "Bomba Warma 250w ferro",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 113,
+    "slug": "bomba-warma-250wbronze",
+    "name": "Bomba Warma 250wbronze",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 114,
+    "slug": "bomba-warma-270w",
+    "name": "Bomba Warma 270w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 115,
+    "slug": "bomba-warma-300w",
+    "name": "Bomba Warma 300w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 116,
+    "slug": "bomba-warma-350w",
+    "name": "Bomba Warma 350w",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 117,
+    "slug": "bomba-warma-350w-bronze",
+    "name": "Bomba Warma 350w bronze",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 118,
+    "slug": "bomba-warma-350w-ferro",
+    "name": "Bomba Warma 350w ferro",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 119,
+    "slug": "bomba-warma-pressurizadora",
+    "name": "Bomba Warma pressurizadora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 120,
+    "slug": "cabos-calefatores-de-alta-resistividade",
+    "name": "Cabos Calefatores de Alta Resistividade",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 121,
+    "slug": "cabos-calefatores-de-alta-resistividade-protecao-ipx8",
+    "name": "Cabos Calefatores de Alta Resistividade Proteção IPX8",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 122,
+    "slug": "cabos-111-50-m",
+    "name": "Cabos: 111,50 m²",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 123,
+    "slug": "cabos-145-12-m",
+    "name": "Cabos: 145,12 m²",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 124,
+    "slug": "cabos-17-36-m",
+    "name": "Cabos: 17,36 m²",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 125,
+    "slug": "cabos-248-86-m",
+    "name": "Cabos: 248,86 m²",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 126,
+    "slug": "cabos-69-54-m",
+    "name": "Cabos: 69,54 m²",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 127,
+    "slug": "caixas",
+    "name": "Caixas",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 128,
+    "slug": "caixas-4x4",
+    "name": "Caixas 4x4",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 129,
+    "slug": "caixas-4x4-1",
+    "name": "Caixas 4x4: 1",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 130,
+    "slug": "caixas-4x4-2",
+    "name": "Caixas 4x4: 2",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 131,
+    "slug": "caixas-4x4-7",
+    "name": "Caixas 4x4: 7",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 132,
+    "slug": "caixas-de-derivacao",
+    "name": "Caixas de derivação",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 133,
+    "slug": "caixas-de-derivacao-com-coletores-italianos-de-alta-vazao",
+    "name": "Caixas de derivação com coletores italianos de alta vazão",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 134,
+    "slug": "caixas-de-distribuicao",
+    "name": "Caixas de distribuição",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 135,
+    "slug": "caldeira-a-diesel-ferroli-atlas-d-ln-50-f",
+    "name": "Caldeira a diesel FERROLI ATLAS D LN 50 F",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 136,
+    "slug": "caldeira-a-diesel-s32-kiturami-turbo-boiler",
+    "name": "Caldeira a diesel S32 Kiturami Turbo Boiler",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 137,
+    "slug": "caldeira-a-diesel-s32-kiturami-turbo-boiler-diesel",
+    "name": "Caldeira a diesel S32 Kiturami Turbo Boiler Diesel",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 138,
+    "slug": "caldeira-a-gas-rinnai-fhi42",
+    "name": "Caldeira a gás Rinnai FHi42",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 139,
+    "slug": "caldeira-a-lenha-tis-30",
+    "name": "Caldeira a lenha TIS 30",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 140,
+    "slug": "caldeira-atmos-d50s-de-chama-invertida-49-9kw",
+    "name": "Caldeira Atmos D50s de chama invertida 49,9kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 141,
+    "slug": "caldeira-atmos-dc32s-de-chama-invertida-27kw",
+    "name": "Caldeira Atmos DC32s de chama invertida 27kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 142,
+    "slug": "caldeira-atmos-dc32s-de-chama-invertida-35kw",
+    "name": "Caldeira Atmos DC32s de chama invertida 35kw",
+    "descriptionLines": [
+      "90,3% de rendimento",
+      "Não produz emissão de fumaça em funcionamento",
+      "Potência de 35kw"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 143,
+    "slug": "caldeira-atmos-dc32s-de-chama-invertida-50kw",
+    "name": "Caldeira Atmos DC32s de chama invertida 50kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 144,
+    "slug": "caldeira-atmos-dc40s-de-chama-invertida",
+    "name": "Caldeira Atmos DC40s de chama invertida",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 145,
+    "slug": "caldeira-atmos-dc50s-de-chama-invertida-49kw",
+    "name": "Caldeira Atmos DC50s de chama invertida 49kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 146,
+    "slug": "caldeira-atmos-dc50s-de-chama-invertida-de-50kw",
+    "name": "Caldeira Atmos DC50s de chama invertida de 50KW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 147,
+    "slug": "caldeira-atmos-dc70gsx-de-chama-invertida-70kw",
+    "name": "Caldeira Atmos DC70GSX de chama invertida 70kw",
+    "descriptionLines": [
+      "90,3% de rendimento",
+      "Não produz emissão de fumaça em funcionamento",
+      "Potência de 70kw"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 148,
+    "slug": "caldeira-biomassa-neva-bio-csi",
+    "name": "Caldeira Biomassa NEVA BIO CSI",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 149,
+    "slug": "caldeira-de-alto-rendimento-e-longa-duracao-polonesa-95kw",
+    "name": "Caldeira de alto rendimento e longa duração polonesa 95kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 150,
+    "slug": "caldeira-de-alto-rendimento-e-longa-duracao-polonesa-tis-50kw",
+    "name": "Caldeira de alto rendimento e longa duração polonesa TIS 50kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 151,
+    "slug": "caldeira-italiana-riello-aut-43kw",
+    "name": "Caldeira Italiana Riello aut 43kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 152,
+    "slug": "caldeira-mural-a-gas-kiturami-boiler-30s",
+    "name": "Caldeira mural a gás Kiturami Boiler 30s",
+    "descriptionLines": [
+      "30 kW  de potência25 litros por minutoEficiência de 93",
+      "7%Chama modulanteTermostato de ambiente  inclusoChaminé original inclusa"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 153,
+    "slug": "caldeira-mural-a-gas-rinnai-reu-b300-feab-eco",
+    "name": "Caldeira Mural a Gás Rinnai - REU B300 FEAB eco",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 154,
+    "slug": "caldeira-mural-a-gas-rinnai-reu-b300-feabl-eco",
+    "name": "Caldeira mural a gás Rinnai - REU B300 FEABL eco",
+    "descriptionLines": [
+      "42,8 k",
+      "Cal/h  de potência30 litros por minuto",
+      "Controle de funções por painel digital",
+      "Exaustão forçada",
+      "Pressão máxima de 30 mca"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 155,
+    "slug": "caldeira-mynute-s35-beretta-italiana",
+    "name": "Caldeira Mynute S35 Beretta Italiana",
+    "descriptionLines": [
+      "Alto rendimento (92,9%)Eficiência de acordo com norma europeia",
+      "Potência térmica de 37,6 kw"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 156,
+    "slug": "caldeira-tis-pr-40n-warma",
+    "name": "Caldeira TIS PR 40N Warma",
+    "descriptionLines": [
+      "Placas em aço inoxidável",
+      "Conectores em aisi 316",
+      "Placas em aisi 316",
+      "Divisões em lâminas fundidas de cobre e níquel"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 157,
+    "slug": "caldeira-tis-uni-200s-warma",
+    "name": "Caldeira TIS UNI 200S - Warma",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 158,
+    "slug": "caldeira-tis-uni-30n-warma",
+    "name": "Caldeira TIS UNI 30N - Warma",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 159,
+    "slug": "caldeira-tis-uni-30n",
+    "name": "Caldeira Tis. Uni 30N",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 160,
+    "slug": "cano-de-cobre",
+    "name": "Cano de cobre",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 161,
+    "slug": "cano-multicamada-16mm",
+    "name": "Cano multicamada 16mm",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 162,
+    "slug": "cano-para-chamine",
+    "name": "Cano para chaminé",
+    "descriptionLines": [
+      "Produzido em Inox"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 163,
+    "slug": "controlador-de-ambiente-incluso",
+    "name": "Controlador de ambiente incluso",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 164,
+    "slug": "controlador-de-temperatura",
+    "name": "Controlador de temperatura",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 165,
+    "slug": "controlador-de-temperatura-auxiliar",
+    "name": "Controlador de temperatura auxiliar",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 166,
+    "slug": "controlador-de-temperatura-de-ambiente",
+    "name": "Controlador de temperatura de ambiente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 167,
+    "slug": "controlador-de-temperatura-digital-touchscreen-mmz-tholz",
+    "name": "Controlador de temperatura digital touchscreen MMZ Tholz",
+    "descriptionLines": [
+      "Programável",
+      "Entrada de sensor NTC já incluso",
+      "Indicado para aquecimento e refrigeração do sistema"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 168,
+    "slug": "controlador-de-temperatura-do-boiler",
+    "name": "Controlador de temperatura do boiler",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 169,
+    "slug": "controlador-de-temperatura-tic17",
+    "name": "Controlador de temperatura TIC17",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 170,
+    "slug": "controlador-eletronico-de-temperatura",
+    "name": "Controlador eletrônico de temperatura",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 171,
+    "slug": "controlador-eletronico-de-temperatura-de-ambiente",
+    "name": "Controlador eletrônico de temperatura de ambiente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 172,
+    "slug": "controlador-slim-white-touch",
+    "name": "Controlador Slim White Touch",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 173,
+    "slug": "design-inverter-riello-33b",
+    "name": "Design Inverter Riello 33B",
+    "descriptionLines": [
+      "Aquece o ambiente através de irradiação e ventilaçãomotores Brushless DC Inverter7",
+      "329 W"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 174,
+    "slug": "difusor-metalico-para-ar-quente",
+    "name": "Difusor metálico para ar quente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 175,
+    "slug": "disjuntor-geral-100a",
+    "name": "Disjuntor geral 100A",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 176,
+    "slug": "disjuntor-geral-50kw",
+    "name": "Disjuntor geral 50kW",
+    "descriptionLines": [
+      "Área ocupada: 369 m²"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 177,
+    "slug": "duto-flexivel-de-aluminio-para-ar-quente",
+    "name": "Duto flexível de alumínio para ar quente",
+    "descriptionLines": [
+      "Marca Termovent"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 178,
+    "slug": "dutos",
+    "name": "Dutos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 179,
+    "slug": "estrutura-de-40-tubos",
+    "name": "Estrutura de 40 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 180,
+    "slug": "estrutura-fixadora",
+    "name": "Estrutura fixadora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 181,
+    "slug": "estrutura-metalica",
+    "name": "Estrutura metálica",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 182,
+    "slug": "estrutura-metalica-30v-com-mainfold-aco-inox-316-40h",
+    "name": "Estrutura metálica 30V com mainfold aço inox 316 40H",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 183,
+    "slug": "estrutura-metalica-40h-com-mainfold-aco-inox-316-40h",
+    "name": "Estrutura metálica 40H com mainfold aço inox 316 40H",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 184,
+    "slug": "estrutura-metalica-40v-40-tubos",
+    "name": "Estrutura metálica 40V(40 tubos)",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 185,
+    "slug": "estrutura-metalica-50h-com-mainfold-aco-inox-316-50h",
+    "name": "Estrutura metálica 50H com mainfold aço inox 316 50H",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 186,
+    "slug": "estrutura-metalica-p-30-tubos",
+    "name": "Estrutura metálica p/ 30 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 187,
+    "slug": "estrutura-solo-monoposte-h3-8-modulos-mesa-dupla-ccm",
+    "name": "Estrutura solo monoposte H3 8 módulos mesa dupla CCM",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 188,
+    "slug": "fan-coil-italiano-riello",
+    "name": "Fan coil italiano - Riello",
+    "descriptionLines": [
+      "KOBC 080 220",
+      "VBaixíssimo Nível de Ruído",
+      "Sistema Integrado de Degelo"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 189,
+    "slug": "fancoil-fc3",
+    "name": "Fancoil FC3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 190,
+    "slug": "filtro-para-agua-salobra",
+    "name": "Filtro para água salobra",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 191,
+    "slug": "geradora-a-lenha-kronus",
+    "name": "Geradora a Lenha Kronus",
+    "descriptionLines": [
+      "Potência de 80",
+      "000 kCal/h"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 192,
+    "slug": "geradora-a-lenha-nacional",
+    "name": "Geradora a Lenha Nacional",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 193,
+    "slug": "geradora-a-pellets-kronus",
+    "name": "Geradora a Pellets Kronus",
+    "descriptionLines": [
+      "Potência de 95",
+      "Consumo de pellets por hora: 17,2 kg/h",
+      "Corpo em ferro fundido com chama vertical inserido na lateral"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 194,
+    "slug": "geradora-de-100-kw",
+    "name": "Geradora de 100 kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 195,
+    "slug": "geradora-de-60-kw",
+    "name": "Geradora de 60 kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 196,
+    "slug": "geradora-de-agua-quente",
+    "name": "Geradora de água quente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 197,
+    "slug": "geradora-de-agua-quente-eletrica-kronus",
+    "name": "Geradora de água quente elétrica Kronus",
+    "descriptionLines": [
+      "A caldeira é construída com aço de liga especial PGH265 com 5 mm de espessura",
+      "A caldeira é feita de uma única chapa metálica, diminuindo possíveis vazões",
+      "O sistema de fornecimento de ar às câmaras de combustão primária e secundária garante a máxima pós-combustão dos gases emitidos",
+      "Peso: 267"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 198,
+    "slug": "geradora-tis-150kw-warma",
+    "name": "Geradora TIS 150kW Warma",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 199,
+    "slug": "geradora-tis-uni-50n",
+    "name": "Geradora TIS UNI 50N",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 200,
+    "slug": "geradora-tis-uni-70-warma",
+    "name": "Geradora TIS UNI 70 Warma",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 201,
+    "slug": "geradora-tis-uni-warma",
+    "name": "Geradora TIS UNI Warma*",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 202,
+    "slug": "grades-de-acabamento",
+    "name": "Grades de acabamento",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 203,
+    "slug": "grades-de-acabamento-2",
+    "name": "Grades de acabamento 2",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 204,
+    "slug": "grelha-de-acabamento-branca",
+    "name": "Grelha de acabamento branca",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 205,
+    "slug": "grelhas-de-insuflamento",
+    "name": "Grelhas de insuflamento",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 206,
+    "slug": "interligacao-da-saida-de-consumo",
+    "name": "Interligação da saída de consumo",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 207,
+    "slug": "interligacao-da-saida-de-consumo-ate-pontos",
+    "name": "Interligação da saída de consumo até pontos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 208,
+    "slug": "interligacao-da-serpentina-ate-boiler",
+    "name": "Interligação da serpentina até Boiler",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 209,
+    "slug": "interligacao-do-sistema-de-pressurizacao",
+    "name": "Interligação do sistema de pressurização",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 210,
+    "slug": "interligacao-do-sistema-de-pressurizacao-ate-pontos",
+    "name": "Interligação do sistema de pressurização até pontos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 211,
+    "slug": "inversor",
+    "name": "Inversor",
+    "descriptionLines": [
+      "Kw3",
+      "MPPT"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 212,
+    "slug": "inversor-de-frequencia-weg",
+    "name": "Inversor de frequência WEG",
+    "descriptionLines": [
+      "Área ocupada: 369 m² Modelo: 60 KTL"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 213,
+    "slug": "inversor-solar-solis",
+    "name": "Inversor solar Solis",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 214,
+    "slug": "inversor-solar-solis-7-5kw-mono",
+    "name": "Inversor solar Solis 7.5kW Mono",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 215,
+    "slug": "kit-caixa-de-acabamento-com-dutos",
+    "name": "Kit caixa de acabamento com dutos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 216,
+    "slug": "kit-com-caixas-e-dutos",
+    "name": "Kit com caixas e dutos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 217,
+    "slug": "kit-completo-caixa-duto-magueira-sensor-e-tampa",
+    "name": "Kit completo - Caixa, duto, magueira, sensor e tampa",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 218,
+    "slug": "kit-conexao-para-radiador",
+    "name": "Kit conexão para radiador",
+    "descriptionLines": [
+      "2 suportes com bucha1 tampão cromado 1/2”4 redução 1 x 1/2\"1 válvula desaeradora 1/2"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 219,
+    "slug": "kit-de-acessorios",
+    "name": "Kit de acessórios",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 220,
+    "slug": "kit-de-agua-circulante-automatizado",
+    "name": "Kit de água circulante automatizado",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 221,
+    "slug": "kit-de-caixas-com-dutos",
+    "name": "Kit de caixas com dutos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 222,
+    "slug": "kit-de-chamine",
+    "name": "Kit de chaminé",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 223,
+    "slug": "kit-de-flexiveis-para-caldeira",
+    "name": "Kit de flexíveis para caldeira",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 224,
+    "slug": "kit-de-instalacao",
+    "name": "Kit de instalação",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 225,
+    "slug": "kit-de-instalacao-de-piscinas",
+    "name": "Kit de instalação de piscinas",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 226,
+    "slug": "kit-de-instalacao-de-radiadores",
+    "name": "Kit de instalação de radiadores",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 227,
+    "slug": "kit-de-instalacao-para-piscinas",
+    "name": "Kit de instalação para piscinas",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 228,
+    "slug": "kit-de-instalacao-para-sistema-de-bomba-de-calor",
+    "name": "Kit de instalação para sistema de bomba de calor",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 229,
+    "slug": "kit-de-radiador",
+    "name": "Kit de radiador",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 230,
+    "slug": "kit-dutos-para-caixas",
+    "name": "Kit dutos para caixas",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 231,
+    "slug": "kit-instalacao-e-mao-de-obra",
+    "name": "Kit instalação e mão de obra",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 232,
+    "slug": "kit-kt32kw",
+    "name": "kit kt32kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 233,
+    "slug": "kit-para-instalacao-de-radiador",
+    "name": "Kit para instalação de radiador",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 234,
+    "slug": "kit-tk-para-piscina",
+    "name": "Kit TK para piscina",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 235,
+    "slug": "kit-tubos-e-conexoes",
+    "name": "Kit tubos e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 236,
+    "slug": "lareira-de-alto-desempenho-kawmet-k17-16-1kw",
+    "name": "Lareira de alto desempenho Kawmet k17 16,1KW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 237,
+    "slug": "lareira-de-alto-desempenho-kawmet-w15-12kw",
+    "name": "Lareira de alto desempenho Kawmet w15 12KW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 238,
+    "slug": "lareira-de-alto-desempenho-kawmet-w15-de-dupla-combustao",
+    "name": "Lareira de alto desempenho Kawmet W15 de dupla combustão",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 239,
+    "slug": "lareira-de-alto-desempenho-kawmet-w17-12-3kw-embutir",
+    "name": "Lareira de alto desempenho Kawmet W17 12,3KW embutir",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 240,
+    "slug": "lareira-de-alto-desempenho-kawmet-w17-16-1kw-embutir",
+    "name": "Lareira de alto desempenho Kawmet W17 16,1KW embutir",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 241,
+    "slug": "lareira-de-embutir-kawmet-w15-de-alto-desempenho",
+    "name": "Lareira de embutir Kawmet W15 de alto desempenho",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 242,
+    "slug": "lareira-fogo-montanha",
+    "name": "Lareira Fogo Montanha",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 243,
+    "slug": "lareira-fogo-montanha-square-d-pellet",
+    "name": "Lareira Fogo Montanha Square D Pellet",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 244,
+    "slug": "lareira-italiana-la-nordica-extraflame-comfort-idro-l80",
+    "name": "Lareira italiana La Nordica Extraflame Comfort IDRO L80",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 245,
+    "slug": "lareira-kawmet-w11-hidro",
+    "name": "Lareira Kawmet W11 Hidro",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 246,
+    "slug": "lareira-sobreposta-nottitaliane",
+    "name": "Lareira sobreposta Nottitaliane",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 247,
+    "slug": "luva-de-cobre",
+    "name": "Luva de cobre",
+    "descriptionLines": [
+      "Troca de toda tubulação da Caldeira e parte de cobre dos reservatórios Mudança do modo de operação de trabalho dos reservatórios"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 248,
+    "slug": "mainfold-40v-40-tubos",
+    "name": "Mainfold 40V (40 tubos)",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 249,
+    "slug": "mainfold-em-aco-inox-316-p-30-tubos",
+    "name": "Mainfold em aço inox 316 p/ 30 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 250,
+    "slug": "mainfold-inox-316-40h",
+    "name": "Mainfold inox 316 40H",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 251,
+    "slug": "malha-e-isolamento",
+    "name": "Malha e isolamento",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 252,
+    "slug": "malha-pop-3-4-20",
+    "name": "Malha pop 3.4-20",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 253,
+    "slug": "malha-pop-3-4-20x20",
+    "name": "Malha pop 3.4-20x20",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 254,
+    "slug": "malhas-e-isolamento-termico",
+    "name": "Malhas e isolamento térmico",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 255,
+    "slug": "manta-de-fibra-ceramica-610x12-70mm",
+    "name": "Manta de fibra cerâmica 610x12,70mm",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 256,
+    "slug": "manta-termica",
+    "name": "Manta térmica",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 257,
+    "slug": "manta-termica-de-fibra-italiana",
+    "name": "Manta térmica de fibra italiana",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 258,
+    "slug": "manta-termica-italiana",
+    "name": "Manta térmica italiana",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 259,
+    "slug": "mao-de-obra",
+    "name": "Mão de obra",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 260,
+    "slug": "mao-de-obra-deslocamento-e-garantia",
+    "name": "Mão de obra, deslocamento e garantia",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 261,
+    "slug": "mao-de-obra-impostos-e-frete",
+    "name": "Mão de obra, impostos e frete",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 1500000,
+    "imageId": null
+  },
+  {
+    "id": 262,
+    "slug": "mao-de-obra-1-100-00-reais-ja-adicionados-ao-valor-total",
+    "name": "Mão de obra: 1.100,00 reais (já adicionados ao valor total)",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 263,
+    "slug": "mao-de-obra-r-500-00",
+    "name": "Mão de obra: R$ 500,00",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 264,
+    "slug": "modulo-fotovoltaico-leapton-monocristalino-560w",
+    "name": "Módulo fotovoltaico Leapton monocristalino 560W",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 265,
+    "slug": "modulo-painel-solar-monocristalino-bifacial",
+    "name": "Módulo painel solar Monocristalino bifacial",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 266,
+    "slug": "modulo-solar-canadian-450-wp",
+    "name": "Módulo solar Canadian 450 Wp",
+    "descriptionLines": [
+      "Monocristalino"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 267,
+    "slug": "modulos-fotovoltaicos-weg",
+    "name": "Módulos Fotovoltaicos WEG",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 268,
+    "slug": "otimizador-solar-edge",
+    "name": "Otimizador solar Edge",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 269,
+    "slug": "piso-aquecido",
+    "name": "Piso aquecido",
+    "descriptionLines": [
+      "Caixa de derivação"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 270,
+    "slug": "piso-aquecido-total",
+    "name": "Piso aquecido - total",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 271,
+    "slug": "piso-aquecido-eletrico",
+    "name": "Piso aquecido elétrico",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 272,
+    "slug": "piso-aquecido-hidraulico",
+    "name": "Piso aquecido hidráulico",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 273,
+    "slug": "piso-eletrico",
+    "name": "Piso elétrico",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 274,
+    "slug": "piso-eletrico-para-banheiros-1-2-3-e-4",
+    "name": "Piso elétrico para banheiros 1, 2, 3 e 4",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 275,
+    "slug": "placa-de-alta-pressao",
+    "name": "Placa de alta pressão",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 276,
+    "slug": "placa-de-piscina",
+    "name": "Placa de piscina",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 277,
+    "slug": "placa-de-piscina-0-33-3",
+    "name": "Placa de piscina 0,33-3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 278,
+    "slug": "placa-de-piscina-1-3",
+    "name": "Placa de piscina 1/3",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 279,
+    "slug": "placa-de-piscina-3-0-33",
+    "name": "Placa de piscina 3-0.33",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 280,
+    "slug": "placa-de-piscina-3x0-33",
+    "name": "Placa de piscina 3x0,33",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 281,
+    "slug": "placa-de-piscina-4-0-33",
+    "name": "Placa de piscina 4/0,33",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 282,
+    "slug": "placa-de-piscina-4x0-33",
+    "name": "Placa de piscina 4x0.33",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 283,
+    "slug": "placa-de-piscina-5-1",
+    "name": "Placa de piscina 5×1",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 284,
+    "slug": "placa-silicato-de-calcio",
+    "name": "Placa silicato de cálcio",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 285,
+    "slug": "placa-solar-24-tubos",
+    "name": "Placa solar 24 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 286,
+    "slug": "placa-solar-30-tubos",
+    "name": "Placa solar 30 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 287,
+    "slug": "placa-solar-40-tubos",
+    "name": "Placa solar 40 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 288,
+    "slug": "placa-solar-40-tubos-prime",
+    "name": "Placa solar 40 tubos Prime",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 289,
+    "slug": "placa-solar-50-tubos",
+    "name": "Placa solar 50 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 290,
+    "slug": "placa-solar-60-tubos",
+    "name": "Placa solar 60 tubos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 291,
+    "slug": "placa-solar-tubo-a-vacuo",
+    "name": "Placa solar tubo a vácuo",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 292,
+    "slug": "placa-solar-vertical-plana",
+    "name": "Placa solar vertical plana",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 293,
+    "slug": "pressostato",
+    "name": "Pressostato",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 294,
+    "slug": "pressostato-de-agua",
+    "name": "Pressostato de água",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 295,
+    "slug": "pressostato-de-agua-quente",
+    "name": "Pressostato de água quente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 296,
+    "slug": "pressostato-warma-dc3-bronze",
+    "name": "Pressostato Warma DC3 Bronze",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 297,
+    "slug": "pressurizador-cv-com-inversor-de-frequencia-e-circulante",
+    "name": "Pressurizador ½ cv com inversor de frequência e circulante",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 298,
+    "slug": "pressurizador-texius-tpi-xl-6-30",
+    "name": "Pressurizador Texius TPI-XL-6-30",
+    "descriptionLines": [
+      "Corpo, rotor e eixo em aço Inox 304",
+      "Pressão máxima na sucção: 40 mca",
+      "Temperatura máxima do fluido: 70°CPotência de 2,0 CV"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 299,
+    "slug": "pressurizadores",
+    "name": "Pressurizadores",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 300,
+    "slug": "pressurizadores-e-sistema-de-agua-circulante",
+    "name": "Pressurizadores e sistema de água circulante",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 301,
+    "slug": "quadro-de-comando",
+    "name": "Quadro de comando",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 302,
+    "slug": "quadro-de-comando-com-contactoras",
+    "name": "Quadro de comando com contactoras",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 303,
+    "slug": "quadro-de-comando-da-geradora",
+    "name": "Quadro de comando da Geradora",
+    "descriptionLines": [
+      "Eficiência de até 93%",
+      "Possui resistência elétricaSistema de controle que permite ajustar a temperatura desejadaPossui sistema de proteçãoA geradora é isolada termicamente"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 304,
+    "slug": "quadro-de-comando-digital",
+    "name": "Quadro de comando digital",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 305,
+    "slug": "quadro-de-comando-e-disjuntores",
+    "name": "Quadro de comando e disjuntores",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 500000,
+    "imageId": null
+  },
+  {
+    "id": 306,
+    "slug": "quadro-de-comando-eletrico",
+    "name": "Quadro de comando elétrico",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 307,
+    "slug": "quadro-de-comando-integrado",
+    "name": "Quadro de comando integrado",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 308,
+    "slug": "quadro-de-comando-para-sistema",
+    "name": "Quadro de comando para sistema",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 309,
+    "slug": "quadro-de-controle",
+    "name": "Quadro de controle",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 310,
+    "slug": "quadro-de-controle-do-sistema-integrado",
+    "name": "Quadro de controle do sistema integrado",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 311,
+    "slug": "quadro-de-controle-para-sistema-de-agua-circulante",
+    "name": "Quadro de controle para sistema de água circulante",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 312,
+    "slug": "quadro-de-controles-com-contactoras",
+    "name": "Quadro de controles com contactoras",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 313,
+    "slug": "quadro-eletrico-com-comando",
+    "name": "Quadro elétrico com comando",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 314,
+    "slug": "queimador-a-diesel-40g-g5-riello",
+    "name": "Queimador a diesel 40G G5 Riello",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 315,
+    "slug": "queimador-a-diesel-lamborghinieco-8",
+    "name": "Queimador a diesel LamborghiniECO 8",
+    "descriptionLines": [
+      "Baixas emissões",
+      "Controle da cabeça de combustão",
+      "Controle do ar de combustão externa do queimador",
+      "Obturador de ar com batente de gravidade",
+      "Ventilação estabilizada",
+      "Excelente combustão graças à distribuição uniforme do ar"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 316,
+    "slug": "queimador-a-diesel-riello-rg2",
+    "name": "Queimador a diesel Riello RG2",
+    "descriptionLines": [
+      "Baixas emissões",
+      "Controle da cabeça de combustão",
+      "Controle do ar de combustão externa do queimador",
+      "135 kWExcelente combustão graças à distribuição uniforme do ar"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 317,
+    "slug": "queimador-de-pellets-silo",
+    "name": "Queimador de pellets/silo",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 318,
+    "slug": "radiador-bimetalico-lux-500-80-com-10-elementos",
+    "name": "Radiador bimetálico LUX 500/80 com 10 elementos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 319,
+    "slug": "radiador-bimetalico-lux-500-80-com-113-elementos",
+    "name": "Radiador bimetálico LUX 500/80 com 113 elementos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 320,
+    "slug": "radiador-bimetalico-lux-500-80-com-125-elementos",
+    "name": "Radiador bimetálico LUX 500/80 com 125 elementos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 321,
+    "slug": "radiador-italiano",
+    "name": "Radiador italiano",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 322,
+    "slug": "radiador-plus-evo-italiano-500-12-mm",
+    "name": "Radiador PLUS EVO Italiano 500 12 mm",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 323,
+    "slug": "radiador-plus-evo-italiano-500-mm",
+    "name": "Radiador PLUS EVO Italiano 500 mm",
+    "descriptionLines": [
+      "O modelo PLUS EVO é projetado para acompanhar a evolução do design, cada vez mais baseado em linhas mínimas e modernas, adequadas para todos os ambientes",
+      "Pressão máxima de funcionamento: 20 bar",
+      "Fabricação italiana"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 324,
+    "slug": "reservatorio-misturador-inox-150l",
+    "name": "Reservatório misturador inox 150L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 325,
+    "slug": "reservatorio-termico-baixa-pressao-kronus",
+    "name": "Reservatório térmico baixa pressão Kronus",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 326,
+    "slug": "reservatorio-termico-boiler-600l-baixa-pressao-inox-316l",
+    "name": "Reservatório térmico boiler 600L baixa pressão inox 316L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 327,
+    "slug": "reservatorio-termico-de-alta-pressao",
+    "name": "Reservatório térmico de alta pressão",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 328,
+    "slug": "reservatorio-termico-italiano-2000-litros",
+    "name": "Reservatório térmico Italiano 2000 Litros",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 329,
+    "slug": "resistencia-eletrica",
+    "name": "Resistência elétrica",
+    "descriptionLines": [
+      "Para Tubo de Cobre 15 mm580-24-19 Adaptador p/ Tubo Niquelado Para Tubo de Cobre 15 mm580-24-19 Adaptador p/ Tubo Niquelado 3000 W"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 330,
+    "slug": "resistencia-eletrica-3kw",
+    "name": "Resistência elétrica 3kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 331,
+    "slug": "retirada-de-dois-tanques-velhos-do-local",
+    "name": "Retirada de dois tanques velhos do local",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 332,
+    "slug": "retirada-de-tanques-velhos",
+    "name": "Retirada de tanques velhos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 333,
+    "slug": "sistema-de-agua-circulante",
+    "name": "Sistema de água circulante",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 334,
+    "slug": "sistema-de-agua-circulante-por-pulso",
+    "name": "Sistema de água circulante por pulso",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 335,
+    "slug": "sistema-de-controle-de-temperatura-e-umidade",
+    "name": "Sistema de controle de temperatura e umidade",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 336,
+    "slug": "sistema-de-limpeza",
+    "name": "Sistema de limpeza",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 337,
+    "slug": "sistema-de-pressurizacao",
+    "name": "Sistema de pressurização",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 338,
+    "slug": "sistema-de-pressurizacao-agua-quente-e-fria",
+    "name": "Sistema de pressurização água quente e fria",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 339,
+    "slug": "sistema-de-pressurizacao-com-bomba-cv-e-inversor-de-frequencia",
+    "name": "Sistema de pressurização com bomba ½ CV e inversor de frequência",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 340,
+    "slug": "sistema-de-pressurizacao-quente-e-fria",
+    "name": "Sistema de pressurização quente e fria",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 341,
+    "slug": "sistema-de-pressurizacao-syllent-cv",
+    "name": "Sistema de pressurização Syllent ½ cv",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 342,
+    "slug": "sistema-de-seguranca-para-alta-pressao-e-super-aquecimento-do-sistema",
+    "name": "Sistema de segurança para alta pressão e super aquecimento do sistema",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 343,
+    "slug": "sistema-de-trocador-de-calor-para-150kw",
+    "name": "Sistema de trocador de calor para 150kw",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 344,
+    "slug": "sistema-solar-de-piscina",
+    "name": "Sistema solar de piscina",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 345,
+    "slug": "tanque-de-aco-304",
+    "name": "Tanque de aço 304",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 346,
+    "slug": "tanque-de-diesel",
+    "name": "Tanque de diesel",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 347,
+    "slug": "tanque-de-diesel-de-polipropileno",
+    "name": "Tanque de diesel de polipropileno",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 348,
+    "slug": "tanque-de-disel-300-litros-polipropileno",
+    "name": "Tanque de Disel 300 litros polipropileno",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 349,
+    "slug": "termostato-analogico-white",
+    "name": "Termostato Analógico White",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 350,
+    "slug": "termostato-de-ambiente",
+    "name": "Termostato de Ambiente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 351,
+    "slug": "termostato-de-ambiente-beretta-alpha-dgt",
+    "name": "Termostato de ambiente Beretta Alpha DGT",
+    "descriptionLines": [
+      "Controle do termostato (5 a 35 graus)Display digital",
+      "Simples Instalação"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 352,
+    "slug": "termostato-de-ambiente-digital",
+    "name": "Termostato de ambiente digital",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 353,
+    "slug": "termostato-de-bulbo",
+    "name": "Termostato de bulbo",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 354,
+    "slug": "termostato-slim-white",
+    "name": "Termostato Slim White",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 355,
+    "slug": "termostato-slim-white-wi-fi",
+    "name": "Termostato Slim White Wi-Fi",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 356,
+    "slug": "termostato-slim-wifi",
+    "name": "Termostato Slim WiFi",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 357,
+    "slug": "termostatos",
+    "name": "Termostatos",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 358,
+    "slug": "termostatos-10",
+    "name": "Termostatos: 10",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 359,
+    "slug": "termostatos-4",
+    "name": "Termostatos: 4",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 360,
+    "slug": "termostatos-5",
+    "name": "Termostatos: 5",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 361,
+    "slug": "termostatos-6",
+    "name": "Termostatos: 6",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 362,
+    "slug": "termostatos-7",
+    "name": "Termostatos: 7",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 363,
+    "slug": "trocador-de-calor-brasado",
+    "name": "Trocador de calor brasado",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 364,
+    "slug": "trocador-de-calor-brasado-124kw",
+    "name": "Trocador de calor brasado 124kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 365,
+    "slug": "trocador-de-calor-brasado-70kw",
+    "name": "Trocador de calor brasado 70kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 366,
+    "slug": "trocador-de-calor-brasado-rinna",
+    "name": "Trocador de calor brasado Rinna",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 367,
+    "slug": "trocador-de-calor-brasado-rinnai",
+    "name": "Trocador de calor brasado Rinnai",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 368,
+    "slug": "trocador-de-calor-brasado-rinnai-20-placas",
+    "name": "Trocador de calor brasado Rinnai 20 placas",
+    "descriptionLines": [
+      "Placas em aço inoxidável",
+      "Conectores em aisi 316",
+      "Placas em aisi 316",
+      "Divisões em lâminas fundidas de cobre e níquel"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 369,
+    "slug": "trocador-de-calor-brasado-rinnai-20-placas-tr-95",
+    "name": "Trocador de calor brasado Rinnai 20 placas TR 95",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 370,
+    "slug": "trocador-de-calor-de-650m",
+    "name": "Trocador de calor de 650m³",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 371,
+    "slug": "trocador-de-calor-kaori-175kw",
+    "name": "Trocador de calor Kaori 175kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 372,
+    "slug": "trocador-de-calor-kaori-70kw",
+    "name": "Trocador de calor Kaori 70kW",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 373,
+    "slug": "trocador-de-calor-misturador",
+    "name": "Trocador de calor misturador",
+    "descriptionLines": [
+      "Rede hidráulica individual para cada radiador"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 374,
+    "slug": "trocador-de-calor-misturador-200l",
+    "name": "Trocador de calor misturador 200L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 375,
+    "slug": "tubo-a-vacuo",
+    "name": "Tubo a vácuo",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 376,
+    "slug": "tubo-a-vacuo2-estruturas-metalicas-de-30v2-mainfolds-de-aco-inox-316-30v",
+    "name": "Tubo a vácuo2 estruturas metálicas de 30V2 mainfolds de aço inox 316 30V",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 377,
+    "slug": "tubo-de-aluminio-multicamada",
+    "name": "Tubo de alumínio multicamada",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 378,
+    "slug": "tubo-multicamadas-16mm",
+    "name": "Tubo multicamadas 16mm",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 379,
+    "slug": "tubo-multicamadas-90-graus",
+    "name": "Tubo multicamadas 90 graus",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 380,
+    "slug": "tubos-e-conexoes",
+    "name": "Tubos e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 381,
+    "slug": "tubos-registros-e-conexoes",
+    "name": "Tubos, registros e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 382,
+    "slug": "tubos-valvulas-de-seguranca-e-conexoes",
+    "name": "Tubos, válvulas de segurança e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 383,
+    "slug": "tubos-valvulas-e-conexoes",
+    "name": "Tubos, válvulas e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": 680000,
+    "imageId": null
+  },
+  {
+    "id": 384,
+    "slug": "valvula-2-vias",
+    "name": "Válvula 2 vias",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 385,
+    "slug": "valvula-angular",
+    "name": "Válvula angular",
+    "descriptionLines": [
+      "Marca Mercury540-24-19"
+    ],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 386,
+    "slug": "valvula-de-alivio-de-pressao",
+    "name": "Válvula de alívio de pressão",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 387,
+    "slug": "valvula-de-radiador-angular-com-registros",
+    "name": "Válvula de radiador angular com registros",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 388,
+    "slug": "valvula-de-retencao-succao-e-desaeradores",
+    "name": "Válvula de retenção, sucção e desaeradores",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 389,
+    "slug": "valvula-de-seguranca",
+    "name": "Válvula de segurança",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 390,
+    "slug": "valvula-desaeradora",
+    "name": "Válvula desaeradora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 391,
+    "slug": "valvula-desviadora",
+    "name": "Válvula desviadora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 392,
+    "slug": "valvula-mescladora-italiana-45-60-celsius",
+    "name": "Válvula mescladora italiana 45º-60º celsius",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 393,
+    "slug": "valvulas-de-escape-de-ar-e-retencao",
+    "name": "Válvulas de escape de ar e retenção",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 394,
+    "slug": "valvulas-e-conexoes",
+    "name": "Válvulas e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 395,
+    "slug": "valvulas-e-conexoes-em-bronze",
+    "name": "Válvulas e conexões em bronze",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 396,
+    "slug": "valvulas-e-desareadora",
+    "name": "Válvulas e desareadora",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 397,
+    "slug": "valvulas-e-visualizadores",
+    "name": "Válvulas e visualizadores",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 398,
+    "slug": "valvulas-tubos-e-conexoes",
+    "name": "Válvulas, tubos e conexões",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 399,
+    "slug": "vaso-de-expansao-100l",
+    "name": "Vaso de expansão 100L",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 400,
+    "slug": "vaso-de-expansao-aberto",
+    "name": "Vaso de expansão aberto",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 401,
+    "slug": "vaso-de-expansao-aberto-inox",
+    "name": "Vaso de expansão aberto INOX",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 402,
+    "slug": "vaso-de-expansao-polietileno",
+    "name": "Vaso de expansão polietileno",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  },
+  {
+    "id": 403,
+    "slug": "ventilador-turbina-para-ar-quente",
+    "name": "Ventilador turbina para ar quente",
+    "descriptionLines": [],
+    "defaultUnitPriceCents": null,
+    "imageId": null
+  }
+]
