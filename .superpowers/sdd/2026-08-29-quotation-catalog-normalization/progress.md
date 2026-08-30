@@ -114,3 +114,14 @@ Task 6: complete (commits f180c08..07cfdba, review clean)
   - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
   - `git diff --check` — PASS.
 - Supabase types were not regenerated: no disposable migrated source or generator project configuration is available in this workspace. The generated file was not hand-edited, per user ruling; it remains a known stale generated artifact pending a real migrated source.
+
+### Task 10 fix round 1 report
+
+- Fresh-app ruling: repository inspection confirmed `app/libs/supabase/database.types.ts` was consumed only as the generic parameter of an otherwise auth-only browser Supabase client. Prisma owns relational access; Supabase clients in this app are used for Auth and Storage, with no relational table query typing consumers.
+- Deleted the stale generated file instead of hand-editing it, removed the `Database` import/generic and obsolete `TypedSupabaseClient` alias, and removed the generator script that would recreate the obsolete surface. Added a source guard proving the file, imports, generic, alias, and script remain absent.
+- Exact validation evidence:
+  - `yarn test app/routes/products-static.test.ts` — PASS, 1 file / 5 tests.
+  - `yarn test` — PASS, 20 files / 121 tests.
+  - `yarn typecheck` — PASS.
+  - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
+  - `git diff --check` — PASS.

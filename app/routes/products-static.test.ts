@@ -50,6 +50,19 @@ describe("fresh-app legacy product removal", () => {
     }
   });
 
+  it("removes the obsolete Supabase relational generic surface", () => {
+    expect(existsSync(path.join(root, "app/libs/supabase/database.types.ts"))).toBe(false);
+    for (const file of applicationSources(path.join(root, "app"))) {
+      expect(readFileSync(file, "utf8"), file).not.toContain("database.types");
+    }
+
+    const browserClient = source("app/libs/supabase/client.tsx");
+    expect(browserClient).toContain("createBrowserClient(");
+    expect(browserClient).not.toMatch(/createBrowserClient\s*</);
+    expect(browserClient).not.toContain("TypedSupabaseClient");
+    expect(source("package.json")).not.toContain("supabaseTypes");
+  });
+
   it("uses an unconditional direct cleanup migration and no compatibility preflight", () => {
     const migration = source("prisma/migrations/20260829190000_remove_legacy_products/migration.sql");
     for (const table of ["ShowcaseProduct", "ProductSpec", "Showcase", "Product", "Brand", "Category"]) {
