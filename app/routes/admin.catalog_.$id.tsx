@@ -940,45 +940,6 @@ export default function AdminCatalogEditor() {
       </section>
 
       <section className="grid gap-3 border border-border p-4">
-        <h2 className="text-lg font-semibold">Aliases e proveniência</h2>
-        {item.aliases.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sem aliases registrados.</p>
-        ) : (
-          <ul className="grid gap-2 text-sm">
-            {item.aliases.map((alias) => (
-              <li key={alias.id} className="rounded border border-border px-3 py-2">
-                {alias.originalName} ({alias.sourceSlug})
-              </li>
-            ))}
-          </ul>
-        )}
-        {item.sourceMaps.length > 0 || item.canonicalMaps.length > 0 ? (
-          <div className="grid gap-2 rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-            <p>
-              Este produto participa de uma normalização. Alterações posteriores podem tornar a reversão insegura; consulte a execução antes
-              de editar.
-            </p>
-            {item.sourceMaps.map((sourceMap) => (
-              <p key={`source-${sourceMap.id}`}>
-                Origem da normalização:{" "}
-                <Link className="underline" to={`/admin/catalog/normalization/${sourceMap.runId}`}>
-                  execução #{sourceMap.runId}
-                </Link>
-              </p>
-            ))}
-            {item.canonicalMaps.map((canonicalMap) => (
-              <p key={`canonical-${canonicalMap.id}`}>
-                Família canônica da{" "}
-                <Link className="underline" to={`/admin/catalog/normalization/${canonicalMap.runId}`}>
-                  execução #{canonicalMap.runId}
-                </Link>
-              </p>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <section className="grid gap-3 border border-border p-4">
         <h2 className="text-lg font-semibold">Pré-visualização ao vivo</h2>
         <div className="grid gap-2 sm:grid-cols-2">
           {state.options.map((option) => (

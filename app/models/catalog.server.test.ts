@@ -10,14 +10,14 @@ const { prismaMock, txMock } = vi.hoisted(() => {
   };
   const prismaMock = {
     quoteCatalogItem: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), updateMany: vi.fn(), deleteMany: vi.fn() },
-    quotationLine: { count: vi.fn() }, catalogNormalizationSourceMap: { count: vi.fn() }, quoteCatalogAlias: { count: vi.fn() },
+    quotationLine: { groupBy: vi.fn() },
     $transaction: vi.fn(async (callback: (tx: typeof txMock) => unknown) => callback(txMock)),
   };
   return { prismaMock, txMock };
 });
 vi.mock("~/libs/prisma/client.server", () => ({ default: prismaMock }));
 
-import { archiveCatalogFamily, getCatalogDeletionEligibility, getCatalogFamilyDetail, listActiveCatalogPickerSummaries, listCatalogSummaries, restoreCatalogFamily, updateCatalogFamilyAggregate } from "./catalog.server";
+import { archiveCatalogFamily, getCatalogDeletionEligibility, getCatalogDeletionEligibilityByIds, getCatalogFamilyDetail, listActiveCatalogPickerSummaries, listCatalogSummaries, restoreCatalogFamily, updateCatalogFamilyAggregate } from "./catalog.server";
 
 const input = {
   id: 1, expectedUpdatedAt: "2026-08-29T00:00:00.000Z",
@@ -41,7 +41,7 @@ describe("catalog aggregate model", () => {
     expect(prismaMock.quoteCatalogItem.findMany).toHaveBeenCalledWith(expect.objectContaining({
       where: { archivedAt: null, name: { contains: "boiler", mode: "insensitive" } },
       select: expect.objectContaining({
-        _count: { select: { options: true, variants: true, aliases: true } },
+        _count: { select: { options: true, variants: true } },
       }),
     }));
   });
@@ -111,15 +111,13 @@ describe("catalog aggregate model", () => {
     expect(txMock.quoteCatalogItem.updateMany).not.toHaveBeenCalled();
   });
 
-  it("includes ordered aliases and normalization provenance in family detail", async () => {
+  it("includes ordered options and variant images in family detail", async () => {
     prismaMock.quoteCatalogItem.findUnique.mockResolvedValueOnce(null);
     await getCatalogFamilyDetail(1);
     expect(prismaMock.quoteCatalogItem.findUnique).toHaveBeenCalledWith(expect.objectContaining({ include: expect.objectContaining({
-      aliases: expect.objectContaining({ orderBy: { id: "asc" } }),
       variants: expect.objectContaining({
         include: expect.objectContaining({ Image: { select: { location: true, thumbnail: true } } }),
       }),
-      sourceMaps: expect.anything(), canonicalMaps: expect.anything(),
     }) }));
   });
 
@@ -132,10 +130,25 @@ describe("catalog aggregate model", () => {
     expect(prismaMock.quoteCatalogItem.updateMany).toHaveBeenNthCalledWith(2, expect.objectContaining({ data: { archivedAt: null } }));
   });
 
-  it("uses explicit source and canonical maps, not aliases, for deletion eligibility", async () => {
-    prismaMock.quotationLine.count.mockResolvedValueOnce(0);
-    prismaMock.catalogNormalizationSourceMap.count.mockResolvedValueOnce(0).mockResolvedValueOnce(0);
-    prismaMock.quoteCatalogAlias.count.mockResolvedValueOnce(3);
-    await expect(getCatalogDeletionEligibility(1)).resolves.toEqual({ eligible: true, quotationLines: 0, sourceMaps: 0, canonicalMaps: 0, aliases: 3 });
+  it("blocks deletion only when a quotation still references the family", async () => {
+    prismaMock.quotationLine.groupBy.mockResolvedValueOnce([]);
+    await expect(getCatalogDeletionEligibility(1)).resolves.toEqual({ eligible: true, quotationLines: 0 });
+  });
+
+  it("counts a whole catalog page with one query", async () => {
+    prismaMock.quotationLine.groupBy.mockResolvedValueOnce([{ catalogItemId: 1, _count: { _all: 2 } }]);
+
+    const eligibilityById = await getCatalogDeletionEligibilityByIds([1, 2]);
+
+    expect(prismaMock.quotationLine.groupBy).toHaveBeenCalledTimes(1);
+    expect([...eligibilityById.values()]).toEqual([
+      { eligible: false, quotationLines: 2 },
+      { eligible: true, quotationLines: 0 },
+    ]);
+  });
+
+  it("reads no reference table for an empty catalog page", async () => {
+    await expect(getCatalogDeletionEligibilityByIds([])).resolves.toEqual(new Map());
+    expect(prismaMock.quotationLine.groupBy).not.toHaveBeenCalled();
   });
 });

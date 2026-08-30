@@ -29,21 +29,6 @@ enum CatalogOptionPlacement {
   DESCRIPTION
 }
 
-enum CatalogNormalizationStatus {
-  VALIDATED
-  APPLYING
-  APPLIED
-  REVERTING
-  REVERTED
-  FAILED
-}
-
-enum CatalogSourceDisposition {
-  PARENT_SOURCE
-  VARIANT
-  USE_PARENT_FALLBACK
-}
-
 model QuoteClient {
   id        Int         @id @default(autoincrement())
   createdAt DateTime    @default(now()) @map("created_at")
@@ -71,9 +56,6 @@ model QuoteCatalogItem {
   QuotationLine         QuotationLine[]
   options               QuoteCatalogOption[]
   variants              QuoteCatalogVariant[]
-  aliases               QuoteCatalogAlias[]
-  sourceMaps            CatalogNormalizationSourceMap[] @relation("NormalizationSource")
-  canonicalMaps         CatalogNormalizationSourceMap[] @relation("NormalizationCanonical")
 
   @@index([archivedAt, name])
   @@map("quote_catalog_items")
@@ -138,59 +120,6 @@ model QuoteCatalogVariantValue {
   @@id([variantId, optionValueId])
   @@index([optionValueId])
   @@map("quote_catalog_variant_values")
-}
-
-model QuoteCatalogAlias {
-  id             Int              @id @default(autoincrement())
-  catalogItemId  Int              @map("catalog_item_id")
-  originalName   String           @map("original_name") @db.VarChar(300)
-  normalizedKey  String           @unique @map("normalized_key") @db.VarChar(300)
-  sourceSlug     String?          @map("source_slug") @db.VarChar(100)
-  sourceMetadata Json?            @map("source_metadata")
-  catalogItem    QuoteCatalogItem @relation(fields: [catalogItemId], references: [id], onDelete: Restrict)
-
-  @@index([catalogItemId])
-  @@map("quote_catalog_aliases")
-}
-
-model CatalogNormalizationRun {
-  id                   Int                             @id @default(autoincrement())
-  status               CatalogNormalizationStatus      @default(VALIDATED)
-  schemaVersion        Int                             @map("schema_version")
-  algorithmVersion     String                          @map("algorithm_version") @db.VarChar(100)
-  sourceSnapshotDigest String                          @map("source_snapshot_digest") @db.VarChar(64)
-  sourceSnapshot       Json                            @map("source_snapshot")
-  proposal             Json
-  result               Json?
-  createdAt            DateTime                        @default(now()) @map("created_at")
-  updatedAt            DateTime                        @updatedAt @map("updated_at")
-  appliedAt            DateTime?                       @map("applied_at")
-  revertedAt           DateTime?                       @map("reverted_at")
-  sourceMaps           CatalogNormalizationSourceMap[]
-
-  @@unique([sourceSnapshotDigest, algorithmVersion])
-  @@map("catalog_normalization_runs")
-}
-
-model CatalogNormalizationSourceMap {
-  id                       Int                      @id @default(autoincrement())
-  runId                    Int                      @map("run_id")
-  sourceCatalogItemId      Int                      @map("source_catalog_item_id")
-  canonicalCatalogItemId   Int                      @map("canonical_catalog_item_id")
-  sourceStateSnapshot      Json                     @map("source_state_snapshot")
-  selectedValuesSnapshot   Json                     @map("selected_values_snapshot")
-  originalQuotationLineIds Json                     @map("original_quotation_line_ids")
-  priceDisposition         CatalogSourceDisposition @map("price_disposition")
-  imageDisposition         CatalogSourceDisposition @map("image_disposition")
-  canonicalUpdatedAt       DateTime                 @map("canonical_updated_at")
-  createdAt                DateTime                 @default(now()) @map("created_at")
-  run                      CatalogNormalizationRun  @relation(fields: [runId], references: [id], onDelete: Restrict)
-  sourceCatalogItem        QuoteCatalogItem         @relation("NormalizationSource", fields: [sourceCatalogItemId], references: [id], onDelete: Restrict)
-  canonicalCatalogItem     QuoteCatalogItem         @relation("NormalizationCanonical", fields: [canonicalCatalogItemId], references: [id], onDelete: Restrict)
-
-  @@unique([runId, sourceCatalogItemId])
-  @@index([canonicalCatalogItemId])
-  @@map("catalog_normalization_source_maps")
 }
 
 model Quotation {

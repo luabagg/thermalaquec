@@ -12,7 +12,7 @@ import {
   archiveCatalogFamily,
   createCatalogFamily,
   deleteCatalogFamily,
-  getCatalogDeletionEligibility,
+  getCatalogDeletionEligibilityByIds,
   getCatalogFamilyDetail,
   listCatalogSummaries,
   restoreCatalogFamily,
@@ -34,12 +34,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const status = parseCatalogStatus(url.searchParams.get("status"));
   const search = url.searchParams.get("q")?.trim() ?? "";
   const items = await listCatalogSummaries({ status, search });
-  const eligibility = await Promise.all(
-    items.map(async (item) => ({
-      id: item.id,
-      ...(await getCatalogDeletionEligibility(item.id)),
-    })),
-  );
+  const eligibilityById = await getCatalogDeletionEligibilityByIds(items.map((item) => item.id));
+  const eligibility = items.flatMap((item) => {
+    const itemEligibility = eligibilityById.get(item.id);
+    return itemEligibility ? [{ id: item.id, ...itemEligibility }] : [];
+  });
   return json({ items, status, search, eligibility });
 };
 
@@ -329,7 +328,7 @@ export default function AdminCatalog() {
                     </p>
                   </div>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {item._count.options} opções · {item._count.variants} combinações · {item._count.aliases} aliases
+                    {item._count.options} opções · {item._count.variants} combinações
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <Button asChild variant="outline" size="sm">
@@ -377,8 +376,7 @@ export default function AdminCatalog() {
                       </fetcher.Form>
                     ) : itemEligibility ? (
                       <p className="text-xs text-muted-foreground">
-                        Não pode excluir: {itemEligibility.quotationLines} orçamentos,{" "}
-                        {itemEligibility.sourceMaps + itemEligibility.canonicalMaps} normalizações
+                        Não pode excluir: {itemEligibility.quotationLines} orçamentos
                       </p>
                     ) : null}
                   </div>

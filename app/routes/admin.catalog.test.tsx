@@ -9,7 +9,7 @@ const {
   archiveCatalogFamilyMock,
   restoreCatalogFamilyMock,
   deleteCatalogFamilyMock,
-  getCatalogDeletionEligibilityMock,
+  getCatalogDeletionEligibilityByIdsMock,
   getCatalogFamilyDetailMock,
   updateCatalogFamilyAggregateMock,
 } = vi.hoisted(() => ({
@@ -19,7 +19,7 @@ const {
   archiveCatalogFamilyMock: vi.fn(),
   restoreCatalogFamilyMock: vi.fn(),
   deleteCatalogFamilyMock: vi.fn(),
-  getCatalogDeletionEligibilityMock: vi.fn(),
+  getCatalogDeletionEligibilityByIdsMock: vi.fn(),
   getCatalogFamilyDetailMock: vi.fn(),
   updateCatalogFamilyAggregateMock: vi.fn(),
 }));
@@ -34,7 +34,7 @@ vi.mock("~/models/catalog.server", () => ({
   archiveCatalogFamily: archiveCatalogFamilyMock,
   restoreCatalogFamily: restoreCatalogFamilyMock,
   deleteCatalogFamily: deleteCatalogFamilyMock,
-  getCatalogDeletionEligibility: getCatalogDeletionEligibilityMock,
+  getCatalogDeletionEligibilityByIds: getCatalogDeletionEligibilityByIdsMock,
   getCatalogFamilyDetail: getCatalogFamilyDetailMock,
   updateCatalogFamilyAggregate: updateCatalogFamilyAggregateMock,
 }));
@@ -154,7 +154,7 @@ test("catalog list renders alias counts", async () => {
         "catalog-list": {
           status: "active",
           search: "",
-          eligibility: [{ id: 1, eligible: true, quotationLines: 0, sourceMaps: 0, canonicalMaps: 0, aliases: 4 }],
+          eligibility: [{ id: 1, eligible: true, quotationLines: 0 }],
           items: [
             {
               id: 1,
@@ -166,7 +166,7 @@ test("catalog list renders alias counts", async () => {
               archivedAt: null,
               updatedAt: "2026-08-29T00:00:00.000Z",
               Image: null,
-              _count: { options: 2, variants: 3, aliases: 4 },
+              _count: { options: 2, variants: 3 },
             },
           ],
         },
@@ -177,16 +177,36 @@ test("catalog list renders alias counts", async () => {
   const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
   const markup = renderToStaticMarkup(<RouterProvider router={router} />);
   consoleError.mockRestore();
-  expect(markup).toContain("2 opções · 3 combinações · 4 aliases");
+  expect(markup).toContain("2 opções · 3 combinações");
 });
 
 test("loader defaults status to active and empty search", async () => {
   requireAdminMock.mockResolvedValueOnce({ user: { id: "user-1" } });
   listCatalogSummariesMock.mockResolvedValueOnce([]);
-  getCatalogDeletionEligibilityMock.mockResolvedValue({ eligible: true, quotationLines: 0, sourceMaps: 0, canonicalMaps: 0, aliases: 0 });
+  getCatalogDeletionEligibilityByIdsMock.mockResolvedValue(new Map());
 
   const { loader } = await import("./admin.catalog");
   await loader({ request: new Request("https://thermal.test/admin/catalog"), params: {}, context: {} } as never);
 
   expect(listCatalogSummariesMock).toHaveBeenCalledWith({ status: "active", search: "" });
+});
+
+test("loader reads deletion eligibility for the whole page in one call", async () => {
+  requireAdminMock.mockResolvedValueOnce({ user: { id: "user-1" } });
+  listCatalogSummariesMock.mockResolvedValueOnce([{ id: 7 }, { id: 9 }]);
+  getCatalogDeletionEligibilityByIdsMock.mockClear();
+  getCatalogDeletionEligibilityByIdsMock.mockResolvedValue(new Map([
+    [7, { eligible: true, quotationLines: 0 }],
+    [9, { eligible: false, quotationLines: 1 }],
+  ]));
+
+  const { loader } = await import("./admin.catalog");
+  const response = await loader({ request: new Request("https://thermal.test/admin/catalog"), params: {}, context: {} } as never);
+
+  expect(getCatalogDeletionEligibilityByIdsMock).toHaveBeenCalledTimes(1);
+  expect(getCatalogDeletionEligibilityByIdsMock).toHaveBeenCalledWith([7, 9]);
+  expect((await response.json()).eligibility).toEqual([
+    { id: 7, eligible: true, quotationLines: 0 },
+    { id: 9, eligible: false, quotationLines: 1 },
+  ]);
 });

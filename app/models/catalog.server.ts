@@ -56,7 +56,7 @@ const catalogSummarySelect = {
   archivedAt: true,
   updatedAt: true,
   Image: { select: { location: true, thumbnail: true } },
-  _count: { select: { options: true, variants: true, aliases: true } },
+  _count: { select: { options: true, variants: true } },
 } satisfies Prisma.QuoteCatalogItemSelect;
 
 const catalogPickerSummarySelect = {
@@ -81,18 +81,6 @@ const catalogDetailInclude = {
       Image: { select: { location: true, thumbnail: true } },
       values: { select: { optionValueId: true } },
     },
-  },
-  aliases: {
-    orderBy: { id: "asc" as const },
-    select: { id: true, originalName: true, normalizedKey: true, sourceSlug: true, sourceMetadata: true },
-  },
-  sourceMaps: {
-    orderBy: { id: "asc" as const },
-    select: { id: true, runId: true, canonicalCatalogItemId: true, priceDisposition: true, imageDisposition: true, canonicalUpdatedAt: true },
-  },
-  canonicalMaps: {
-    orderBy: { id: "asc" as const },
-    select: { id: true, runId: true, sourceCatalogItemId: true, priceDisposition: true, imageDisposition: true, canonicalUpdatedAt: true },
   },
 } satisfies Prisma.QuoteCatalogItemInclude;
 
@@ -267,15 +255,37 @@ async function updateLifecycle(id: number, expected: string, data: { archivedAt:
   return { ok: true, item: await getCatalogFamilyDetail(id) };
 }
 
-export async function getCatalogDeletionEligibility(id: number) {
-  const [quotationLines, sourceMaps, canonicalMaps, aliases] = await Promise.all([
-    prisma.quotationLine.count({ where: { catalogItemId: id } }),
-    prisma.catalogNormalizationSourceMap.count({ where: { sourceCatalogItemId: id } }),
-    prisma.catalogNormalizationSourceMap.count({ where: { canonicalCatalogItemId: id } }),
-    prisma.quoteCatalogAlias.count({ where: { catalogItemId: id } }),
-  ]);
-  // Aliases are editor data, not normalization provenance; maps are the authoritative record.
-  return { eligible: quotationLines + sourceMaps + canonicalMaps === 0, quotationLines, sourceMaps, canonicalMaps, aliases };
+export type CatalogDeletionEligibility = {
+  eligible: boolean;
+  quotationLines: number;
+};
+
+/**
+ * Counts the references of a whole catalog page with one query.
+ * The list holds hundreds of families, so per-family counts exhaust the connection pool.
+ */
+export async function getCatalogDeletionEligibilityByIds(ids: number[]): Promise<Map<number, CatalogDeletionEligibility>> {
+  const eligibilityById = new Map<number, CatalogDeletionEligibility>(
+    ids.map((id) => [id, { eligible: true, quotationLines: 0 }]),
+  );
+  if (!ids.length) return eligibilityById;
+
+  const quotationLines = await prisma.quotationLine.groupBy({
+    by: ["catalogItemId"],
+    where: { catalogItemId: { in: ids } },
+    _count: { _all: true },
+  });
+  for (const group of quotationLines) {
+    const eligibility = group.catalogItemId === null ? undefined : eligibilityById.get(group.catalogItemId);
+    if (!eligibility) continue;
+    eligibility.quotationLines = group._count._all;
+    eligibility.eligible = group._count._all === 0;
+  }
+  return eligibilityById;
+}
+
+export async function getCatalogDeletionEligibility(id: number): Promise<CatalogDeletionEligibility> {
+  return (await getCatalogDeletionEligibilityByIds([id])).get(id)!;
 }
 
 export async function deleteCatalogFamily(id: number, expectedUpdatedAt: string): Promise<CatalogMutationResult> {
