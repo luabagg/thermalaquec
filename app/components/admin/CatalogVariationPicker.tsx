@@ -26,6 +26,8 @@ export type CatalogPickerResolvedDraft = {
   descriptionLines: string[];
   unitPriceCents: number | null;
   imageId: number | null;
+  imageUrl: string | null;
+  imageThumbnail: string | null;
   variantId: number | null;
   selectionSnapshot: Array<{
     optionSlug: string;
@@ -121,12 +123,8 @@ export function CatalogVariationPicker({ summaries, onAdd }: Props) {
     if (summary._count.options === 0) {
       resolveCatalogPickerDraft(summary.id, [], fetch, controller.signal)
         .then((draft) => {
-          onAdd({
-            ...draft,
-            catalogItemId: summary.id,
-            imageUrl: draft.imageId === summary.imageId ? summary.Image?.location ?? null : null,
-            imageThumbnail: draft.imageId === summary.imageId ? summary.Image?.thumbnail ?? null : null,
-          });
+          if (controller.signal.aborted) return;
+          onAdd({ ...draft, catalogItemId: summary.id });
           clear();
         })
         .catch((cause: unknown) => {
@@ -141,7 +139,9 @@ export function CatalogVariationPicker({ summaries, onAdd }: Props) {
     }
 
     loadCatalogPickerFamily(summary.id, fetch, controller.signal)
-      .then(setFamily)
+      .then((loadedFamily) => {
+        if (!controller.signal.aborted) setFamily(loadedFamily);
+      })
       .catch((cause: unknown) => {
         if ((cause as { name?: string }).name !== "AbortError") {
           setError(portuguesePickerError((cause as Error).message));
@@ -170,7 +170,9 @@ export function CatalogVariationPicker({ summaries, onAdd }: Props) {
       fetch,
       controller.signal,
     )
-      .then(setResolved)
+      .then((draft) => {
+        if (!controller.signal.aborted) setResolved(draft);
+      })
       .catch((cause: unknown) => {
         if ((cause as { name?: string }).name !== "AbortError") {
           setError(portuguesePickerError((cause as Error).message));
@@ -184,12 +186,7 @@ export function CatalogVariationPicker({ summaries, onAdd }: Props) {
 
   function addResolved() {
     if (!summary || !resolved) return;
-    onAdd({
-      ...resolved,
-      catalogItemId: summary.id,
-      imageUrl: resolved.imageId === summary.imageId ? summary.Image?.location ?? null : null,
-      imageThumbnail: resolved.imageId === summary.imageId ? summary.Image?.thumbnail ?? null : null,
-    });
+    onAdd({ ...resolved, catalogItemId: summary.id });
     clear();
   }
 
@@ -232,15 +229,18 @@ export function CatalogVariationPicker({ summaries, onAdd }: Props) {
       ))}
 
       {resolved ? (
-        <div className="rounded border border-border p-3 text-sm sm:col-span-2">
+        <div role="status" aria-live="polite" className="rounded border border-border p-3 text-sm sm:col-span-2">
+          {resolved.imageUrl ? (
+            <img src={resolved.imageThumbnail ?? resolved.imageUrl} alt="" className="mb-2 h-16 w-16 object-contain" />
+          ) : null}
           <p className="font-medium">{resolved.name}</p>
           {resolved.descriptionLines.map((line) => <p key={line} className="text-muted-foreground">{line}</p>)}
         </div>
       ) : null}
-      {busy ? <p className="text-sm text-muted-foreground sm:col-span-2">Carregando…</p> : null}
+      {busy ? <p role="status" aria-live="polite" className="text-sm text-muted-foreground sm:col-span-2">Carregando…</p> : null}
       {error ? (
         <div className="flex items-center gap-2 sm:col-span-2">
-          <p className="text-sm text-destructive">{error}</p>
+          <p role="alert" className="text-sm text-destructive">{error}</p>
           <Button type="button" size="sm" variant="outline" onClick={() => setRetry((value) => value + 1)}>Tentar novamente</Button>
         </div>
       ) : null}

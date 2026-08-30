@@ -43,6 +43,9 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const result = resolveCatalogSelection(family, selectedValueIds);
   if (!result.ok) return catalogResolutionErrorResponse(result.error);
 
+  const resolvedImage = result.value.imageId === item.imageId
+    ? item.Image
+    : item.variants.find((variant) => variant.id === result.value.variantId)?.Image ?? null;
   const tokenPayload = {
     version: 1 as const,
     catalogItemId: item.id,
@@ -53,6 +56,8 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   return json({
     draft: {
       ...result.value,
+      imageUrl: resolvedImage?.location ?? null,
+      imageThumbnail: resolvedImage?.thumbnail ?? null,
       catalogResolutionToken: createCatalogSelectionToken(tokenPayload, requireCatalogSelectionSecret()),
     },
   });

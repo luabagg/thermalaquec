@@ -77,7 +77,10 @@ const catalogDetailInclude = {
   },
   variants: {
     orderBy: { id: "asc" as const },
-    include: { values: { select: { optionValueId: true } } },
+    include: {
+      Image: { select: { location: true, thumbnail: true } },
+      values: { select: { optionValueId: true } },
+    },
   },
   aliases: {
     orderBy: { id: "asc" as const },

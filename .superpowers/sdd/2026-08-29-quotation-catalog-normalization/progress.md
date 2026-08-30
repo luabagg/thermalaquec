@@ -87,3 +87,14 @@ Task 6: complete (commits f180c08..07cfdba, review clean)
 - Initial quotation payload now uses active-only compact summaries with counts and no descriptions, options, values, or variants.
 - Simple products resolve immediately through the authenticated server endpoint; configurable families load ordered detail lazily, resolve complete selections server-side, preview generated fields, and add only signed resolved drafts.
 - Added Portuguese unavailable/request errors, retry, cancellation/family changes, and focused compact-query/network/selection tests.
+
+### Task 9 fix round 1 report
+
+- Replaced helper/static picker tests with jsdom interaction coverage for disabled Add, option changes, signed draft insertion, simple immediate resolution, retry, cancel/family switching, stale aborted detail/resolution responses, unavailable combinations, and accessible async/error announcements.
+- Resolve responses now map the resolver-selected parent or variant image to trusted database URL/thumbnail fields; picker previews and inserts those fields without client inference.
+- Validation evidence:
+  - `yarn test app/components/admin/CatalogVariationPicker.test.tsx 'app/routes/admin.catalog.$id_.resolve.test.ts' app/models/catalog.server.test.ts 'app/routes/admin.quotations.$id.test.tsx'` — PASS, 4 files / 28 tests.
+  - `yarn test` — PASS, 19 files / 116 tests.
+  - `yarn typecheck` — PASS.
+  - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
+  - `git diff --check` — PASS.

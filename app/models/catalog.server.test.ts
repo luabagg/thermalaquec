@@ -116,6 +116,9 @@ describe("catalog aggregate model", () => {
     await getCatalogFamilyDetail(1);
     expect(prismaMock.quoteCatalogItem.findUnique).toHaveBeenCalledWith(expect.objectContaining({ include: expect.objectContaining({
       aliases: expect.objectContaining({ orderBy: { id: "asc" } }),
+      variants: expect.objectContaining({
+        include: expect.objectContaining({ Image: { select: { location: true, thumbnail: true } } }),
+      }),
       sourceMaps: expect.anything(), canonicalMaps: expect.anything(),
     }) }));
   });
