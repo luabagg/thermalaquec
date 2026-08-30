@@ -8,91 +8,13 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Category {
-  id          Int        @id @default(autoincrement())
-  created_at  DateTime   @default(now())
-  name        String     @unique @db.VarChar(100)
-  description String?
-  parentId    Int?
-  parent      Category?  @relation("ParentCategory", fields: [parentId], references: [id])
-  children    Category[] @relation("ParentCategory")
-  product     Product[]
-
-  @@index([name])
-}
-
-model Brand {
-  id         Int       @id @default(autoincrement())
-  created_at DateTime  @default(now())
-  name       String    @unique @db.VarChar(100)
-  Product    Product[]
-
-  @@index([name])
-}
-
-model Product {
-  id               Int               @id @default(autoincrement())
-  created_at       DateTime          @default(now())
-  name             String            @db.VarChar(100)
-  model            String?           @db.VarChar(100)
-  shortDescription String?           @db.VarChar(250)
-  description      String?
-  visible          Boolean           @default(true)
-  viewCount        Int               @default(0)
-  brandId          Int?
-  categoryId       Int?
-  imageId          Int?
-  Brand            Brand?            @relation(fields: [brandId], references: [id])
-  Category         Category?         @relation(fields: [categoryId], references: [id])
-  Image            Image?            @relation(fields: [imageId], references: [id])
-  ProductSpec      ProductSpec[]
-  ShowcaseProduct  ShowcaseProduct[]
-
-  @@index([name, visible])
-  @@index([viewCount])
-}
-
-model ProductSpec {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  name       String   @db.VarChar(100)
-  value      String   @db.VarChar(100)
-  product_id Int
-  product    Product  @relation(fields: [product_id], references: [id])
-}
-
 model Image {
   id                  Int                   @id @default(autoincrement())
   location            String                @unique @db.VarChar(250)
   thumbnail           String?               @db.VarChar(250)
-  Product             Product[]
-  Showcase            Showcase[]
   QuoteCatalogItem    QuoteCatalogItem[]
   QuoteCatalogVariant QuoteCatalogVariant[]
   QuotationLine       QuotationLine[]
-}
-
-model ShowcaseProduct {
-  id         Int      @id @default(autoincrement())
-  showcaseId Int
-  productId  Int
-  product    Product  @relation(fields: [productId], references: [id])
-  showcase   Showcase @relation(fields: [showcaseId], references: [id])
-}
-
-model Showcase {
-  id              Int               @id @default(autoincrement())
-  created_at      DateTime          @default(now())
-  name            String            @unique @db.VarChar(100)
-  description     String?
-  visible         Boolean           @default(true)
-  viewCount       Int               @default(0)
-  imageId         Int?
-  Image           Image?            @relation(fields: [imageId], references: [id])
-  ShowcaseProduct ShowcaseProduct[]
-
-  @@index([name, visible])
-  @@index([viewCount])
 }
 
 // --- Quotation domain (separate from marketing Product) ---

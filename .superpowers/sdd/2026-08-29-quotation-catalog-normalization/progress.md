@@ -98,3 +98,19 @@ Task 6: complete (commits f180c08..07cfdba, review clean)
   - `yarn typecheck` — PASS.
   - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
   - `git diff --check` — PASS.
+
+## Task 10 completion report
+
+- User ruling (binding): this is a fresh undeployed application. Legacy compatibility, row-count preflight, acknowledgement/audit machinery, and guarded fallback behavior are intentionally not implemented.
+- Removed Prisma `Product`, `ProductSpec`, `Brand`, `Category`, `Showcase`, and `ShowcaseProduct`, obsolete `Image` relations, `app/models/product.server.ts`, and the seed alias fallback. Added the direct migration `20260829190000_remove_legacy_products` without executing any database command.
+- Public `/produtos` routes remain backed exclusively by `app/data/products.ts`; focused source/runtime tests prove static loading and absence of legacy Prisma/runtime seams.
+- Exact validation evidence:
+  - `npx prisma format` — PASS.
+  - `POSTGRES_PRISMA_URL='postgresql://user:pass@localhost:5432/db' POSTGRES_URL_NON_POOLING='postgresql://user:pass@localhost:5432/db' npx prisma validate` — PASS.
+  - `POSTGRES_PRISMA_URL='postgresql://user:pass@localhost:5432/db' POSTGRES_URL_NON_POOLING='postgresql://user:pass@localhost:5432/db' npx prisma generate` — PASS; Prisma Client regenerated.
+  - `yarn test app/routes/products-static.test.ts` — PASS, 1 file / 4 tests.
+  - `yarn test` — PASS, 20 files / 120 tests.
+  - `yarn typecheck` — PASS.
+  - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
+  - `git diff --check` — PASS.
+- Supabase types were not regenerated: no disposable migrated source or generator project configuration is available in this workspace. The generated file was not hand-edited, per user ruling; it remains a known stale generated artifact pending a real migrated source.
