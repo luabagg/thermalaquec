@@ -125,3 +125,18 @@ Task 6: complete (commits f180c08..07cfdba, review clean)
   - `yarn typecheck` — PASS.
   - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
   - `git diff --check` — PASS.
+
+## Task 11 completion report
+
+- Added `docs/catalog-normalization.md` for the implemented fresh-app system and updated the local quotation-data README. The runbook distinguishes `VALIDATED` from `APPLIED`, states that existing remote duplication remains until deliberate migration deployment and a validated apply run, documents the direct legacy removal ruling, and covers setup, artifacts/digest, agent proposal requirements, validation, apply confirmation, safe revert, Catalog corrections, signed snapshots, imports, staging, and recovery.
+- Plan checkboxes mark only code-level/documentation evidence. Disposable migration/apply rehearsal and manual Catalog/quotation acceptance remain unchecked because `TEST_DATABASE_URL` was not set in the process. No migration deploy/dev, normalization apply/revert, seed, legacy drop, or other mutation command ran.
+- Exact non-destructive verification evidence:
+  - `yarn lint` — PASS with 0 errors and 2 existing `import/no-duplicates` warnings in `app/routes/admin._index.tsx`.
+  - `yarn test` — PASS, 20 files / 121 tests.
+  - `yarn typecheck` — PASS.
+  - `yarn build` — PASS (client and SSR production bundles; existing Browserslist freshness warning only).
+  - `POSTGRES_PRISMA_URL='postgresql://user:pass@localhost:5432/db' POSTGRES_URL_NON_POOLING='postgresql://user:pass@localhost:5432/db' npx prisma validate` — PASS.
+  - `POSTGRES_PRISMA_URL='postgresql://user:pass@localhost:5432/db' POSTGRES_URL_NON_POOLING='postgresql://user:pass@localhost:5432/db' npx prisma generate` — PASS; Prisma Client regenerated.
+  - `npx prisma migrate status` — read-only check reached the configured PostgreSQL database and reported five migrations total with `20260829170000_normalized_quote_catalog` and `20260829190000_remove_legacy_products` pending; Prisma exited 1 because the database is not up to date. No migration was applied.
+  - `git diff --check` — PASS.
+- Operational residual: the configured remote database has not received the normalized schema/direct legacy-removal migrations, no remote export/proposal/apply was performed, and no disposable database/manual browser rehearsal was available. The pre-existing `.tool-versions` modification remains preserved and outside this task.
