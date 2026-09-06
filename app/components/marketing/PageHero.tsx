@@ -29,6 +29,8 @@ export const PageHero = ({
             src={imageSrc}
             alt={imageAlt}
             className="absolute inset-0 h-full w-full object-cover"
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/45" />
         </>

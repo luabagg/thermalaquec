@@ -134,7 +134,7 @@ export function FloatingWhatsApp() {
 function ThermalAvatar() {
   return (
     <img
-      src="/whatsapp-icon.jpg"
+      src="/whatsapp-icon.webp"
       alt=""
       width={40}
       height={40}

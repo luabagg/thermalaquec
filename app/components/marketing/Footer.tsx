@@ -12,7 +12,7 @@ export const Footer = () => {
         <div className="flex flex-col items-start gap-5">
           <div className="flex items-center gap-4">
             <Link to="/">
-              <img src="/logo.webp" alt={SITE_NAME} className="h-14 w-auto" />
+              <img src="/logo.webp" alt={SITE_NAME} className="h-14 w-auto" loading="lazy" />
             </Link>
             <img src="/certificacao-absolar.webp" alt="Certificação Absolar" className="h-14 w-auto" loading="lazy" />
           </div>

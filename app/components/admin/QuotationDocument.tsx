@@ -63,7 +63,7 @@ export const QuotationDocument = memo(function QuotationDocument({
           : "quote-stage mx-auto shadow-sm print:shadow-none"
       }
     >
-      <img className="quote-stage__bg" src="/quote-building-bg.png" alt="" aria-hidden />
+      <img className="quote-stage__bg" src="/quote-building-bg.webp" alt="" aria-hidden />
       <div className="quote-doc__logo" aria-label={QUOTE_COMPANY.legalName}>
         <img src="/quote-logo.webp" alt={QUOTE_COMPANY.legalName} width={160} height={160} />
         <span className="quote-doc__logo-person">{rep.brandPerson}</span>

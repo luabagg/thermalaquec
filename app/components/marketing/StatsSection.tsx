@@ -66,6 +66,7 @@ export const StatsSection = () => {
         alt=""
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover opacity-25"
+        loading="lazy"
       />
       <div className="absolute inset-0 bg-ink/70" />
       <div className="relative z-10 container mx-auto max-w-screen-xl px-4 md:px-6">
