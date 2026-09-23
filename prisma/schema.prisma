@@ -53,12 +53,26 @@ model QuoteCatalogItem {
   defaultUnitPriceCents Int?                            @map("default_unit_price_cents")
   imageId               Int?                            @map("image_id")
   Image                 Image?                          @relation(fields: [imageId], references: [id])
+  categoryId            Int?                            @map("category_id")
+  category              QuoteCatalogCategory?           @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   QuotationLine         QuotationLine[]
   options               QuoteCatalogOption[]
   variants              QuoteCatalogVariant[]
 
   @@index([archivedAt, name])
+  @@index([categoryId])
   @@map("quote_catalog_items")
+}
+
+model QuoteCatalogCategory {
+  id        Int                @id @default(autoincrement())
+  slug      String             @unique @db.VarChar(60)
+  name      String             @db.VarChar(80)
+  color     String             @db.VarChar(7)
+  sortOrder Int                @default(0) @map("sort_order")
+  items     QuoteCatalogItem[]
+
+  @@map("quote_catalog_categories")
 }
 
 model QuoteCatalogOption {
