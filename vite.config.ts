@@ -24,4 +24,8 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  optimizeDeps: {
+    // Only the quotation editor imports these. Found late, they make Vite reload the page mid-session.
+    include: ["cmdk", "@radix-ui/react-popover"],
+  },
 });
