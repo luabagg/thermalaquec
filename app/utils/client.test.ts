@@ -63,3 +63,9 @@ test("addresses print only the parts that exist", () => {
   );
   expect(formatPhone("54991553618")).toBe("(54) 99155-3618");
 });
+
+test("a phone typed with the Brazil country code is stored without it", () => {
+  const result = parseClientForm(form({ name: "A", city: "B", state: "SP", phone: "+55 (54) 99155-3618" }));
+
+  expect(result.ok && result.data.phone).toBe("54991553618");
+});

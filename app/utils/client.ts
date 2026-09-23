@@ -56,6 +56,12 @@ export function isValidTaxId(compact: string) {
   return compact.length === 11 ? isValidCpf(compact) : isValidCnpj(compact);
 }
 
+/** Digits with area code. A leading Brazil country code (+55) is dropped. */
+function nationalPhone(raw: string) {
+  const digits = digitsOnly(raw);
+  return /^55\d{10,11}$/.test(digits) ? digits.slice(2) : digits;
+}
+
 function optionalText(form: FormData, field: ClientField) {
   const value = String(form.get(field) ?? "").trim();
   return value || null;
@@ -68,7 +74,7 @@ export function parseClientForm(form: FormData): ClientParseResult {
   const city = String(form.get("city") ?? "").trim();
   const state = String(form.get("state") ?? "").trim().toUpperCase();
   const document = stripTaxId(String(form.get("document") ?? "")) || null;
-  const phone = digitsOnly(String(form.get("phone") ?? "")) || null;
+  const phone = nationalPhone(String(form.get("phone") ?? "")) || null;
   const postalCode = digitsOnly(String(form.get("postalCode") ?? "")) || null;
   const email = optionalText(form, "email");
 
