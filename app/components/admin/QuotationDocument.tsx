@@ -1,5 +1,7 @@
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+
+import { useIsomorphicLayoutEffect } from "~/lib/use-isomorphic-layout-effect";
 import { formatClientAddress, formatPhone, type ClientInput } from "~/utils/client";
 import { formatBRL, quotationTotalCents, splitNoteLines } from "~/utils/quotation";
 import { buildQuoteBlocks, paginateQuoteBlocks, type QuoteBlock } from "~/utils/quotation-pages";
@@ -96,9 +98,9 @@ export const QuotationDocument = memo(function QuotationDocument(props: Quotatio
   }, [blocks]);
 
   // Content changes arrive as renders, so remeasure after each one.
-  useLayoutEffect(measure);
+  useIsomorphicLayoutEffect(measure);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const body = measureRef.current?.querySelector('[data-measure="first"] .quote-doc__body');
     if (!body) return;
     const observer = new ResizeObserver(() => measure());

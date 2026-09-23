@@ -1,4 +1,6 @@
-import { useLayoutEffect, useRef, useState, type ChangeEvent, type ComponentProps } from "react";
+import { useRef, useState, type ChangeEvent, type ComponentProps } from "react";
+
+import { useIsomorphicLayoutEffect } from "~/lib/use-isomorphic-layout-effect";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -31,7 +33,7 @@ export function TaxIdInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const caretRef = useRef<number | null>(null);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const node = inputRef.current;
     const caret = caretRef.current;
     if (!node || caret == null) return;
