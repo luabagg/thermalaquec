@@ -46,7 +46,7 @@ export default function QuotationPrint() {
     setIsPreparingPrint(true);
 
     try {
-      const root = document.querySelector(".quote-stage");
+      const root = document.querySelector(".quote-pages");
       await waitForPrintReadiness(root);
       if (!isMountedRef.current) return;
 

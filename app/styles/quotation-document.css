@@ -22,6 +22,42 @@
   background: #111;
 }
 
+.quote-pages {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 210mm;
+  max-width: 100%;
+}
+
+/* A4 sheet. It grows only when one block is taller than a page. */
+.quote-page {
+  width: 100%;
+}
+
+/* Print pages keep one layout on every screen, so screen measurements match paper. */
+.quote-pages:has(.quote-stage--print) {
+  width: 210mm;
+  max-width: none;
+}
+
+/* Invisible copy used to measure blocks and page capacity. */
+.quote-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.quote-page--measure {
+  height: 297mm;
+}
+
 .quote-stage__bg {
   position: absolute;
   inset: 0;
@@ -46,9 +82,45 @@
   min-height: 0;
 }
 
+.quote-doc__body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .quote-doc__header {
   margin-bottom: 1.25rem;
   padding-right: 44mm;
+}
+
+.quote-doc__header--compact {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-right: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--quote-rule);
+}
+
+.quote-doc__mini-logo {
+  width: 12mm;
+  height: 12mm;
+  object-fit: cover;
+  background: #1f1f1f;
+  flex-shrink: 0;
+}
+
+.quote-doc__compact-id {
+  flex: 1;
+  min-width: 0;
+}
+
+.quote-doc__compact-client {
+  margin: 0.1rem 0 0;
+  color: var(--quote-muted);
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
 }
 
 .quote-doc__header-top {
@@ -300,13 +372,8 @@
   margin-top: 0.2rem;
 }
 
-.quote-doc__payments {
-  margin-top: 1.5rem;
-  margin-bottom: 2rem;
-}
-
 .quote-doc__payments h2 {
-  margin: 0 0 0.6rem;
+  margin: 1.5rem 0 0.6rem;
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--quote-muted);
@@ -317,14 +384,13 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 0.65rem;
 }
 
 .quote-doc__payments li {
   display: grid;
   grid-template-columns: minmax(10rem, 1.4fr) auto;
   gap: 0.25rem 1rem;
+  padding: 0.325rem 0;
   color: var(--quote-muted);
   font-size: 0.85rem;
 }
@@ -382,6 +448,16 @@
     display: block !important;
   }
 
+  .quote-pages {
+    display: block;
+    width: 210mm;
+    max-width: none;
+  }
+
+  .quote-measure {
+    display: none;
+  }
+
   .quote-stage {
     width: 210mm !important;
     max-width: none !important;
@@ -389,6 +465,7 @@
     height: auto;
     overflow: visible;
     margin: 0;
+    break-after: page;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
@@ -404,10 +481,8 @@
     margin: 8mm 11mm 0;
   }
 
-  /* Defense: global print used to hide every header/footer. */
-  .quote-doc__header,
-  .quote-doc__footer {
-    display: block !important;
+  .quote-page:last-of-type {
+    break-after: auto;
   }
 
   .quote-doc__line,
@@ -430,25 +505,22 @@
   }
 }
 
+/* Compact screen layout for the editor preview only; print pages opt out above. */
 @media screen and (max-width: 900px) {
-  .quote-stage {
-    min-height: auto;
-  }
-
-  .quote-doc {
+  .quote-stage:not(.quote-stage--print) .quote-doc {
     margin: 0.75rem 0.75rem 0;
     padding: 1.25rem;
   }
 
-  .quote-doc__logo {
+  .quote-stage:not(.quote-stage--print) .quote-doc__logo {
     right: 1.5rem;
   }
 
-  .quote-doc__header {
+  .quote-stage:not(.quote-stage--print) .quote-doc__header:not(.quote-doc__header--compact) {
     padding-right: 42mm;
   }
 
-  .quote-doc__line-body {
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-body {
     grid-template-columns: 1fr 3rem;
     grid-template-areas:
       "name qty"
@@ -456,31 +528,31 @@
       "photo photo";
   }
 
-  .quote-doc__line-body--no-photo {
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-body--no-photo {
     grid-template-areas:
       "name qty"
       "desc desc";
   }
 
-  .quote-doc__line-name {
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-name {
     grid-area: name;
   }
 
-  .quote-doc__line-qty {
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-qty {
     grid-area: qty;
   }
 
-  .quote-doc__line-desc,
-  .quote-doc__line-desc-empty {
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-desc,
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-desc-empty {
     grid-area: desc;
   }
 
-  .quote-doc__line-photo {
+  .quote-stage:not(.quote-stage--print) .quote-doc__line-photo {
     grid-area: photo;
     justify-self: start;
   }
 
-  .quote-doc__summary {
+  .quote-stage:not(.quote-stage--print) .quote-doc__summary {
     grid-template-columns: 1fr;
   }
 }
