@@ -1,205 +1,86 @@
 import type { ActionFunctionArgs, LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
-import { useEffect, useMemo, useRef, useState, type FormEvent, useCallback } from "react";
+import { data, redirect } from "@remix-run/node";
+import { Await, Form, Link, useFetcher, useLoaderData, useNavigate } from "@remix-run/react";
+import type { ShouldRevalidateFunctionArgs } from "@remix-run/react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+
+import { CatalogPicker } from "~/components/admin/CatalogPicker";
+import { EditorClientSection } from "~/components/admin/EditorClientSection";
 import {
-  CatalogVariationPicker,
-  type CatalogPickerAddedDraft,
-} from "~/components/admin/CatalogVariationPicker";
-import { QuotationEditorLineRow, QuotationEditorPaymentRow } from "~/components/admin/QuotationEditorRows";
+  QuotationEditorLineRow,
+  QuotationEditorPaymentRow,
+  type QuotationEditorLine,
+  type QuotationEditorPayment,
+} from "~/components/admin/QuotationEditorRows";
 import { QuotationPreview } from "~/components/admin/QuotationPreview";
 import { Button } from "~/components/ui/button";
-import { TaxIdInput } from "~/components/ui/tax-id-input";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { cn } from "~/lib/utils";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
-import { loadQuotationEditorData, saveQuotation } from "~/models/quotation.server";
+import { cn } from "~/lib/utils";
+import { listCatalogCategories, listCatalogPickerProducts } from "~/models/catalog.server";
+import { listClientOptions } from "~/models/client.server";
+import { getQuotation, saveQuotation, type QuotationDocumentRecord } from "~/models/quotation.server";
+import quotationStyles from "~/styles/quotation-document.css?url";
+import { toCatalogPickerItems, type CatalogPickerItem } from "~/utils/catalog-picker";
 import { parseBRLToCents } from "~/utils/quotation";
 import { updateEditorRow } from "~/utils/quotation-editor-state";
+import { parseQuotationForm, splitBullets } from "~/utils/quotation-form";
 import {
   beginRevisionSave,
   completeRevisionSave,
   initialRevisionState,
   markRevisionEdited,
 } from "~/utils/quotation-revision";
-import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
-import type { ShouldRevalidateFunctionArgs } from "@remix-run/react";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: quotationStyles }];
 
 export const meta: MetaFunction<typeof loader> = ({ data }) =>
-  buildNoIndexMeta(`${data?.quotation.title ?? "Orçamento"} | ${SITE_NAME}`);
+  buildNoIndexMeta(`Orçamento nº ${data?.quotation.id ?? ""} | ${SITE_NAME}`);
+
+async function loadCatalog() {
+  const [products, categories] = await Promise.all([listCatalogPickerProducts(), listCatalogCategories()]);
+  return { items: toCatalogPickerItems(products), categories };
+}
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { user } = await requireAdmin(request);
   const id = Number(params.id);
-  if (!Number.isFinite(id)) throw redirect("/admin/quotations");
-  const { quotation, catalog } = await loadQuotationEditorData(user.id, id);
+  if (!Number.isInteger(id)) throw redirect("/admin/quotations");
+  // Not awaited: the catalog streams in after the editor renders.
+  const catalog = loadCatalog();
+  const [quotation, clients] = await Promise.all([getQuotation(id, user.id), listClientOptions()]);
   if (!quotation) throw new Response("Not found", { status: 404 });
-  return json({ quotation, catalog, rep: resolveQuoteRep(user.email) });
+  return { quotation, clients, catalog, rep: resolveQuoteRep(user.email) };
 };
-
-type DraftLine = {
-  id: number | null;
-  clientKey: string;
-  name: string;
-  quantity: number;
-  description: string;
-  priceInput: string;
-  unitPriceCents: number;
-  catalogItemId: number | null;
-  catalogResolutionToken: string | null;
-  imageId: number | null;
-  imageUrl: string | null;
-  imageThumbnail: string | null;
-};
-
-type DraftPayment = {
-  id: number | null;
-  clientKey: string;
-  label: string;
-  amountInput: string;
-  amountCents: number;
-  detail: string;
-};
-
-function descToString(raw: unknown) {
-  if (Array.isArray(raw)) return raw.map(String).filter(Boolean).join("\n");
-  return "";
-}
-
-function lineToDraft(line: {
-  id: number;
-  name: string;
-  quantity: number;
-  descriptionLines: unknown;
-  unitPriceCents: number;
-  catalogItemId: number | null;
-  imageId: number | null;
-  Image: { location: string; thumbnail: string | null } | null;
-}): DraftLine {
-  return {
-    id: line.id,
-    clientKey: String(line.id),
-    name: line.name,
-    quantity: line.quantity,
-    description: descToString(line.descriptionLines),
-    priceInput: centsToInput(line.unitPriceCents),
-    unitPriceCents: line.unitPriceCents,
-    catalogItemId: line.catalogItemId,
-    catalogResolutionToken: null,
-    imageId: line.imageId,
-    imageUrl: line.Image?.location ?? null,
-    imageThumbnail: line.Image?.thumbnail ?? null,
-  };
-}
-
-function paymentToDraft(opt: {
-  id: number;
-  label: string;
-  amountCents: number;
-  detail: string | null;
-}): DraftPayment {
-  return {
-    id: opt.id,
-    clientKey: String(opt.id),
-    label: opt.label,
-    amountInput: centsToInput(opt.amountCents),
-    amountCents: opt.amountCents,
-    detail: opt.detail ?? "",
-  };
-}
-
-function parseLinesFromForm(form: FormData) {
-  const count = Number(form.get("lineCount") || 0);
-  const lines = [];
-  for (let i = 0; i < count; i++) {
-    const name = String(form.get(`line.${i}.name`) || "").trim();
-    if (!name) continue;
-    const quantity = Math.max(1, Number(form.get(`line.${i}.quantity`) || 1));
-    const desc = String(form.get(`line.${i}.description`) || "");
-    const descriptionLines = desc
-      .split(/\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
-    const priceRaw = String(form.get(`line.${i}.price`) || "0");
-    const unitPriceCents = parseBRLToCents(priceRaw) ?? 0;
-    const idRaw = form.get(`line.${i}.id`);
-    const lineId = idRaw ? Number(idRaw) : null;
-    const catalogRaw = form.get(`line.${i}.catalogItemId`);
-    const catalogItemId = catalogRaw ? Number(catalogRaw) : null;
-    const tokenRaw = form.get(`line.${i}.catalogResolutionToken`);
-    const catalogResolutionToken = tokenRaw ? String(tokenRaw) : null;
-    const imageRaw = form.get(`line.${i}.imageId`);
-    const imageId = imageRaw ? Number(imageRaw) : null;
-    lines.push({
-      ...(Number.isFinite(lineId as number) ? { id: lineId as number } : {}),
-      name,
-      quantity,
-      descriptionLines,
-      unitPriceCents,
-      catalogItemId: Number.isFinite(catalogItemId as number) ? catalogItemId : null,
-      catalogResolutionToken,
-      imageId: Number.isFinite(imageId as number) ? imageId : null,
-    });
-  }
-  return lines;
-}
-
-function parsePaymentsFromForm(form: FormData) {
-  const count = Number(form.get("paymentCount") || 0);
-  const options = [];
-  for (let i = 0; i < count; i++) {
-    const label = String(form.get(`pay.${i}.label`) || "").trim();
-    if (!label) continue;
-    const amountCents = parseBRLToCents(String(form.get(`pay.${i}.amount`) || "0")) ?? 0;
-    const detail = String(form.get(`pay.${i}.detail`) || "") || null;
-    options.push({ label, amountCents, detail });
-  }
-  return options;
-}
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   const { user } = await requireAdmin(request);
   const id = Number(params.id);
-  if (!Number.isFinite(id)) return json({ error: "Invalid id" }, { status: 400 });
-
   const form = await request.formData();
   const intent = String(form.get("intent") || "save");
-  if (intent !== "save" && intent !== "save-print" && intent !== "autosave") {
-    return json({ error: "Unknown intent" }, { status: 400 });
+  const revision = Number(form.get("revision")) || 0;
+  if (!Number.isInteger(id) || (intent !== "save" && intent !== "save-print" && intent !== "autosave")) {
+    return data({ ok: false as const, status: 400, error: "Pedido inválido.", revision }, { status: 400 });
   }
+  const parsed = parseQuotationForm(form);
+  if ("error" in parsed) return data({ ok: false as const, status: 400, error: parsed.error, revision }, { status: 400 });
 
-  const revision = Number(form.get("revision") || 0);
-  const issuedRaw = String(form.get("issuedAt") || "");
-  const issuedAt = issuedRaw ? new Date(issuedRaw + "T12:00:00") : undefined;
-  const result = await saveQuotation({
+  const result = await saveQuotation({ quotationId: id, ownerUserId: user.id, ...parsed });
+  if (!result.ok) return data({ ok: false as const, status: result.status, error: result.error, revision }, { status: result.status });
+  return data({
+    ok: true as const,
     quotationId: id,
-    ownerUserId: user.id,
-    revision: Number.isFinite(revision) ? revision : 0,
-    intent: intent as "save" | "save-print" | "autosave",
-    title: String(form.get("title") || ""),
-    issuedAt,
-    status: String(form.get("status") || "draft") === "final" ? "final" : "draft",
-    location: String(form.get("location") || "") || null,
-    document: String(form.get("document") || "") || null,
-    notes: String(form.get("notes") || "") || null,
-    lines: parseLinesFromForm(form),
-    paymentOptions: parsePaymentsFromForm(form),
-  });
-
-  return json({ ...result, revision: Number.isFinite(revision) ? revision : 0 }, {
-    status: result.ok ? 200 : result.status,
+    revision,
+    ...(intent === "save-print" ? { redirectTo: `/admin/quotations/${id}/print?autoprint=1` } : {}),
   });
 };
 
+/** The editor keeps its own draft; its saves never need the loader again. Client edits do. */
 export const shouldRevalidate = ({ actionResult, defaultShouldRevalidate }: ShouldRevalidateFunctionArgs) => {
-  if (actionResult && typeof actionResult === "object" && "ok" in actionResult) {
-    return false;
-  }
+  if (actionResult && typeof actionResult === "object" && "ok" in actionResult) return false;
   return defaultShouldRevalidate;
 };
 
@@ -211,26 +92,71 @@ function newClientKey() {
   return `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function bulletsOf(raw: unknown) {
+  return Array.isArray(raw) ? raw.map(String).filter(Boolean) : [];
+}
+
+function lineToDraft(line: QuotationDocumentRecord["lines"][number]): QuotationEditorLine {
+  return {
+    clientKey: String(line.id),
+    name: line.name,
+    quantity: line.quantity,
+    description: bulletsOf(line.descriptionLines).join("\n"),
+    priceInput: centsToInput(line.unitPriceCents),
+    unitPriceCents: line.unitPriceCents,
+    catalogVariantId: line.catalogVariantId,
+    imageId: line.imageId,
+    imageUrl: line.image?.location ?? null,
+    imageThumbnail: line.image?.thumbnail ?? null,
+    openOnMount: false,
+  };
+}
+
+function catalogItemToDraft(item: CatalogPickerItem): QuotationEditorLine {
+  return {
+    clientKey: newClientKey(),
+    name: item.name,
+    quantity: 1,
+    description: item.descriptionLines.join("\n"),
+    priceInput: centsToInput(item.unitPriceCents ?? 0),
+    unitPriceCents: item.unitPriceCents ?? 0,
+    catalogVariantId: item.variantId,
+    imageId: item.imageId,
+    imageUrl: item.imageUrl,
+    imageThumbnail: item.imageThumbnail,
+    openOnMount: false,
+  };
+}
+
+function paymentToDraft(option: QuotationDocumentRecord["paymentOptions"][number]): QuotationEditorPayment {
+  return {
+    clientKey: String(option.id),
+    label: option.label,
+    amountInput: centsToInput(option.amountCents),
+    amountCents: option.amountCents,
+    detail: option.detail ?? "",
+  };
+}
+
+function toDateInput(value: Date | string) {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
 const AUTOSAVE_EVERY_MS = 2 * 60 * 1000;
 
 export default function QuotationBuilder() {
-  const { quotation, catalog, rep } = useLoaderData<typeof loader>();
+  const { quotation, clients, catalog, rep } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
-  const issuedValue = new Date(quotation.issuedAt).toISOString().slice(0, 10);
   const quotationId = quotation.id;
 
   const [pane, setPane] = useState<"edit" | "preview">("edit");
   const [isLg, setIsLg] = useState(false);
-  const [title, setTitle] = useState(quotation.title);
-  const [issuedAt, setIssuedAt] = useState(issuedValue);
+  const [clientId, setClientId] = useState(quotation.client.id);
+  const [issuedAt, setIssuedAt] = useState(() => toDateInput(quotation.issuedAt));
   const [status, setStatus] = useState(quotation.status);
-  const [location, setLocation] = useState(quotation.client.location ?? "");
-  const [document, setDocument] = useState(quotation.client.document ?? "");
   const [notes, setNotes] = useState(quotation.notes ?? "");
-  const [lines, setLines] = useState<DraftLine[]>(() => quotation.lines.map(lineToDraft));
-  const [payments, setPayments] = useState<DraftPayment[]>(() =>
-    quotation.paymentOptions.map(paymentToDraft),
-  );
+  const [lines, setLines] = useState<QuotationEditorLine[]>(() => quotation.lines.map(lineToDraft));
+  const [payments, setPayments] = useState<QuotationEditorPayment[]>(() => quotation.paymentOptions.map(paymentToDraft));
   const [lineUploadErrors, setLineUploadErrors] = useState<Record<string, string>>({});
   const [lineUploadingKey, setLineUploadingKey] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -243,8 +169,7 @@ export default function QuotationBuilder() {
   const lineUploadingKeyRef = useRef<string | null>(null);
   saveFetcherRef.current = saveFetcher;
   lineUploadingKeyRef.current = lineUploadingKey;
-  const saveBusy = saveFetcher.state !== "idle";
-  const busy = saveBusy || lineUploadingKey !== null;
+  const busy = saveFetcher.state !== "idle" || lineUploadingKey !== null;
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
@@ -254,30 +179,22 @@ export default function QuotationBuilder() {
     return () => mql.removeEventListener("change", sync);
   }, []);
 
+  // Reset the draft only when another quotation opens. A revalidation after a client edit must keep unsaved work.
+  const loadedIdRef = useRef(quotationId);
   useEffect(() => {
+    if (loadedIdRef.current === quotationId) return;
+    loadedIdRef.current = quotationId;
     ignoreDirtyUntilRef.current = 1;
     revisionStateRef.current = initialRevisionState();
     setAutosaveHint(null);
-    setTitle(quotation.title);
-    setIssuedAt(new Date(quotation.issuedAt).toISOString().slice(0, 10));
+    setClientId(quotation.client.id);
+    setIssuedAt(toDateInput(quotation.issuedAt));
     setStatus(quotation.status);
-    setLocation(quotation.client.location ?? "");
-    setDocument(quotation.client.document ?? "");
     setNotes(quotation.notes ?? "");
     setLines(quotation.lines.map(lineToDraft));
     setPayments(quotation.paymentOptions.map(paymentToDraft));
     setActionError(null);
-  }, [
-    quotationId,
-    quotation.client.document,
-    quotation.client.location,
-    quotation.issuedAt,
-    quotation.lines,
-    quotation.notes,
-    quotation.paymentOptions,
-    quotation.status,
-    quotation.title,
-  ]);
+  }, [quotationId, quotation]);
 
   useEffect(() => {
     if (ignoreDirtyUntilRef.current > 0) {
@@ -287,13 +204,10 @@ export default function QuotationBuilder() {
     revisionStateRef.current = markRevisionEdited(revisionStateRef.current);
     setActionError(null);
     setAutosaveHint(null);
-  }, [title, issuedAt, status, location, document, notes, lines, payments]);
+  }, [clientId, issuedAt, status, notes, lines, payments]);
 
   useEffect(() => {
-    const data = saveFetcher.data as
-      | { ok: true; quotationId: number; revision: number; redirectTo?: string }
-      | { ok: false; status: number; error: string; revision: number }
-      | undefined;
+    const data = saveFetcher.data;
     if (saveFetcher.state !== "idle" || !data) return;
     const completion = completeRevisionSave(revisionStateRef.current, data);
     revisionStateRef.current = completion.state;
@@ -302,117 +216,82 @@ export default function QuotationBuilder() {
       setActionError(completion.effect.message);
       return;
     }
-
     setActionError(null);
     if (completion.effect.type === "navigate") {
       navigate(completion.effect.to);
       return;
     }
-    setAutosaveHint(
-      `Rascunho salvo às ${new Date().toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}`,
-    );
+    setAutosaveHint(`Rascunho salvo às ${new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`);
   }, [navigate, saveFetcher.data, saveFetcher.state]);
 
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (status !== "draft") return;
-      const fetcher = saveFetcherRef.current;
-      if (!revisionStateRef.current.dirty || !formRef.current) return;
-      if (fetcher.state !== "idle" || lineUploadingKeyRef.current !== null) return;
-      submitQuotation("autosave");
-    }, AUTOSAVE_EVERY_MS);
-    return () => window.clearInterval(id);
-  }, [status]);
-
-  function submitQuotation(intent: "save" | "save-print" | "autosave") {
+  const submitQuotation = useCallback((intent: "save" | "save-print" | "autosave") => {
     const form = formRef.current;
     const fetcher = saveFetcherRef.current;
     if (!form || fetcher.state !== "idle" || lineUploadingKeyRef.current !== null) return;
-
     const begun = beginRevisionSave(revisionStateRef.current);
     revisionStateRef.current = begun.state;
-
     const body = new FormData(form);
     body.set("intent", intent);
     body.set("revision", String(begun.requestRevision));
     fetcher.submit(body, { method: "post" });
     setActionError(null);
-  }
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (status !== "draft" || !revisionStateRef.current.dirty) return;
+      submitQuotation("autosave");
+    }, AUTOSAVE_EVERY_MS);
+    return () => window.clearInterval(id);
+  }, [status, submitQuotation]);
 
   function handleFormSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-    const intent = submitter?.value === "save-print" ? "save-print" : "save";
-    submitQuotation(intent);
+    submitQuotation(submitter?.value === "save-print" ? "save-print" : "save");
   }
 
-  const updateLine = useCallback((clientKey: string, patch: Partial<DraftLine>) => {
+  const updateLine = useCallback((clientKey: string, patch: Partial<QuotationEditorLine>) => {
     setLines((prev) =>
       updateEditorRow(prev, clientKey, (line) => {
         const next = { ...line, ...patch };
-        if (patch.priceInput !== undefined) {
-          next.unitPriceCents = parseBRLToCents(patch.priceInput) ?? line.unitPriceCents;
-        }
+        if (patch.priceInput !== undefined) next.unitPriceCents = parseBRLToCents(patch.priceInput) ?? line.unitPriceCents;
         return next;
       }),
     );
   }, []);
 
-  const updatePayment = useCallback((clientKey: string, patch: Partial<DraftPayment>) => {
+  const updatePayment = useCallback((clientKey: string, patch: Partial<QuotationEditorPayment>) => {
     setPayments((prev) =>
       updateEditorRow(prev, clientKey, (payment) => {
         const next = { ...payment, ...patch };
-        if (patch.amountInput !== undefined) {
-          next.amountCents = parseBRLToCents(patch.amountInput) ?? payment.amountCents;
-        }
+        if (patch.amountInput !== undefined) next.amountCents = parseBRLToCents(patch.amountInput) ?? payment.amountCents;
         return next;
       }),
     );
   }, []);
 
   const addBlankLine = useCallback(() => {
-    const clientKey = newClientKey();
     setLines((prev) => [
       ...prev,
       {
-        id: null,
-        clientKey,
-        name: "Novo item",
+        clientKey: newClientKey(),
+        name: "",
         quantity: 1,
         description: "",
         priceInput: "0,00",
         unitPriceCents: 0,
-        catalogItemId: null,
-        catalogResolutionToken: null,
+        catalogVariantId: null,
         imageId: null,
         imageUrl: null,
         imageThumbnail: null,
+        openOnMount: true,
       },
     ]);
   }, []);
 
-  const addCatalogDraft = useCallback((draft: CatalogPickerAddedDraft) => {
-    const clientKey = newClientKey();
-    setLines((current) => [
-      ...current,
-      {
-        id: null,
-        clientKey,
-        name: draft.name,
-        quantity: 1,
-        description: draft.descriptionLines.join("\n"),
-        priceInput: centsToInput(draft.unitPriceCents ?? 0),
-        unitPriceCents: draft.unitPriceCents ?? 0,
-        catalogItemId: draft.catalogItemId,
-        catalogResolutionToken: draft.catalogResolutionToken,
-        imageId: draft.imageId,
-        imageUrl: draft.imageUrl,
-        imageThumbnail: draft.imageThumbnail,
-      },
-    ]);
+  const addCatalogItems = useCallback((items: CatalogPickerItem[]) => {
+    setLines((current) => [...current, ...items.map(catalogItemToDraft)]);
   }, []);
 
   const removeLine = useCallback((clientKey: string) => {
@@ -420,82 +299,51 @@ export default function QuotationBuilder() {
   }, []);
 
   const addPayment = useCallback(() => {
-    const clientKey = newClientKey();
-    setPayments((prev) => [
-      ...prev,
-      {
-        id: null,
-        clientKey,
-        label: "À vista",
-        amountInput: "0,00",
-        amountCents: 0,
-        detail: "",
-      },
-    ]);
+    setPayments((prev) => [...prev, { clientKey: newClientKey(), label: "À vista", amountInput: "0,00", amountCents: 0, detail: "" }]);
   }, []);
 
   const removePayment = useCallback((clientKey: string) => {
     setPayments((prev) => prev.filter((payment) => payment.clientKey !== clientKey));
   }, []);
 
-  const handleLineImageUpload = useCallback(async (clientKey: string, file: File) => {
-    setLineUploadErrors((prev) => {
-      const next = { ...prev };
-      delete next[clientKey];
-      return next;
-    });
-
-    setLineUploadingKey(clientKey);
-    try {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("folder", "quotes");
-      const res = await fetch("/admin/uploads", {
-        method: "POST",
-        body,
-        credentials: "same-origin",
+  const handleLineImageUpload = useCallback(
+    async (clientKey: string, file: File) => {
+      setLineUploadErrors((prev) => {
+        const next = { ...prev };
+        delete next[clientKey];
+        return next;
       });
-      const data = (await res.json()) as { id?: number; location?: string; thumbnail?: string; error?: string };
-      if (!res.ok || data.error || data.id == null) {
-        setLineUploadErrors((prev) => ({
-          ...prev,
-          [clientKey]: data.error ?? "Falha no envio da imagem",
-        }));
-        return;
+      setLineUploadingKey(clientKey);
+      try {
+        const body = new FormData();
+        body.append("file", file);
+        body.append("folder", "quotes");
+        const res = await fetch("/admin/uploads", { method: "POST", body, credentials: "same-origin" });
+        const data = (await res.json()) as { id?: number; location?: string; thumbnail?: string; error?: string };
+        if (!res.ok || data.error || data.id == null) {
+          setLineUploadErrors((prev) => ({ ...prev, [clientKey]: data.error ?? "Falha no envio da imagem" }));
+          return;
+        }
+        updateLine(clientKey, { imageId: data.id, imageUrl: data.location ?? null, imageThumbnail: data.thumbnail ?? null });
+      } catch {
+        setLineUploadErrors((prev) => ({ ...prev, [clientKey]: "Falha no envio da imagem" }));
+      } finally {
+        setLineUploadingKey(null);
       }
+    },
+    [updateLine],
+  );
 
-      updateLine(clientKey, {
-        imageId: data.id,
-        imageUrl: data.location ?? null,
-        imageThumbnail: data.thumbnail ?? null,
-      });
-    } catch {
-      setLineUploadErrors((prev) => ({
-        ...prev,
-        [clientKey]: "Falha no envio da imagem",
-      }));
-    } finally {
-      setLineUploadingKey(null);
-    }
-  }, [updateLine]);
-
+  const client = clients.find((candidate) => candidate.id === clientId) ?? quotation.client;
   const previewInput = useMemo(
     () => ({
-      title,
       issuedAt,
-      client: {
-        name: quotation.client.name,
-        location: location || null,
-        document: document || null,
-      },
+      client,
       lines: lines.map((line) => ({
         clientKey: line.clientKey,
         name: line.name,
         quantity: line.quantity,
-        descriptionLines: line.description
-          .split(/\n/)
-          .map((l) => l.trim())
-          .filter(Boolean),
+        descriptionLines: splitBullets(line.description),
         unitPriceCents: line.unitPriceCents,
         imageUrl: line.imageUrl,
         thumbnailUrl: line.imageThumbnail,
@@ -509,7 +357,7 @@ export default function QuotationBuilder() {
       notes: notes || null,
       rep,
     }),
-    [title, issuedAt, quotation.client.name, location, document, lines, payments, notes, rep],
+    [issuedAt, client, lines, payments, notes, rep],
   );
   const showPreview = isLg || pane === "preview";
 
@@ -524,24 +372,16 @@ export default function QuotationBuilder() {
               </Link>{" "}
               / Editor
             </p>
-            <h1 className="font-display text-xl font-bold">{quotation.title}</h1>
+            <h1 className="font-display text-xl font-bold">
+              Orçamento nº {quotation.id} · {client.name}
+            </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex gap-2 lg:hidden">
-              <Button
-                type="button"
-                variant={pane === "edit" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setPane("edit")}
-              >
+              <Button type="button" variant={pane === "edit" ? "default" : "outline"} size="sm" onClick={() => setPane("edit")}>
                 Editar
               </Button>
-              <Button
-                type="button"
-                variant={pane === "preview" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setPane("preview")}
-              >
+              <Button type="button" variant={pane === "preview" ? "default" : "outline"} size="sm" onClick={() => setPane("preview")}>
                 Prévia
               </Button>
             </div>
@@ -559,42 +399,22 @@ export default function QuotationBuilder() {
           method="post"
           ref={formRef}
           onSubmit={handleFormSubmit}
-          className={cn(
-            "no-print space-y-6 self-start border border-border bg-white p-4",
-            pane !== "edit" && "hidden lg:block",
-          )}
+          className={cn("no-print space-y-6 self-start border border-border bg-white p-4", pane !== "edit" && "hidden lg:block")}
         >
           <input type="hidden" name="lineCount" value={lines.length} />
           <input type="hidden" name="paymentCount" value={payments.length} />
 
           {actionError ? (
-            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {actionError}
-            </p>
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">{actionError}</p>
           ) : null}
 
           <section className="space-y-3">
             <h2 className="font-display text-lg font-semibold">Cabeçalho</h2>
-            <div>
-              <Label htmlFor="title">Título / Cliente</Label>
-              <Input
-                id="title"
-                name="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
+            <EditorClientSection clients={clients} clientId={clientId} onClientChange={setClientId} />
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label htmlFor="issuedAt">Data</Label>
-                <Input
-                  id="issuedAt"
-                  name="issuedAt"
-                  type="date"
-                  value={issuedAt}
-                  onChange={(e) => setIssuedAt(e.target.value)}
-                />
+                <Input id="issuedAt" name="issuedAt" type="date" value={issuedAt} onChange={(e) => setIssuedAt(e.target.value)} />
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
@@ -610,21 +430,6 @@ export default function QuotationBuilder() {
                 </select>
               </div>
             </div>
-            <div>
-              <Label htmlFor="location">Local (opcional)</Label>
-              <Input
-                id="location"
-                name="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
-            </div>
-            <TaxIdInput
-              id="document"
-              name="document"
-              value={document}
-              onValueChange={setDocument}
-            />
           </section>
 
           <section className="space-y-3">
@@ -634,7 +439,14 @@ export default function QuotationBuilder() {
                 + Linha avulsa
               </Button>
             </div>
-            <CatalogVariationPicker summaries={catalog} onAdd={addCatalogDraft} />
+            <Suspense fallback={<CatalogPicker items={null} categories={[]} onAdd={addCatalogItems} />}>
+              <Await
+                resolve={catalog}
+                errorElement={<p className="text-sm text-destructive">Não foi possível carregar o catálogo. Recarregue a página.</p>}
+              >
+                {(loaded) => <CatalogPicker items={loaded.items} categories={loaded.categories} onAdd={addCatalogItems} />}
+              </Await>
+            </Suspense>
             {lines.map((line, i) => (
               <QuotationEditorLineRow
                 key={line.clientKey}
@@ -670,13 +482,7 @@ export default function QuotationBuilder() {
               </Button>
             </div>
             {payments.map((opt, i) => (
-              <QuotationEditorPaymentRow
-                key={opt.clientKey}
-                payment={opt}
-                index={i}
-                onRemove={removePayment}
-                onChange={updatePayment}
-              />
+              <QuotationEditorPaymentRow key={opt.clientKey} payment={opt} index={i} onRemove={removePayment} onChange={updatePayment} />
             ))}
           </section>
 
@@ -695,12 +501,7 @@ export default function QuotationBuilder() {
           </div>
         </Form>
 
-        <div
-          className={cn(
-            "space-y-3 self-start lg:sticky lg:top-4 print:static",
-            pane !== "preview" && "hidden lg:block print:block",
-          )}
-        >
+        <div className={cn("space-y-3 self-start lg:sticky lg:top-4 print:static", pane !== "preview" && "hidden lg:block print:block")}>
           {showPreview ? (
             <div className="overflow-x-auto border border-border bg-zinc-200/60 p-2 print:flex print:justify-center print:overflow-visible print:border-0 print:bg-white print:p-0 sm:p-4">
               <div className="origin-top-left min-w-[320px] print:min-w-0">

@@ -71,11 +71,4 @@ describe("fresh-app legacy product removal", () => {
     expect(migration).not.toMatch(/preflight|acknowledge|IF EXISTS|RAISE EXCEPTION/i);
     expect(existsSync(path.join(root, "scripts/legacy-products/preflight.ts"))).toBe(false);
   });
-
-  it("seeds the normalized catalog by slug without legacy alias fallback", () => {
-    const seed = source("prisma/seed.js");
-    expect(seed).toContain("prisma.quoteCatalogItem.upsert");
-    expect(seed).not.toContain("prisma.quoteCatalogAlias");
-    expect(seed).not.toContain("normalizeCatalogAlias");
-  });
 });

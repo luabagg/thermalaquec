@@ -5,9 +5,18 @@ import { QuotationDocument } from "./QuotationDocument";
 import { updateEditorRow } from "~/utils/quotation-editor-state";
 
 const documentProps = {
-  title: "Quote",
-  issuedAt: "2026-08-29T12:00:00.000Z",
-  client: { name: "Client", location: null, document: null },
+  issuedAt: "2026-08-29T00:00:00.000Z",
+  client: {
+    name: "Client",
+    document: null,
+    phone: null,
+    street: null,
+    number: null,
+    complement: null,
+    district: null,
+    city: "Farroupilha",
+    state: "RS",
+  },
   lines: [
     {
       clientKey: "line-1",

@@ -1,16 +1,11 @@
 import { memo, useDeferredValue } from "react";
 
-import { QuotationDocument } from "~/components/admin/QuotationDocument";
+import { QuotationDocument, type QuotationDocumentClient } from "~/components/admin/QuotationDocument";
 import type { QuoteRepProfile } from "~/lib/site";
 
 export type QuotationPreviewProps = {
-  title: string;
   issuedAt: string;
-  client: {
-    name: string;
-    location: string | null;
-    document: string | null;
-  };
+  client: QuotationDocumentClient;
   lines: Array<{
     clientKey: string;
     name: string;
@@ -35,7 +30,6 @@ export const QuotationPreview = memo(function QuotationPreview(props: QuotationP
 
   return (
     <QuotationDocument
-      title={preview.title}
       issuedAt={preview.issuedAt}
       client={preview.client}
       lines={preview.lines}

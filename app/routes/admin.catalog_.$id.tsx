@@ -1,1010 +1,412 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import type { CatalogFamilyInput } from "~/utils/catalog-resolver";
+import { data, redirect } from "@remix-run/node";
+import { Form, Link, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
+import { ChevronDown, Trash2 } from "lucide-react";
+import { useState } from "react";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { json } from "@remix-run/node";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { Button } from "~/components/ui/button";
 import { FileButton } from "~/components/ui/file-button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { archiveCatalogFamily, getCatalogFamilyDetail, restoreCatalogFamily, updateCatalogFamilyAggregate } from "~/models/catalog.server";
-import { catalogMutationErrorResponse, parseCatalogAggregateJson, toStringArray } from "~/utils/catalog-admin";
-import { catalogVariantKey, resolveCatalogSelection } from "~/utils/catalog-resolver";
-import { formatBRL, parseBRLToCents } from "~/utils/quotation";
+import {
+  archiveCatalogProduct,
+  deleteCatalogProduct,
+  getCatalogProduct,
+  listCatalogCategories,
+  restoreCatalogProduct,
+  updateCatalogProduct,
+  type CatalogMutationResult,
+  type CatalogProductDetail,
+} from "~/models/catalog.server";
+import { STALE_CATALOG_MESSAGE, formatAttributes, parseCatalogProductForm } from "~/utils/catalog-admin";
+import { formatBRL } from "~/utils/quotation";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) =>
-  buildNoIndexMeta(data ? `${data.item.name} | Catálogo | ${SITE_NAME}` : `Catálogo | ${SITE_NAME}`);
+  buildNoIndexMeta(`${data?.product.name ?? "Produto"} | Catálogo | ${SITE_NAME}`);
 
-export type EditorOption = {
-  id?: number;
-  clientKey: string;
-  name: string;
-  slug: string;
-  placement: "TITLE" | "DESCRIPTION";
-  sortOrder: number;
-  values: Array<{
-    id?: number;
-    clientKey: string;
-    label: string;
-    slug: string;
-    titleFragment: string | null;
-    descriptionLines: string[];
-    sortOrder: number;
-  }>;
-};
-
-export type EditorVariant = {
-  id?: number;
-  clientKey: string;
-  valueClientKeys: string[];
-  sku: string | null;
-  active: boolean;
-  nameOverride: string | null;
-  descriptionLinesOverride: string[] | null;
-  unitPriceCents: number | null;
-  imageId: number | null;
-};
-
-export type EditorState = {
-  id: number;
-  expectedUpdatedAt: string;
-  family: {
-    slug: string;
-    name: string;
-    nameTemplate: string | null;
-    descriptionLines: string[];
-    defaultUnitPriceCents: number | null;
-    imageId: number | null;
-  };
-  options: EditorOption[];
-  variants: EditorVariant[];
-};
-
-export type PendingRemoval = {
-  kind: "option" | "value";
-  optionClientKey: string;
-  valueClientKey?: string;
-  label: string;
-  affectedVariantClientKeys: string[];
-};
-
-export function detailToEditorState(item: NonNullable<Awaited<ReturnType<typeof getCatalogFamilyDetail>>>): EditorState {
-  return {
-    id: item.id,
-    expectedUpdatedAt: item.updatedAt.toISOString(),
-    family: {
-      slug: item.slug,
-      name: item.name,
-      nameTemplate: item.nameTemplate,
-      descriptionLines: toStringArray(item.descriptionLines),
-      defaultUnitPriceCents: item.defaultUnitPriceCents,
-      imageId: item.imageId,
-    },
-    options: item.options.map((option, optionIndex) => ({
-      id: option.id,
-      clientKey: `option-${option.id}`,
-      name: option.name,
-      slug: option.slug,
-      placement: option.placement,
-      sortOrder: option.sortOrder ?? optionIndex,
-      values: option.values.map((value, valueIndex) => ({
-        id: value.id,
-        clientKey: `value-${value.id}`,
-        label: value.label,
-        slug: value.slug,
-        titleFragment: value.titleFragment,
-        descriptionLines: toStringArray(value.descriptionLines),
-        sortOrder: value.sortOrder ?? valueIndex,
-      })),
-    })),
-    variants: item.variants.map((variant, variantIndex) => ({
-      id: variant.id,
-      clientKey: `variant-${variant.id ?? variantIndex}`,
-      valueClientKeys: variant.values.map((entry) => `value-${entry.optionValueId}`),
-      sku: variant.sku,
-      active: variant.active,
-      nameOverride: variant.nameOverride,
-      descriptionLinesOverride: variant.descriptionLinesOverride ? toStringArray(variant.descriptionLinesOverride) : null,
-      unitPriceCents: variant.unitPriceCents,
-      imageId: variant.imageId,
-    })),
-  };
-}
-
-function syntheticNumericId(clientKey: string) {
-  let hash = 2166136261;
-  for (let index = 0; index < clientKey.length; index += 1) {
-    hash ^= clientKey.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return -(Math.abs(hash) + 1);
-}
-
-function syntheticIds(prefix: string, clientKeys: string[]) {
-  const result = new Map<string, number>();
-  const used = new Set<number>();
-  for (const clientKey of [...new Set(clientKeys)].sort()) {
-    let id = syntheticNumericId(`${prefix}:${clientKey}`);
-    while (used.has(id)) id -= 1;
-    used.add(id);
-    result.set(clientKey, id);
-  }
-  return result;
-}
-
-/** Builds an in-memory resolver model. Synthetic IDs exist only here and are never submitted. */
-export function buildPreviewModel(state: EditorState): {
-  family: CatalogFamilyInput;
-  valueIdByClientKey: Map<string, number>;
-} {
-  const optionSyntheticIds = syntheticIds(
-    "option",
-    state.options.filter((option) => option.id === undefined).map((option) => option.clientKey)
-  );
-  const unsavedValues = state.options.flatMap((option) => option.values).filter((value) => value.id === undefined);
-  const valueSyntheticIds = syntheticIds(
-    "value",
-    unsavedValues.map((value) => value.clientKey)
-  );
-  const variantSyntheticIds = syntheticIds(
-    "variant",
-    state.variants.filter((variant) => variant.id === undefined).map((variant) => variant.clientKey)
-  );
-  const valueIdByClientKey = new Map<string, number>();
-  for (const option of state.options) {
-    for (const value of option.values) {
-      valueIdByClientKey.set(value.clientKey, value.id ?? valueSyntheticIds.get(value.clientKey)!);
-    }
-  }
-
-  return {
-    valueIdByClientKey,
-    family: {
-      id: state.id,
-      slug: state.family.slug,
-      name: state.family.name,
-      nameTemplate: state.family.nameTemplate,
-      descriptionLines: state.family.descriptionLines,
-      defaultUnitPriceCents: state.family.defaultUnitPriceCents,
-      imageId: state.family.imageId,
-      options: state.options.map((option) => ({
-        id: option.id ?? optionSyntheticIds.get(option.clientKey)!,
-        name: option.name,
-        slug: option.slug,
-        placement: option.placement,
-        sortOrder: option.sortOrder,
-        values: option.values.map((value) => ({
-          id: valueIdByClientKey.get(value.clientKey)!,
-          label: value.label,
-          slug: value.slug,
-          titleFragment: value.titleFragment,
-          descriptionLines: value.descriptionLines,
-          sortOrder: value.sortOrder,
-        })),
-      })),
-      variants: state.variants.map((variant) => {
-        const valueIds = variant.valueClientKeys
-          .map((clientKey) => valueIdByClientKey.get(clientKey))
-          .filter((valueId): valueId is number => valueId !== undefined);
-        return {
-          id: variant.id ?? variantSyntheticIds.get(variant.clientKey)!,
-          key: catalogVariantKey(valueIds),
-          active: variant.active,
-          valueIds,
-          nameOverride: variant.nameOverride,
-          descriptionLinesOverride: variant.descriptionLinesOverride,
-          unitPriceCents: variant.unitPriceCents,
-          imageId: variant.imageId,
-        };
-      }),
-    },
-  };
-}
-
-export function appendEditorOption(state: EditorState, clientKey: string): EditorState {
-  return {
-    ...state,
-    options: [
-      ...state.options,
-      {
-        id: undefined,
-        clientKey,
-        name: "",
-        slug: "",
-        placement: "TITLE",
-        sortOrder: state.options.length,
-        values: [],
-      },
-    ],
-  };
-}
-
-export function appendEditorValue(state: EditorState, optionClientKey: string, clientKey: string): EditorState {
-  return {
-    ...state,
-    options: state.options.map((option) =>
-      option.clientKey !== optionClientKey
-        ? option
-        : {
-            ...option,
-            values: [
-              ...option.values,
-              {
-                id: undefined,
-                clientKey,
-                label: "",
-                slug: "",
-                titleFragment: null,
-                descriptionLines: [],
-                sortOrder: option.values.length,
-              },
-            ],
-          }
-    ),
-  };
-}
-
-export function appendEditorVariant(state: EditorState, clientKey: string): EditorState {
-  return {
-    ...state,
-    variants: [
-      ...state.variants,
-      {
-        id: undefined,
-        clientKey,
-        valueClientKeys: [],
-        sku: null,
-        active: true,
-        nameOverride: null,
-        descriptionLinesOverride: null,
-        unitPriceCents: null,
-        imageId: null,
-      },
-    ],
-  };
-}
-
-export function applyEditorRemoval(state: EditorState, removal: PendingRemoval): EditorState {
-  const affected = new Set(removal.affectedVariantClientKeys);
-  return {
-    ...state,
-    options: state.options
-      .filter((option) => removal.kind !== "option" || option.clientKey !== removal.optionClientKey)
-      .map((option) =>
-        option.clientKey !== removal.optionClientKey || removal.kind !== "value"
-          ? option
-          : {
-              ...option,
-              values: option.values.filter((value) => value.clientKey !== removal.valueClientKey),
-            }
-      ),
-    variants: state.variants.filter((variant) => !affected.has(variant.clientKey)),
-  };
-}
-
-export function DestructiveRemovalConfirmation({
-  removal,
-  confirmed,
-  onConfirmedChange,
-  onConfirm,
-  onCancel,
-}: {
-  removal: PendingRemoval;
-  confirmed: boolean;
-  onConfirmedChange: (confirmed: boolean) => void;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <section className="rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900" aria-labelledby="destructive-title">
-      <p id="destructive-title" className="font-medium">
-        Confirmar remoção de “{removal.label}”
-      </p>
-      <p className="mt-1">
-        Esta remoção também excluirá {removal.affectedVariantClientKeys.length}{" "}
-        {removal.affectedVariantClientKeys.length === 1 ? "combinação" : "combinações"}. IDs existentes só serão removidos após salvar.
-      </p>
-      <div className="mt-3 flex items-center gap-2">
-        <input id="confirm-destructive" type="checkbox" checked={confirmed} onChange={(event) => onConfirmedChange(event.target.checked)} />
-        <Label htmlFor="confirm-destructive">Entendo e quero remover o item e as combinações afetadas.</Label>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Button type="button" variant="destructive" size="sm" disabled={!confirmed} onClick={onConfirm}>
-          Confirmar remoção
-        </Button>
-        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-          Cancelar
-        </Button>
-      </div>
-    </section>
-  );
+function productId(raw: string | undefined) {
+  const id = Number(raw);
+  if (!Number.isInteger(id)) throw new Response("Not found", { status: 404 });
+  return id;
 }
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   await requireAdmin(request);
-  const id = Number(params.id);
-  if (!Number.isFinite(id)) throw new Response("Not Found", { status: 404 });
-  const item = await getCatalogFamilyDetail(id);
-  if (!item) throw new Response("Not Found", { status: 404 });
-  return json({ item, editorState: detailToEditorState(item) });
+  const [product, categories] = await Promise.all([getCatalogProduct(productId(params.id)), listCatalogCategories()]);
+  if (!product) throw new Response("Not found", { status: 404 });
+  return { product, categories };
 };
+
+function mutationError(result: Exclude<CatalogMutationResult, { ok: true }>) {
+  if (result.error === "stale") return data({ error: STALE_CATALOG_MESSAGE }, { status: 409 });
+  if (result.error === "not_found") return data({ error: "Produto não encontrado." }, { status: 404 });
+  return data({ error: result.message ?? "Dados inválidos." }, { status: 400 });
+}
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
   await requireAdmin(request);
-  const id = Number(params.id);
-  if (!Number.isFinite(id)) return json({ error: "Produto não encontrado" }, { status: 404 });
-
+  const id = productId(params.id);
   const form = await request.formData();
-  const intent = String(form.get("intent") || "save");
+  const intent = String(form.get("intent") ?? "save");
+  const expectedUpdatedAt = new Date(String(form.get("expectedUpdatedAt") ?? ""));
 
-  if (intent === "archive" || intent === "restore") {
-    const expectedUpdatedAt = String(form.get("expectedUpdatedAt") || "");
-    if (!expectedUpdatedAt) return json({ error: "Dados inválidos" }, { status: 400 });
-    const result =
-      intent === "archive" ? await archiveCatalogFamily(id, expectedUpdatedAt) : await restoreCatalogFamily(id, expectedUpdatedAt);
-    if (!result.ok) return catalogMutationErrorResponse(result);
-    return json({ ok: true });
+  if (intent === "archive" || intent === "restore" || intent === "delete") {
+    if (Number.isNaN(expectedUpdatedAt.valueOf())) return data({ error: STALE_CATALOG_MESSAGE }, { status: 409 });
+    const lifecycle = { archive: archiveCatalogProduct, restore: restoreCatalogProduct, delete: deleteCatalogProduct }[intent];
+    const result = await lifecycle(id, expectedUpdatedAt);
+    if (!result.ok) return mutationError(result);
+    return intent === "delete" ? redirect("/admin/catalog") : data({ saved: true as const });
   }
 
-  if (intent !== "save") return json({ error: "Ação inválida" }, { status: 400 });
-  const parsed = parseCatalogAggregateJson(String(form.get("aggregate") || ""));
-  if ("error" in parsed) return json({ error: parsed.error }, { status: 400 });
-  if (parsed.id !== id) return json({ error: "Dados inválidos" }, { status: 400 });
-
-  const result = await updateCatalogFamilyAggregate(parsed);
-  if (!result.ok) return catalogMutationErrorResponse(result);
-  return json({ ok: true });
+  const parsed = parseCatalogProductForm(form);
+  if (!parsed.ok) return data({ error: parsed.error }, { status: 400 });
+  const result = await updateCatalogProduct(id, parsed.expectedUpdatedAt, parsed.input);
+  if (!result.ok) return mutationError(result);
+  return data({ saved: true as const });
 };
 
-function previewErrorMessage(error: string) {
-  switch (error) {
-    case "missing_option":
-      return "Selecione um valor para cada opção.";
-    case "duplicate_option":
-      return "Cada opção só pode ter um valor selecionado.";
-    case "unknown_value":
-      return "Valor desconhecido na pré-visualização.";
-    case "unknown_combination":
-      return "Combinação não permitida.";
-    case "invalid_template":
-      return "Modelo de nome inválido.";
-    default:
-      return "Não foi possível pré-visualizar esta seleção.";
-  }
+type VariantDraft = {
+  clientKey: string;
+  id: number | null;
+  name: string;
+  attributes: string;
+  description: string;
+  price: string;
+  imageId: number | null;
+  imageUrl: string | null;
+  active: boolean;
+  openOnMount: boolean;
+};
+
+function centsToInput(cents: number | null) {
+  return cents === null ? "" : (cents / 100).toFixed(2).replace(".", ",");
 }
 
-function nullableNumber(raw: string) {
-  if (!raw.trim()) return null;
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : null;
+function bullets(value: unknown) {
+  return Array.isArray(value) ? value.map(String).join("\n") : "";
 }
 
-export default function AdminCatalogEditor() {
-  const { item, editorState } = useLoaderData<typeof loader>();
+function toDrafts(product: CatalogProductDetail): VariantDraft[] {
+  return product.variants.map((variant) => ({
+    clientKey: String(variant.id),
+    id: variant.id,
+    name: variant.name,
+    attributes: formatAttributes(variant.attributes),
+    description: bullets(variant.descriptionLines),
+    price: centsToInput(variant.priceCents),
+    imageId: variant.imageId,
+    imageUrl: variant.image?.thumbnail ?? variant.image?.location ?? null,
+    active: variant.active,
+    openOnMount: false,
+  }));
+}
+
+async function uploadCatalogImage(file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("folder", "catalog");
+  const res = await fetch("/admin/uploads", { method: "POST", body, credentials: "same-origin" });
+  const payload = (await res.json()) as { id?: number; location?: string; thumbnail?: string; error?: string };
+  if (!res.ok || payload.id == null) throw new Error(payload.error ?? "Falha no envio da imagem");
+  return { id: payload.id, url: payload.thumbnail ?? payload.location ?? null };
+}
+
+const areaClass = "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
+
+function ProductEditor({ product, categories }: ReturnType<typeof useLoaderData<typeof loader>>) {
   const actionData = useActionData<typeof action>();
-  const [state, setState] = useState<EditorState>(editorState);
-  const [previewValueClientKeys, setPreviewValueClientKeys] = useState<string[]>([]);
-  const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
-  const [confirmDestructive, setConfirmDestructive] = useState(false);
+  const navigation = useNavigation();
+  const busy = navigation.state !== "idle";
+  const [variants, setVariants] = useState(() => toDrafts(product));
+  const [productImage, setProductImage] = useState({ id: product.imageId, url: product.image?.thumbnail ?? product.image?.location ?? null });
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(item.Image?.thumbnail ?? item.Image?.location ?? null);
-  const nextClientKey = useRef(1);
+  const expectedUpdatedAt = new Date(product.updatedAt).toISOString();
 
-  useEffect(() => {
-    setState(editorState);
-    setPreviewValueClientKeys([]);
-    setPendingRemoval(null);
-    setConfirmDestructive(false);
-    setImagePreview(item.Image?.thumbnail ?? item.Image?.location ?? null);
-  }, [editorState, item.Image]);
+  const patchVariant = (clientKey: string, patch: Partial<VariantDraft>) =>
+    setVariants((current) => current.map((variant) => (variant.clientKey === clientKey ? { ...variant, ...patch } : variant)));
 
-  const aggregateJson = useMemo(() => JSON.stringify(state), [state]);
-  const preview = useMemo(() => {
-    if (!previewValueClientKeys.length) return null;
-    const model = buildPreviewModel(state);
-    const valueIds = previewValueClientKeys
-      .map((clientKey) => model.valueIdByClientKey.get(clientKey))
-      .filter((valueId): valueId is number => valueId !== undefined);
-    return resolveCatalogSelection(model.family, valueIds);
-  }, [previewValueClientKeys, state]);
-
-  function makeClientKey(prefix: string) {
-    const key = `${prefix}-new-${nextClientKey.current}`;
-    nextClientKey.current += 1;
-    return key;
-  }
-
-  function updateFamily(patch: Partial<EditorState["family"]>) {
-    setState((current) => ({ ...current, family: { ...current.family, ...patch } }));
-  }
-
-  function updateOption(optionClientKey: string, patch: Partial<EditorOption>) {
-    setState((current) => ({
-      ...current,
-      options: current.options.map((option) => (option.clientKey === optionClientKey ? { ...option, ...patch } : option)),
-    }));
-  }
-
-  function updateValue(optionClientKey: string, valueClientKey: string, patch: Partial<EditorOption["values"][number]>) {
-    setState((current) => ({
-      ...current,
-      options: current.options.map((option) =>
-        option.clientKey !== optionClientKey
-          ? option
-          : {
-              ...option,
-              values: option.values.map((value) => (value.clientKey === valueClientKey ? { ...value, ...patch } : value)),
-            }
-      ),
-    }));
-  }
-
-  function updateVariant(variantClientKey: string, patch: Partial<EditorVariant>) {
-    setState((current) => ({
-      ...current,
-      variants: current.variants.map((variant) => (variant.clientKey === variantClientKey ? { ...variant, ...patch } : variant)),
-    }));
-  }
-
-  function addOption() {
-    setState((current) => appendEditorOption(current, makeClientKey("option")));
-  }
-
-  function addValue(optionClientKey: string) {
-    setState((current) => appendEditorValue(current, optionClientKey, makeClientKey("value")));
-  }
-
-  function removeWithConsequences(removal: PendingRemoval) {
-    setState((current) => applyEditorRemoval(current, removal));
-    setPreviewValueClientKeys((current) =>
-      current.filter((clientKey) =>
-        state.options
-          .filter(
-            (option) =>
-              option.clientKey === removal.optionClientKey &&
-              (removal.kind === "option" || option.values.some((value) => value.clientKey === removal.valueClientKey))
-          )
-          .flatMap((option) => option.values)
-          .every((value) => value.clientKey !== clientKey)
-      )
-    );
-    setPendingRemoval(null);
-    setConfirmDestructive(false);
-  }
-
-  function requestOptionRemoval(option: EditorOption) {
-    const valueKeys = new Set(option.values.map((value) => value.clientKey));
-    const removal: PendingRemoval = {
-      kind: "option",
-      optionClientKey: option.clientKey,
-      label: option.name || "Opção sem nome",
-      affectedVariantClientKeys: state.variants
-        .filter((variant) => variant.valueClientKeys.some((key) => valueKeys.has(key)))
-        .map((variant) => variant.clientKey),
-    };
-    if (removal.affectedVariantClientKeys.length === 0) removeWithConsequences(removal);
-    else setPendingRemoval(removal);
-  }
-
-  function requestValueRemoval(option: EditorOption, value: EditorOption["values"][number]) {
-    const removal: PendingRemoval = {
-      kind: "value",
-      optionClientKey: option.clientKey,
-      valueClientKey: value.clientKey,
-      label: value.label || "Valor sem nome",
-      affectedVariantClientKeys: state.variants
-        .filter((variant) => variant.valueClientKeys.includes(value.clientKey))
-        .map((variant) => variant.clientKey),
-    };
-    if (removal.affectedVariantClientKeys.length === 0) removeWithConsequences(removal);
-    else setPendingRemoval(removal);
-  }
-
-  function addVariant() {
-    setState((current) => appendEditorVariant(current, makeClientKey("variant")));
-  }
-
-  async function handleImageUpload(file: File) {
+  async function upload(file: File, apply: (image: { id: number; url: string | null }) => void) {
     setUploadError(null);
     setUploading(true);
     try {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("folder", "catalog");
-      const response = await fetch("/admin/uploads", {
-        method: "POST",
-        body,
-        credentials: "same-origin",
-      });
-      const data = (await response.json()) as {
-        id?: number;
-        location?: string;
-        thumbnail?: string | null;
-        error?: string;
-      };
-      if (!response.ok || data.id == null) {
-        setUploadError(data.error ?? "Falha no envio da imagem.");
-        return;
-      }
-      updateFamily({ imageId: data.id });
-      setImagePreview(data.thumbnail ?? data.location ?? null);
-    } catch {
-      setUploadError("Falha no envio da imagem.");
+      apply(await uploadCatalogImage(file));
+    } catch (error) {
+      setUploadError((error as Error).message);
     } finally {
       setUploading(false);
     }
   }
 
+  function addVariant() {
+    setVariants((current) => [
+      ...current,
+      {
+        clientKey: `new-${Date.now()}`,
+        id: null,
+        name: product.name,
+        attributes: "",
+        description: "",
+        price: "",
+        imageId: null,
+        imageUrl: null,
+        active: true,
+        openOnMount: true,
+      },
+    ]);
+  }
+
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-grow flex-col gap-8 px-4 py-12">
-      <div>
-        <p className="text-sm text-muted-foreground">
-          <Link to="/admin" className="underline-offset-2 hover:underline">
-            Admin
-          </Link>
-          {" / "}
-          <Link to="/admin/catalog" className="underline-offset-2 hover:underline">
-            Catálogo
-          </Link>
-          {" / "}
-          {item.name}
-        </p>
-        <h1 className="mt-1 font-display text-3xl font-bold">{item.name}</h1>
-      </div>
+    <>
+      <Form method="post" className="grid gap-6">
+        <input type="hidden" name="expectedUpdatedAt" value={expectedUpdatedAt} />
+        <input type="hidden" name="variantCount" value={variants.length} />
+        <input type="hidden" name="imageId" value={productImage.id ?? ""} />
 
-      {actionData && "error" in actionData ? (
-        <div className="rounded border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive" role="alert">
-          <p>{actionData.error}</p>
-          {"fields" in actionData && actionData.fields ? (
-            <ul className="mt-1 list-disc pl-5">
-              {Object.entries(actionData.fields).map(([field, message]) => (
-                <li key={field}>{String(message)}</li>
+        <section className="grid gap-3 border border-border p-4 sm:grid-cols-2">
+          <h2 className="text-lg font-semibold sm:col-span-2">Produto</h2>
+          <div className="grid gap-1 sm:col-span-2">
+            <Label htmlFor="product-name">Nome</Label>
+            <Input id="product-name" name="name" defaultValue={product.name} required />
+          </div>
+          <div className="grid gap-1">
+            <Label htmlFor="product-brand">Marca (opcional)</Label>
+            <Input id="product-brand" name="brand" defaultValue={product.brand ?? ""} />
+          </div>
+          <div className="grid gap-1">
+            <Label htmlFor="product-category">Categoria</Label>
+            <select
+              id="product-category"
+              name="categoryId"
+              defaultValue={product.categoryId ?? ""}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Sem categoria</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
               ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : null}
-      {actionData && "ok" in actionData && actionData.ok ? (
-        <p className="rounded border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-primary">Alterações salvas.</p>
-      ) : null}
-
-      <section className="grid gap-3 border border-border p-4">
-        <h2 className="text-lg font-semibold">Produto</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="family-name">Nome</Label>
-            <Input id="family-name" value={state.family.name} onChange={(event) => updateFamily({ name: event.target.value })} />
+            </select>
           </div>
-          <div>
-            <Label htmlFor="family-slug">Slug</Label>
-            <Input id="family-slug" value={state.family.slug} onChange={(event) => updateFamily({ slug: event.target.value })} />
+          <div className="grid gap-1 sm:col-span-2">
+            <Label htmlFor="product-description">Bullets de todas as variantes (um por linha)</Label>
+            <textarea id="product-description" name="description" rows={3} defaultValue={bullets(product.descriptionLines)} className={areaClass} />
           </div>
-        </div>
-        <div>
-          <Label htmlFor="family-template">Modelo do nome</Label>
-          <Input
-            id="family-template"
-            value={state.family.nameTemplate ?? ""}
-            onChange={(event) => updateFamily({ nameTemplate: event.target.value || null })}
-            placeholder="{name} {capacidade}"
-          />
-        </div>
-        <div>
-          <Label htmlFor="family-description">Descrição base</Label>
-          <textarea
-            id="family-description"
-            rows={3}
-            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            value={state.family.descriptionLines.join("\n")}
-            onChange={(event) =>
-              updateFamily({
-                descriptionLines: event.target.value
-                  .split(/\n/)
-                  .map((line) => line.trim())
-                  .filter(Boolean),
-              })
-            }
-          />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="family-price">Preço padrão</Label>
-            <Input
-              id="family-price"
-              value={
-                state.family.defaultUnitPriceCents != null ? formatBRL(state.family.defaultUnitPriceCents).replace("R$", "").trim() : ""
-              }
-              onChange={(event) => updateFamily({ defaultUnitPriceCents: parseBRLToCents(event.target.value) })}
-              placeholder="0,00"
-            />
-          </div>
-          <div>
-            <Label htmlFor="catalog-base-image">Imagem base</Label>
-            <div className="mt-1 flex flex-wrap items-center gap-3">
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt={`Imagem de ${state.family.name}`}
-                  className="h-20 w-20 rounded border border-border object-cover"
-                />
-              ) : (
-                <div className="flex h-20 w-20 items-center justify-center rounded border border-dashed border-border text-center text-xs text-muted-foreground">
-                  Sem imagem
-                </div>
-              )}
-              <div className="grid gap-2">
-                <FileButton id="catalog-base-image" disabled={uploading} busy={uploading} onFile={(file) => void handleImageUpload(file)} />
-                {state.family.imageId != null ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      updateFamily({ imageId: null });
-                      setImagePreview(null);
-                    }}
-                  >
-                    Remover imagem
-                  </Button>
-                ) : null}
-              </div>
+          <div className="flex items-center gap-3 sm:col-span-2">
+            {productImage.url ? <img src={productImage.url} alt="" className="h-16 w-16 rounded border border-border object-cover" /> : null}
+            <div className="grid gap-1">
+              <Label htmlFor="product-image">Imagem do produto</Label>
+              <FileButton
+                id="product-image"
+                disabled={uploading}
+                busy={uploading}
+                onFile={(file) => void upload(file, setProductImage)}
+              />
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              O envio prepara a imagem; clique em Salvar alterações para associá-la ao produto.
-            </p>
-            {uploadError ? (
-              <p className="mt-1 text-sm text-destructive" role="alert">
-                {uploadError}
-              </p>
+            {productImage.id ? (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setProductImage({ id: null, url: null })}>
+                Remover imagem
+              </Button>
             ) : null}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="grid gap-4 border border-border p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Opções e valores</h2>
-          <Button type="button" variant="outline" size="sm" onClick={addOption}>
-            Adicionar opção
-          </Button>
-        </div>
-        {state.options.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Sem eixos de opção. Adicione um para configurar valores.</p>
-        ) : null}
-        {state.options.map((option) => (
-          <div key={option.clientKey} className="grid gap-3 rounded border border-border p-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-medium">Eixo de opção</p>
-              <Button type="button" variant="outline" size="sm" onClick={() => requestOptionRemoval(option)}>
-                Remover opção
-              </Button>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-4">
-              <div>
-                <Label htmlFor={`option-name-${option.clientKey}`}>Opção</Label>
-                <Input
-                  id={`option-name-${option.clientKey}`}
-                  value={option.name}
-                  onChange={(event) => updateOption(option.clientKey, { name: event.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor={`option-slug-${option.clientKey}`}>Slug</Label>
-                <Input
-                  id={`option-slug-${option.clientKey}`}
-                  value={option.slug}
-                  onChange={(event) => updateOption(option.clientKey, { slug: event.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor={`option-placement-${option.clientKey}`}>Posição</Label>
-                <select
-                  id={`option-placement-${option.clientKey}`}
-                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={option.placement}
-                  onChange={(event) =>
-                    updateOption(option.clientKey, { placement: event.target.value === "DESCRIPTION" ? "DESCRIPTION" : "TITLE" })
-                  }
-                >
-                  <option value="TITLE">Título</option>
-                  <option value="DESCRIPTION">Descrição</option>
-                </select>
-              </div>
-              <div>
-                <Label htmlFor={`option-order-${option.clientKey}`}>Ordem</Label>
-                <Input
-                  id={`option-order-${option.clientKey}`}
-                  type="number"
-                  value={option.sortOrder}
-                  onChange={(event) => updateOption(option.clientKey, { sortOrder: nullableNumber(event.target.value) ?? 0 })}
-                />
-              </div>
-            </div>
-            <ul className="grid gap-2">
-              {option.values.map((value) => (
-                <li key={value.clientKey} className="grid gap-2 rounded border border-dashed border-border p-2">
-                  <div className="flex justify-end">
-                    <Button type="button" variant="outline" size="sm" onClick={() => requestValueRemoval(option, value)}>
-                      Remover valor
-                    </Button>
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    <div>
-                      <Label htmlFor={`value-label-${value.clientKey}`}>Valor</Label>
-                      <Input
-                        id={`value-label-${value.clientKey}`}
-                        value={value.label}
-                        onChange={(event) => updateValue(option.clientKey, value.clientKey, { label: event.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`value-slug-${value.clientKey}`}>Slug</Label>
-                      <Input
-                        id={`value-slug-${value.clientKey}`}
-                        value={value.slug}
-                        onChange={(event) => updateValue(option.clientKey, value.clientKey, { slug: event.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor={`value-order-${value.clientKey}`}>Ordem</Label>
-                      <Input
-                        id={`value-order-${value.clientKey}`}
-                        type="number"
-                        value={value.sortOrder}
-                        onChange={(event) =>
-                          updateValue(option.clientKey, value.clientKey, { sortOrder: nullableNumber(event.target.value) ?? 0 })
-                        }
-                      />
-                    </div>
-                  </div>
-                  {option.placement === "TITLE" ? (
-                    <div>
-                      <Label htmlFor={`value-fragment-${value.clientKey}`}>Fragmento do título</Label>
-                      <Input
-                        id={`value-fragment-${value.clientKey}`}
-                        value={value.titleFragment ?? ""}
-                        onChange={(event) => updateValue(option.clientKey, value.clientKey, { titleFragment: event.target.value || null })}
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      <Label htmlFor={`value-description-${value.clientKey}`}>Bullets da descrição</Label>
-                      <textarea
-                        id={`value-description-${value.clientKey}`}
-                        rows={2}
-                        className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        value={value.descriptionLines.join("\n")}
-                        onChange={(event) =>
-                          updateValue(option.clientKey, value.clientKey, {
-                            descriptionLines: event.target.value
-                              .split(/\n/)
-                              .map((line) => line.trim())
-                              .filter(Boolean),
-                          })
-                        }
-                      />
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <Button type="button" variant="outline" size="sm" className="w-fit" onClick={() => addValue(option.clientKey)}>
-              Adicionar valor
+        <section className="grid gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">Variantes ({variants.length})</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+              + Variante
             </Button>
           </div>
-        ))}
-      </section>
+          <p className="text-sm text-muted-foreground">
+            Cada variante é um item do orçamento. O nome é o que sai impresso.
+          </p>
+          {variants.map((variant, index) => (
+            <VariantRow
+              key={variant.clientKey}
+              variant={variant}
+              index={index}
+              canRemove={variants.length > 1}
+              uploading={uploading}
+              onChange={(patch) => patchVariant(variant.clientKey, patch)}
+              onRemove={() => setVariants((current) => current.filter((row) => row.clientKey !== variant.clientKey))}
+              onUpload={(file) => void upload(file, (image) => patchVariant(variant.clientKey, { imageId: image.id, imageUrl: image.url }))}
+            />
+          ))}
+        </section>
 
-      {pendingRemoval ? (
-        <DestructiveRemovalConfirmation
-          removal={pendingRemoval}
-          confirmed={confirmDestructive}
-          onConfirmedChange={setConfirmDestructive}
-          onConfirm={() => removeWithConsequences(pendingRemoval)}
-          onCancel={() => {
-            setPendingRemoval(null);
-            setConfirmDestructive(false);
-          }}
-        />
-      ) : null}
-
-      <section className="grid gap-3 border border-border p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Combinações</h2>
-          <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-            Adicionar combinação
+        {uploadError ? <p className="text-sm text-destructive">{uploadError}</p> : null}
+        {actionData && "error" in actionData ? (
+          <p role="alert" className="text-sm text-destructive">
+            {actionData.error}
+          </p>
+        ) : null}
+        <div className="flex items-center gap-3">
+          <Button type="submit" name="intent" value="save" disabled={busy || uploading}>
+            {busy ? "Salvando…" : "Salvar produto"}
           </Button>
-        </div>
-        {state.variants.length === 0 ? <p className="text-sm text-muted-foreground">Sem combinações explícitas.</p> : null}
-        <ul className="grid gap-3">
-          {state.variants.map((variant, variantIndex) => (
-            <li key={variant.clientKey} className="grid gap-3 rounded border border-border p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-medium">Combinação {variantIndex + 1}</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setState((current) => ({
-                      ...current,
-                      variants: current.variants.filter((entry) => entry.clientKey !== variant.clientKey),
-                    }))
-                  }
-                >
-                  Remover combinação
-                </Button>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {state.options.map((option) => (
-                  <div key={`${variant.clientKey}-${option.clientKey}`}>
-                    <Label htmlFor={`variant-${variant.clientKey}-${option.clientKey}`}>{option.name || "Opção"}</Label>
-                    <select
-                      id={`variant-${variant.clientKey}-${option.clientKey}`}
-                      className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      value={variant.valueClientKeys.find((key) => option.values.some((value) => value.clientKey === key)) ?? ""}
-                      onChange={(event) => {
-                        const optionKeys = new Set(option.values.map((value) => value.clientKey));
-                        const retained = variant.valueClientKeys.filter((key) => !optionKeys.has(key));
-                        updateVariant(variant.clientKey, {
-                          valueClientKeys: event.target.value ? [...retained, event.target.value] : retained,
-                        });
-                      }}
-                    >
-                      <option value="">Selecione</option>
-                      {option.values.map((value) => (
-                        <option key={value.clientKey} value={value.clientKey}>
-                          {value.label || "Valor sem nome"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-              </div>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <div>
-                  <Label htmlFor={`variant-sku-${variant.clientKey}`}>SKU</Label>
-                  <Input
-                    id={`variant-sku-${variant.clientKey}`}
-                    value={variant.sku ?? ""}
-                    onChange={(event) => updateVariant(variant.clientKey, { sku: event.target.value || null })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`variant-price-${variant.clientKey}`}>Preço específico</Label>
-                  <Input
-                    id={`variant-price-${variant.clientKey}`}
-                    value={variant.unitPriceCents != null ? formatBRL(variant.unitPriceCents).replace("R$", "").trim() : ""}
-                    onChange={(event) => updateVariant(variant.clientKey, { unitPriceCents: parseBRLToCents(event.target.value) })}
-                    placeholder="Usar preço padrão"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`variant-image-${variant.clientKey}`}>ID da imagem</Label>
-                  <Input
-                    id={`variant-image-${variant.clientKey}`}
-                    type="number"
-                    value={variant.imageId ?? ""}
-                    onChange={(event) => updateVariant(variant.clientKey, { imageId: nullableNumber(event.target.value) })}
-                    placeholder="Usar imagem base"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor={`variant-name-${variant.clientKey}`}>Nome específico</Label>
-                <Input
-                  id={`variant-name-${variant.clientKey}`}
-                  value={variant.nameOverride ?? ""}
-                  onChange={(event) => updateVariant(variant.clientKey, { nameOverride: event.target.value || null })}
-                  placeholder="Usar nome composto"
-                />
-              </div>
-              <div>
-                <Label htmlFor={`variant-description-${variant.clientKey}`}>Descrição específica</Label>
-                <textarea
-                  id={`variant-description-${variant.clientKey}`}
-                  rows={2}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  value={(variant.descriptionLinesOverride ?? []).join("\n")}
-                  onChange={(event) =>
-                    updateVariant(variant.clientKey, {
-                      descriptionLinesOverride: event.target.value.trim()
-                        ? event.target.value
-                            .split(/\n/)
-                            .map((line) => line.trim())
-                            .filter(Boolean)
-                        : null,
-                    })
-                  }
-                  placeholder="Usar descrição composta"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  id={`variant-active-${variant.clientKey}`}
-                  type="checkbox"
-                  checked={variant.active}
-                  onChange={(event) => updateVariant(variant.clientKey, { active: event.target.checked })}
-                />
-                <Label htmlFor={`variant-active-${variant.clientKey}`}>Combinação ativa</Label>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <p className="text-xs text-muted-foreground">A chave da combinação é calculada no servidor a partir dos valores selecionados.</p>
-      </section>
-
-      <section className="grid gap-3 border border-border p-4">
-        <h2 className="text-lg font-semibold">Pré-visualização ao vivo</h2>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {state.options.map((option) => (
-            <div key={`preview-${option.clientKey}`}>
-              <Label htmlFor={`preview-${option.clientKey}`}>{option.name || "Opção"}</Label>
-              <select
-                id={`preview-${option.clientKey}`}
-                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={previewValueClientKeys.find((key) => option.values.some((value) => value.clientKey === key)) ?? ""}
-                onChange={(event) => {
-                  const optionKeys = new Set(option.values.map((value) => value.clientKey));
-                  setPreviewValueClientKeys((current) => {
-                    const retained = current.filter((key) => !optionKeys.has(key));
-                    return event.target.value ? [...retained, event.target.value] : retained;
-                  });
-                }}
-              >
-                <option value="">Selecione</option>
-                {option.values.map((value) => (
-                  <option key={value.clientKey} value={value.clientKey}>
-                    {value.label || "Valor sem nome"}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
-        {preview ? (
-          preview.ok ? (
-            <div className="rounded border border-border p-3 text-sm" aria-live="polite">
-              <p className="font-medium">{preview.value.name}</p>
-              <ul className="mt-2 list-disc pl-5 text-muted-foreground">
-                {preview.value.descriptionLines.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-              <p className="mt-2 text-muted-foreground">
-                {preview.value.unitPriceCents != null ? formatBRL(preview.value.unitPriceCents) : "sem preço"}
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-destructive" aria-live="polite">
-              {previewErrorMessage(preview.error)}
+          {actionData && "saved" in actionData ? (
+            <p role="status" className="text-sm text-muted-foreground">
+              Produto salvo.
             </p>
-          )
-        ) : (
-          <p className="text-sm text-muted-foreground">Escolha valores, inclusive os ainda não salvos, para pré-visualizar o orçamento.</p>
-        )}
-      </section>
+          ) : null}
+        </div>
+      </Form>
 
-      <div className="flex flex-wrap gap-2">
-        <Form method="post">
-          <input type="hidden" name="intent" value="save" />
-          <input type="hidden" name="aggregate" value={aggregateJson} />
-          <Button type="submit" disabled={pendingRemoval != null}>
-            Salvar alterações
+      <Form
+        method="post"
+        className="flex flex-wrap items-center gap-2 border border-border p-4"
+        onSubmit={(event) => {
+          const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+          if (submitter?.value === "delete" && !confirm(`Excluir ${product.name} e suas variantes?`)) event.preventDefault();
+        }}
+      >
+        <input type="hidden" name="expectedUpdatedAt" value={expectedUpdatedAt} />
+        {product.archivedAt ? (
+          <Button type="submit" name="intent" value="restore" variant="outline" disabled={busy}>
+            Restaurar
           </Button>
-        </Form>
-        <Form method="post">
-          <input type="hidden" name="expectedUpdatedAt" value={state.expectedUpdatedAt} />
-          <Button name="intent" value={item.archivedAt ? "restore" : "archive"} variant="outline" type="submit">
-            {item.archivedAt ? "Restaurar" : "Arquivar"}
+        ) : (
+          <Button type="submit" name="intent" value="archive" variant="outline" disabled={busy}>
+            Arquivar
           </Button>
-        </Form>
+        )}
+        <Button type="submit" name="intent" value="delete" variant="destructive" disabled={busy}>
+          Excluir
+        </Button>
+        <p className="text-sm text-muted-foreground">
+          Arquivar tira o produto do orçamento. Orçamentos já feitos guardam seus itens mesmo se o produto for excluído.
+        </p>
+      </Form>
+    </>
+  );
+}
+
+type VariantRowProps = {
+  variant: VariantDraft;
+  index: number;
+  canRemove: boolean;
+  uploading: boolean;
+  onChange(patch: Partial<VariantDraft>): void;
+  onRemove(): void;
+  onUpload(file: File): void;
+};
+
+function VariantRow({ variant, index, canRemove, uploading, onChange, onRemove, onUpload }: VariantRowProps) {
+  const [initiallyOpen] = useState(variant.openOnMount);
+  const field = (name: string) => `variant.${index}.${name}`;
+  const id = (name: string) => `variant-${variant.clientKey}-${name}`;
+
+  return (
+    <details open={initiallyOpen} onInvalidCapture={(event) => (event.currentTarget.open = true)} className="group border border-border">
+      <summary className="flex cursor-pointer list-none items-center gap-2 p-3 [&::-webkit-details-marker]:hidden">
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">{variant.name || "Sem nome"}</span>
+        {!variant.active ? <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">Inativa</span> : null}
+        {variant.price ? <span className="shrink-0 text-xs text-muted-foreground">R$ {variant.price}</span> : null}
+        {canRemove ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 text-destructive hover:text-destructive"
+            aria-label="Remover variante"
+            onClick={(event) => {
+              event.preventDefault();
+              onRemove();
+            }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        ) : null}
+      </summary>
+      <div className="grid gap-3 px-3 pb-3 sm:grid-cols-2">
+        <input type="hidden" name={field("id")} value={variant.id ?? ""} />
+        <input type="hidden" name={field("imageId")} value={variant.imageId ?? ""} />
+        <div className="grid gap-1 sm:col-span-2">
+          <Label htmlFor={id("name")}>Nome impresso</Label>
+          <Input id={id("name")} name={field("name")} value={variant.name} onChange={(e) => onChange({ name: e.target.value })} required />
+        </div>
+        <div className="grid gap-1">
+          <Label htmlFor={id("price")}>Preço (opcional)</Label>
+          <Input
+            id={id("price")}
+            name={field("price")}
+            value={variant.price}
+            inputMode="decimal"
+            placeholder="0,00"
+            onChange={(e) => onChange({ price: e.target.value })}
+          />
+        </div>
+        <label className="flex items-center gap-2 self-end text-sm">
+          <input type="checkbox" name={field("active")} checked={variant.active} onChange={(e) => onChange({ active: e.target.checked })} />
+          Disponível no orçamento
+        </label>
+        <div className="grid gap-1">
+          <Label htmlFor={id("attributes")}>Atributos (“Nome: valor” por linha)</Label>
+          <textarea
+            id={id("attributes")}
+            name={field("attributes")}
+            rows={3}
+            value={variant.attributes}
+            placeholder={"Capacidade: 400L\nMaterial: Inox 316"}
+            onChange={(e) => onChange({ attributes: e.target.value })}
+            className={areaClass}
+          />
+        </div>
+        <div className="grid gap-1">
+          <Label htmlFor={id("description")}>Bullets desta variante</Label>
+          <textarea
+            id={id("description")}
+            name={field("description")}
+            rows={3}
+            value={variant.description}
+            onChange={(e) => onChange({ description: e.target.value })}
+            className={areaClass}
+          />
+        </div>
+        <div className="flex items-center gap-3 sm:col-span-2">
+          {variant.imageUrl ? <img src={variant.imageUrl} alt="" className="h-12 w-12 rounded border border-border object-cover" /> : null}
+          <FileButton id={id("image")} disabled={uploading} busy={uploading} onFile={onUpload} />
+          {variant.imageId ? (
+            <Button type="button" variant="ghost" size="sm" onClick={() => onChange({ imageId: null, imageUrl: null })}>
+              Usar imagem do produto
+            </Button>
+          ) : null}
+        </div>
       </div>
+    </details>
+  );
+}
+
+export default function AdminCatalogProduct() {
+  const loaded = useLoaderData<typeof loader>();
+  const { product } = loaded;
+
+  return (
+    <main className="mx-auto flex w-full max-w-4xl flex-grow flex-col gap-6 px-4 py-12">
+      <div>
+        <p className="text-sm text-muted-foreground">
+          <Link to="/admin/catalog" className="underline-offset-2 hover:underline">
+            Catálogo
+          </Link>{" "}
+          / Editar
+        </p>
+        <h1 className="mt-1 font-display text-3xl font-bold">{product.name}</h1>
+        {product.archivedAt ? <p className="mt-1 text-sm text-muted-foreground">Arquivado: não aparece no orçamento.</p> : null}
+        <p className="mt-1 text-sm text-muted-foreground">
+          {product.variants.filter((variant) => variant.active).length} de {product.variants.length} variantes disponíveis
+          {product.variants.some((variant) => variant.priceCents !== null)
+            ? ` · a partir de ${formatBRL(Math.min(...product.variants.flatMap((variant) => (variant.priceCents === null ? [] : [variant.priceCents]))))}`
+            : ""}
+        </p>
+      </div>
+      {/* Remount on every save, so the drafts start from what was stored. */}
+      <ProductEditor key={new Date(product.updatedAt).toISOString()} {...loaded} />
     </main>
   );
 }

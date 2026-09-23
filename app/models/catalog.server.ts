@@ -1,296 +1,241 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import prisma from "~/libs/prisma/client.server";
-import { catalogVariantKey } from "~/utils/catalog-resolver";
 
 export type CatalogListStatus = "active" | "archived" | "all";
 
-export type CatalogAggregateInput = {
-  id: number;
-  expectedUpdatedAt: string;
-  family: {
-    slug: string;
-    name: string;
-    nameTemplate: string | null;
-    descriptionLines: string[];
-    defaultUnitPriceCents: number | null;
-    imageId: number | null;
-  };
-  options: Array<{
-    id?: number;
-    clientKey: string;
-    name: string;
-    slug: string;
-    placement: "TITLE" | "DESCRIPTION";
-    sortOrder: number;
-    values: Array<{
-      id?: number;
-      clientKey: string;
-      label: string;
-      slug: string;
-      titleFragment: string | null;
-      descriptionLines: string[];
-      sortOrder: number;
-    }>;
-  }>;
-  variants: Array<{
-    id?: number;
-    clientKey: string;
-    valueClientKeys: string[];
-    sku: string | null;
-    active: boolean;
-    nameOverride: string | null;
-    descriptionLinesOverride: string[] | null;
-    unitPriceCents: number | null;
-    imageId: number | null;
-  }>;
+export type CatalogVariantInput = {
+  id: number | null;
+  name: string;
+  attributes: { name: string; value: string }[];
+  descriptionLines: string[];
+  priceCents: number | null;
+  imageId: number | null;
+  active: boolean;
 };
 
-const catalogSummarySelect = {
-  id: true,
-  slug: true,
-  name: true,
-  nameTemplate: true,
-  defaultUnitPriceCents: true,
-  imageId: true,
-  archivedAt: true,
-  updatedAt: true,
-  Image: { select: { location: true, thumbnail: true } },
-  _count: { select: { options: true, variants: true } },
-} satisfies Prisma.QuoteCatalogItemSelect;
-
-const catalogPickerSummarySelect = {
-  id: true,
-  slug: true,
-  name: true,
-  defaultUnitPriceCents: true,
-  imageId: true,
-  Image: { select: { location: true, thumbnail: true } },
-  _count: { select: { options: true, variants: true } },
-} satisfies Prisma.QuoteCatalogItemSelect;
-
-const catalogDetailInclude = {
-  Image: { select: { location: true, thumbnail: true } },
-  options: {
-    orderBy: [{ sortOrder: "asc" as const }, { id: "asc" as const }],
-    include: { values: { orderBy: [{ sortOrder: "asc" as const }, { id: "asc" as const }] } },
-  },
-  variants: {
-    orderBy: { id: "asc" as const },
-    include: {
-      Image: { select: { location: true, thumbnail: true } },
-      values: { select: { optionValueId: true } },
-    },
-  },
-} satisfies Prisma.QuoteCatalogItemInclude;
+export type CatalogProductInput = {
+  name: string;
+  brand: string | null;
+  categoryId: number | null;
+  descriptionLines: string[];
+  imageId: number | null;
+  variants: CatalogVariantInput[];
+};
 
 export type CatalogMutationResult =
-  | { ok: true; item: Awaited<ReturnType<typeof getCatalogFamilyDetail>> }
-  | { ok: false; error: "not_found" | "stale" | "invalid" | "referenced"; fields?: Record<string, string> };
+  | { ok: true; id: number }
+  | { ok: false; error: "not_found" | "stale" | "invalid"; message?: string };
 
-function invalid(fields: Record<string, string>): CatalogMutationResult {
-  return { ok: false, error: "invalid", fields };
+const imageSelect = { select: { location: true, thumbnail: true } } as const;
+
+export function listCatalogCategories() {
+  return prisma.catalogCategory.findMany({
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+    select: { id: true, slug: true, name: true, color: true },
+  });
 }
 
-function familyData(family: CatalogAggregateInput["family"]) {
+export function listCatalogProducts({
+  status = "active",
+  search,
+  categoryId,
+}: { status?: CatalogListStatus; search?: string; categoryId?: number | null } = {}) {
+  const term = search?.trim();
+  const where: Prisma.CatalogProductWhereInput = {
+    ...(status === "active" ? { archivedAt: null } : status === "archived" ? { archivedAt: { not: null } } : {}),
+    ...(categoryId ? { categoryId } : {}),
+    ...(term
+      ? {
+          OR: [
+            { name: { contains: term, mode: "insensitive" } },
+            { brand: { contains: term, mode: "insensitive" } },
+            { variants: { some: { name: { contains: term, mode: "insensitive" } } } },
+          ],
+        }
+      : {}),
+  };
+  return prisma.catalogProduct.findMany({
+    where,
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      brand: true,
+      archivedAt: true,
+      category: { select: { name: true, color: true } },
+      image: imageSelect,
+      _count: { select: { variants: true } },
+    },
+  });
+}
+
+export function getCatalogProduct(id: number) {
+  return prisma.catalogProduct.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      brand: true,
+      categoryId: true,
+      descriptionLines: true,
+      imageId: true,
+      image: imageSelect,
+      archivedAt: true,
+      updatedAt: true,
+      variants: {
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          attributes: true,
+          descriptionLines: true,
+          priceCents: true,
+          imageId: true,
+          image: imageSelect,
+          active: true,
+        },
+      },
+    },
+  });
+}
+
+export type CatalogProductDetail = NonNullable<Awaited<ReturnType<typeof getCatalogProduct>>>;
+
+/** Creates a product with one variant of the same name, because a quotation line always uses a variant. */
+export async function createCatalogProduct(data: { name: string; brand: string | null; categoryId: number | null }) {
+  return prisma.catalogProduct.create({
+    data: { ...data, variants: { create: { name: data.name } } },
+    select: { id: true },
+  });
+}
+
+// Interactive transactions run one statement per round trip; far from the database a large product needs time.
+const TRANSACTION_TIMEOUT_MS = 20_000;
+
+function variantData(variant: CatalogVariantInput, sortOrder: number) {
   return {
-    slug: family.slug.trim(),
-    name: family.name.trim(),
-    nameTemplate: family.nameTemplate?.trim() || null,
-    descriptionLines: family.descriptionLines,
-    defaultUnitPriceCents: family.defaultUnitPriceCents,
-    imageId: family.imageId,
+    name: variant.name,
+    attributes: variant.attributes,
+    descriptionLines: variant.descriptionLines,
+    priceCents: variant.priceCents,
+    imageId: variant.imageId,
+    active: variant.active,
+    sortOrder,
   };
 }
 
-export async function listCatalogSummaries({ status = "active", search }: { status?: CatalogListStatus; search?: string } = {}) {
-  return prisma.quoteCatalogItem.findMany({
-    where: {
-      ...(status === "active" ? { archivedAt: null } : status === "archived" ? { archivedAt: { not: null } } : {}),
-      ...(search?.trim() ? { name: { contains: search.trim(), mode: "insensitive" } } : {}),
-    },
-    orderBy: { name: "asc" },
-    select: catalogSummarySelect,
-  });
-}
-
-export async function listActiveCatalogPickerSummaries() {
-  return prisma.quoteCatalogItem.findMany({
-    where: { archivedAt: null },
-    orderBy: { name: "asc" },
-    select: catalogPickerSummarySelect,
-  });
-}
-
-export async function getCatalogFamilyDetail(id: number) {
-  return prisma.quoteCatalogItem.findUnique({ where: { id }, include: catalogDetailInclude });
-}
-
-export async function createCatalogFamily(family: CatalogAggregateInput["family"]) {
-  const item = await prisma.quoteCatalogItem.create({ data: familyData(family) });
-  return getCatalogFamilyDetail(item.id);
-}
-
-class InvalidAggregateError extends Error {
-  constructor(readonly fields: Record<string, string>) { super("Invalid catalog aggregate"); }
-}
-
-type ValidatedAggregate = {
-  optionIds: Set<number>;
-  omittedValueIds: number[];
-  submittedOptionIds: Set<number>;
-  submittedValueIds: Set<number>;
-  valueIdByClientKey: Map<string, number | undefined>;
-};
-
-async function validateAggregate(input: CatalogAggregateInput): Promise<ValidatedAggregate | CatalogMutationResult> {
-  const existing = await prisma.quoteCatalogItem.findUnique({ where: { id: input.id }, include: catalogDetailInclude });
-  if (!existing) return { ok: false, error: "not_found" };
-
-  const optionIds = new Set(existing.options.map((option) => option.id));
-  const valueById = new Map(existing.options.flatMap((option) => option.values.map((value) => [value.id, { optionId: option.id }] as const)));
-  const variantIds = new Set(existing.variants.map((variant) => variant.id));
-  const submittedOptionIds = new Set(input.options.flatMap((option) => option.id === undefined ? [] : [option.id]));
-  const submittedValueIds = new Set(input.options.flatMap((option) => option.values.flatMap((value) => value.id === undefined ? [] : [value.id])));
-  const valueIdByClientKey = new Map<string, number | undefined>();
-
-  for (const option of input.options) {
-    if (option.id !== undefined && !optionIds.has(option.id)) return invalid({ id: "Child does not belong to this catalog family" });
-    for (const value of option.values) {
-      if (valueIdByClientKey.has(value.clientKey)) return invalid({ options: "Duplicate value client key" });
-      if (value.id !== undefined) {
-        const existingValue = valueById.get(value.id);
-        if (!existingValue || existingValue.optionId !== option.id) return invalid({ options: "Value does not belong to its submitted option" });
-      }
-      valueIdByClientKey.set(value.clientKey, value.id);
-    }
-  }
-  if (input.variants.some((variant) => variant.id !== undefined && !variantIds.has(variant.id))) return invalid({ id: "Child does not belong to this catalog family" });
-  for (const variant of input.variants) {
-    if (variant.valueClientKeys.some((key) => !valueIdByClientKey.has(key)) || new Set(variant.valueClientKeys).size !== variant.valueClientKeys.length) {
-      return invalid({ variants: "Variant references an unknown or duplicate value" });
-    }
-  }
-
-  const omittedValueIds = [...valueById.keys()].filter((id) => !submittedValueIds.has(id));
-  const retainedVariantIds = new Set(input.variants.flatMap((variant) => variant.id === undefined ? [] : [variant.id]));
-  for (const variant of existing.variants) {
-    if (!retainedVariantIds.has(variant.id)) continue;
-    const submitted = input.variants.find((candidate) => candidate.id === variant.id)!;
-    const referencedIds = submitted.valueClientKeys.map((key) => valueIdByClientKey.get(key));
-    if (referencedIds.some((id) => id !== undefined && omittedValueIds.includes(id))) return invalid({ options: "Cannot remove values referenced by retained variants" });
-  }
-  return { optionIds, omittedValueIds, submittedOptionIds, submittedValueIds, valueIdByClientKey };
-}
-
-export async function updateCatalogFamilyAggregate(input: CatalogAggregateInput): Promise<CatalogMutationResult> {
-  const expectedUpdatedAt = new Date(input.expectedUpdatedAt);
-  if (Number.isNaN(expectedUpdatedAt.valueOf())) return { ok: false, error: "invalid", fields: { expectedUpdatedAt: "Invalid timestamp" } };
-  const validated = await validateAggregate(input);
-  if ("ok" in validated) return validated;
-
-  try {
-    return await prisma.$transaction<CatalogMutationResult>(async (tx) => {
-      // This is intentionally the first mutation: it claims the parent version before child writes.
-      const claimed = await tx.quoteCatalogItem.updateMany({
-        where: { id: input.id, updatedAt: expectedUpdatedAt },
-        data: familyData(input.family),
-      });
-      if (claimed.count === 0) return { ok: false, error: "stale" };
-
-      const { omittedValueIds, submittedOptionIds, submittedValueIds, valueIdByClientKey } = validated;
-      for (const option of input.options) {
-      const data = { name: option.name.trim(), slug: option.slug.trim(), placement: option.placement, sortOrder: option.sortOrder };
-      const saved = option.id === undefined
-        ? await tx.quoteCatalogOption.create({ data: { ...data, catalogItemId: input.id } })
-        : await tx.quoteCatalogOption.update({ where: { id: option.id }, data });
-      submittedOptionIds.add(saved.id);
-      for (const value of option.values) {
-        const valueData = { label: value.label.trim(), slug: value.slug.trim(), titleFragment: value.titleFragment?.trim() || null, descriptionLines: value.descriptionLines, sortOrder: value.sortOrder };
-        const savedValue = value.id === undefined
-          ? await tx.quoteCatalogOptionValue.create({ data: { ...valueData, optionId: saved.id } })
-          : await tx.quoteCatalogOptionValue.update({ where: { id: value.id }, data: valueData });
-        submittedValueIds.add(savedValue.id);
-        valueIdByClientKey.set(value.clientKey, savedValue.id);
-      }
-    }
-
-    const submittedVariantIds = new Set<number>();
-    for (const variant of input.variants) {
-      const valueIdsForVariant = variant.valueClientKeys.map((key) => valueIdByClientKey.get(key));
-      if (valueIdsForVariant.some((id) => id === undefined) || new Set(valueIdsForVariant).size !== valueIdsForVariant.length) {
-        throw new InvalidAggregateError({ variants: "Variant references an unknown or duplicate value" });
-      }
-      const data = { key: catalogVariantKey(valueIdsForVariant as number[]), sku: variant.sku?.trim() || null, active: variant.active, nameOverride: variant.nameOverride?.trim() || null, descriptionLinesOverride: variant.descriptionLinesOverride ?? Prisma.JsonNull, unitPriceCents: variant.unitPriceCents, imageId: variant.imageId };
-      const saved = variant.id === undefined
-        ? await tx.quoteCatalogVariant.create({ data: { ...data, catalogItemId: input.id } })
-        : await tx.quoteCatalogVariant.update({ where: { id: variant.id }, data });
-      submittedVariantIds.add(saved.id);
-      await tx.quoteCatalogVariantValue.deleteMany({ where: { variantId: saved.id } });
-      if (valueIdsForVariant.length) await tx.quoteCatalogVariantValue.createMany({ data: valueIdsForVariant.map((optionValueId) => ({ variantId: saved.id, optionValueId: optionValueId! })) });
-    }
-
-    // Remove variants before checking/deleting values, so explicitly removed variants release their values.
-    await tx.quoteCatalogVariant.deleteMany({ where: { catalogItemId: input.id, id: { notIn: [...submittedVariantIds] } } });
-    // Omitted values include values under options that remain in the aggregate.
-    if (omittedValueIds.length) await tx.quoteCatalogOptionValue.deleteMany({ where: { id: { in: omittedValueIds } } });
-    await tx.quoteCatalogOption.deleteMany({ where: { catalogItemId: input.id, id: { notIn: [...submittedOptionIds] } } });
-    return { ok: true, item: await tx.quoteCatalogItem.findUnique({ where: { id: input.id }, include: catalogDetailInclude }) };
-    });
-  } catch (error) {
-    if (error instanceof InvalidAggregateError) return invalid(error.fields);
-    throw error;
-  }
-}
-
-export async function archiveCatalogFamily(id: number, expectedUpdatedAt: string): Promise<CatalogMutationResult> {
-  return updateLifecycle(id, expectedUpdatedAt, { archivedAt: new Date() });
-}
-export async function restoreCatalogFamily(id: number, expectedUpdatedAt: string): Promise<CatalogMutationResult> {
-  return updateLifecycle(id, expectedUpdatedAt, { archivedAt: null });
-}
-async function updateLifecycle(id: number, expected: string, data: { archivedAt: Date | null }): Promise<CatalogMutationResult> {
-  const result = await prisma.quoteCatalogItem.updateMany({ where: { id, updatedAt: new Date(expected) }, data });
-  if (!result.count) return { ok: false, error: "stale" };
-  return { ok: true, item: await getCatalogFamilyDetail(id) };
-}
-
-export type CatalogDeletionEligibility = {
-  eligible: boolean;
-  quotationLines: number;
-};
-
 /**
- * Counts the references of a whole catalog page with one query.
- * The list holds hundreds of families, so per-family counts exhaust the connection pool.
+ * Saves the product and its whole variant list. Variants with an id are updated, the others are created,
+ * and the missing ones are deleted. Quotation lines keep their copied data when a variant goes away.
  */
-export async function getCatalogDeletionEligibilityByIds(ids: number[]): Promise<Map<number, CatalogDeletionEligibility>> {
-  const eligibilityById = new Map<number, CatalogDeletionEligibility>(
-    ids.map((id) => [id, { eligible: true, quotationLines: 0 }]),
+export async function updateCatalogProduct(
+  id: number,
+  expectedUpdatedAt: Date,
+  input: CatalogProductInput,
+): Promise<CatalogMutationResult> {
+  if (input.variants.length === 0) return { ok: false, error: "invalid", message: "O produto precisa de pelo menos uma variante." };
+
+  return prisma.$transaction(async (tx) => {
+    const current = await tx.catalogProduct.findUnique({
+      where: { id },
+      select: {
+        variants: {
+          select: { id: true, name: true, attributes: true, descriptionLines: true, priceCents: true, imageId: true, active: true, sortOrder: true },
+        },
+      },
+    });
+    if (!current) return { ok: false, error: "not_found" };
+    const storedById = new Map(current.variants.map((variant) => [variant.id, variant]));
+    if (input.variants.some((variant) => variant.id !== null && !storedById.has(variant.id))) {
+      return { ok: false, error: "invalid", message: "Uma variante não pertence a este produto." };
+    }
+
+    // Claim the version first, so a concurrent save cannot interleave its child writes with ours.
+    const claimed = await tx.catalogProduct.updateMany({
+      where: { id, updatedAt: expectedUpdatedAt },
+      data: {
+        name: input.name,
+        brand: input.brand,
+        categoryId: input.categoryId,
+        descriptionLines: input.descriptionLines,
+        imageId: input.imageId,
+      },
+    });
+    if (claimed.count === 0) return { ok: false, error: "stale" };
+
+    const keptIds = input.variants.flatMap((variant) => (variant.id === null ? [] : [variant.id]));
+    if (keptIds.length < storedById.size) {
+      await tx.catalogVariant.deleteMany({ where: { productId: id, id: { notIn: keptIds } } });
+    }
+    const rows = input.variants.map((variant, sortOrder) => ({ id: variant.id, data: variantData(variant, sortOrder) }));
+    const created = rows.filter((row) => row.id === null).map((row) => ({ ...row.data, productId: id }));
+    if (created.length) await tx.catalogVariant.createMany({ data: created });
+    // Only changed rows are written, so a typical edit of a large product stays a few statements.
+    for (const row of rows) {
+      if (row.id !== null && !sameVariant(storedById.get(row.id)!, row.data)) {
+        await tx.catalogVariant.update({ where: { id: row.id }, data: row.data });
+      }
+    }
+    return { ok: true, id };
+  }, { timeout: TRANSACTION_TIMEOUT_MS });
+}
+
+// jsonb returns object keys shortest first; { name, value } already has that order, so the texts compare equal.
+// A false "changed" only costs one extra update, never a lost edit.
+function sameVariant(stored: Record<string, unknown>, next: ReturnType<typeof variantData>) {
+  return (Object.keys(next) as (keyof typeof next)[]).every(
+    (field) => JSON.stringify(stored[field]) === JSON.stringify(next[field]),
   );
-  if (!ids.length) return eligibilityById;
+}
 
-  const quotationLines = await prisma.quotationLine.groupBy({
-    by: ["catalogItemId"],
-    where: { catalogItemId: { in: ids } },
-    _count: { _all: true },
+async function setArchived(id: number, expectedUpdatedAt: Date, archivedAt: Date | null): Promise<CatalogMutationResult> {
+  const result = await prisma.catalogProduct.updateMany({ where: { id, updatedAt: expectedUpdatedAt }, data: { archivedAt } });
+  return result.count ? { ok: true, id } : { ok: false, error: "stale" };
+}
+
+export function archiveCatalogProduct(id: number, expectedUpdatedAt: Date) {
+  return setArchived(id, expectedUpdatedAt, new Date());
+}
+
+export function restoreCatalogProduct(id: number, expectedUpdatedAt: Date) {
+  return setArchived(id, expectedUpdatedAt, null);
+}
+
+/** Deleting is always safe: quotation lines keep their copied name, price and bullets. */
+export async function deleteCatalogProduct(id: number, expectedUpdatedAt: Date): Promise<CatalogMutationResult> {
+  const result = await prisma.catalogProduct.deleteMany({ where: { id, updatedAt: expectedUpdatedAt } });
+  return result.count ? { ok: true, id } : { ok: false, error: "stale" };
+}
+
+/** What the quotation picker offers: active variants of products that are not archived. */
+export function listCatalogPickerProducts() {
+  return prisma.catalogProduct.findMany({
+    where: { archivedAt: null, variants: { some: { active: true } } },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      brand: true,
+      categoryId: true,
+      descriptionLines: true,
+      image: imageSelect,
+      imageId: true,
+      variants: {
+        where: { active: true },
+        orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          attributes: true,
+          descriptionLines: true,
+          priceCents: true,
+          imageId: true,
+          image: imageSelect,
+        },
+      },
+    },
   });
-  for (const group of quotationLines) {
-    const eligibility = group.catalogItemId === null ? undefined : eligibilityById.get(group.catalogItemId);
-    if (!eligibility) continue;
-    eligibility.quotationLines = group._count._all;
-    eligibility.eligible = group._count._all === 0;
-  }
-  return eligibilityById;
 }
 
-export async function getCatalogDeletionEligibility(id: number): Promise<CatalogDeletionEligibility> {
-  return (await getCatalogDeletionEligibilityByIds([id])).get(id)!;
-}
-
-export async function deleteCatalogFamily(id: number, expectedUpdatedAt: string): Promise<CatalogMutationResult> {
-  const eligibility = await getCatalogDeletionEligibility(id);
-  if (!eligibility.eligible) return { ok: false, error: "referenced" };
-  const deleted = await prisma.quoteCatalogItem.deleteMany({ where: { id, updatedAt: new Date(expectedUpdatedAt) } });
-  return deleted.count ? { ok: true, item: null } : { ok: false, error: "stale" };
-}
+export type CatalogPickerProductRecord = Awaited<ReturnType<typeof listCatalogPickerProducts>>[number];

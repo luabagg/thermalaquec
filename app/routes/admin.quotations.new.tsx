@@ -1,47 +1,40 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { data, redirect } from "@remix-run/node";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+
+import { ClientFormFields } from "~/components/admin/ClientFormFields";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { TaxIdInput } from "~/components/ui/tax-id-input";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { createQuoteClient, createQuotation, listQuoteClients } from "~/models/quotation.server";
+import { createClient, listClientOptions } from "~/models/client.server";
+import { createQuotation } from "~/models/quotation.server";
+import { formatCityState, parseClientForm } from "~/utils/client";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Novo orçamento | ${SITE_NAME}`);
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await requireAdmin(request);
-  const url = new URL(request.url);
-  const clientId = url.searchParams.get("clientId");
-  const clients = await listQuoteClients();
-  return json({
-    clients,
-    preselectedClientId: clientId ? Number(clientId) : null,
-  });
+  const preselected = Number(new URL(request.url).searchParams.get("clientId"));
+  return { clients: await listClientOptions(), preselectedClientId: Number.isInteger(preselected) ? preselected : null };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { user } = await requireAdmin(request);
   const form = await request.formData();
-  const mode = String(form.get("mode") || "existing");
 
   let clientId: number;
-  if (mode === "new") {
-    const name = String(form.get("name") || "").trim();
-    if (!name) return json({ error: "Nome do cliente obrigatório" }, { status: 400 });
-    const client = await createQuoteClient({
-      name,
-      location: String(form.get("location") || "") || null,
-      document: String(form.get("document") || "") || null,
-    });
-    clientId = client.id;
+  if (form.get("mode") === "new") {
+    const parsed = parseClientForm(form);
+    if (!parsed.ok) return data({ fieldErrors: parsed.fieldErrors, error: undefined }, { status: 400 });
+    const created = await createClient(parsed.data);
+    if (!created.ok) return data({ fieldErrors: created.fieldErrors, error: undefined }, { status: 400 });
+    clientId = created.client.id;
   } else {
     clientId = Number(form.get("clientId"));
-    if (!Number.isFinite(clientId)) {
-      return json({ error: "Selecione um cliente" }, { status: 400 });
+    if (!Number.isInteger(clientId) || clientId <= 0) {
+      return data({ error: "Selecione um cliente.", fieldErrors: undefined }, { status: 400 });
     }
   }
 
@@ -51,6 +44,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function NewQuotation() {
   const { clients, preselectedClientId } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-grow flex-col gap-8 px-4 py-12">
@@ -62,53 +56,41 @@ export default function NewQuotation() {
           / Novo
         </p>
         <h1 className="font-display mt-1 text-3xl font-bold">Novo orçamento</h1>
-        <p className="mt-2 text-muted-foreground">
-          Título = nome do cliente. Data = hoje. CPF/CNPJ e local opcionais.
-        </p>
       </div>
 
-      <Form method="post" className="grid gap-4 border border-border p-4">
-        <input type="hidden" name="mode" value="existing" />
-        <div>
-          <Label htmlFor="clientId">Cliente existente</Label>
-          <select
-            id="clientId"
-            name="clientId"
-            defaultValue={preselectedClientId ?? ""}
-            required={clients.length > 0}
-            className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-          >
-            <option value="" disabled>
-              Selecione…
-            </option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
+      {clients.length > 0 ? (
+        <Form method="post" className="grid gap-4 border border-border p-4">
+          <input type="hidden" name="mode" value="existing" />
+          <div className="grid gap-1">
+            <Label htmlFor="clientId">Cliente</Label>
+            <select
+              id="clientId"
+              name="clientId"
+              required
+              defaultValue={preselectedClientId ?? ""}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="" disabled>
+                Selecione…
               </option>
-            ))}
-          </select>
-        </div>
-        <Button type="submit" disabled={clients.length === 0}>
-          Abrir builder
-        </Button>
-      </Form>
-
-      <Form method="post" className="grid gap-3 border border-border p-4">
-        <input type="hidden" name="mode" value="new" />
-        <h2 className="font-display text-lg font-semibold">Ou criar cliente novo</h2>
-        <div>
-          <Label htmlFor="name">Nome</Label>
-          <Input id="name" name="name" required />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="location">Local (opcional)</Label>
-            <Input id="location" name="location" />
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name} · {formatCityState(client)}
+                </option>
+              ))}
+            </select>
+            {actionData?.error ? <p className="text-sm text-destructive">{actionData.error}</p> : null}
           </div>
-            <TaxIdInput id="document" name="document" />
-        </div>
-        <Button type="submit" variant="outline">
-          Criar cliente e abrir builder
+          <Button type="submit">Abrir editor</Button>
+        </Form>
+      ) : null}
+
+      <Form method="post" className="grid gap-4 border border-border p-4">
+        <input type="hidden" name="mode" value="new" />
+        <h2 className="font-display text-lg font-semibold">{clients.length > 0 ? "Ou cadastre um cliente novo" : "Cadastre o cliente"}</h2>
+        <ClientFormFields idPrefix="new-client" fieldErrors={actionData?.fieldErrors} />
+        <Button type="submit" variant={clients.length > 0 ? "outline" : "default"}>
+          Cadastrar e abrir editor
         </Button>
       </Form>
     </main>

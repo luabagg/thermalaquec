@@ -1,102 +1,58 @@
 import { expect, test } from "vitest";
-import { MAX_CATALOG_AGGREGATE_BYTES, parseCatalogAggregateJson, parseIntegerArray } from "./catalog-admin";
 
-function aggregate(overrides: Record<string, unknown> = {}) {
-  return {
-    id: 1,
-    expectedUpdatedAt: "2026-08-29T00:00:00.000Z",
-    family: {
-      slug: "boiler",
-      name: "Boiler",
-      nameTemplate: null,
-      descriptionLines: [],
-      defaultUnitPriceCents: 100,
-      imageId: null,
-    },
-    options: [],
-    variants: [],
-    ...overrides,
-  };
+import { STALE_CATALOG_MESSAGE, formatAttributes, parseAttributes, parseCatalogProductForm } from "./catalog-admin";
+
+function form(fields: Record<string, string>) {
+  const data = new FormData();
+  for (const [key, value] of Object.entries(fields)) data.set(key, value);
+  return data;
 }
 
-test("accepts only actual positive integer IDs", () => {
-  expect(parseIntegerArray([1, 2, 0, -1, 1.5, "3", null, true])).toEqual([1, 2]);
-  expect(parseIntegerArray("1")).toEqual([]);
+const base = {
+  expectedUpdatedAt: "2026-09-23T12:00:00.000Z",
+  name: "Boiler",
+  variantCount: "1",
+  "variant.0.id": "7",
+  "variant.0.name": "Boiler 400L",
+};
+
+test("a variant without a price has no catalog price, and a typed price is read in reais", () => {
+  const empty = parseCatalogProductForm(form(base));
+  const typed = parseCatalogProductForm(form({ ...base, "variant.0.price": "1.234,56" }));
+
+  expect(empty.ok && empty.input.variants[0].priceCents).toBeNull();
+  expect(typed.ok && typed.input.variants[0].priceCents).toBe(123456);
 });
 
-test("rejects aggregate JSON above the bounded payload size", () => {
-  const raw = JSON.stringify(aggregate({ padding: "x".repeat(MAX_CATALOG_AGGREGATE_BYTES) }));
-  expect(parseCatalogAggregateJson(raw)).toEqual({
-    error: "As alterações excedem o limite permitido. Reduza os textos ou a quantidade de itens.",
+test("an unreadable price is rejected instead of saved as zero", () => {
+  expect(parseCatalogProductForm(form({ ...base, "variant.0.price": "abc" }))).toEqual({
+    ok: false,
+    error: "Preço inválido na variante 1.",
   });
 });
 
-test.each([
-  ["family price", { family: { ...(aggregate().family as object), defaultUnitPriceCents: "Infinity" } }],
-  ["family image", { family: { ...(aggregate().family as object), imageId: "NaN" } }],
-  [
-    "option order",
-    { options: [{ clientKey: "option", name: "Size", slug: "size", placement: "TITLE", sortOrder: "Infinity", values: [] }] },
-  ],
-  [
-    "value order",
-    {
-      options: [
-        {
-          clientKey: "option",
-          name: "Size",
-          slug: "size",
-          placement: "TITLE",
-          sortOrder: 0,
-          values: [{ clientKey: "value", label: "One", slug: "one", titleFragment: null, descriptionLines: [], sortOrder: "NaN" }],
-        },
-      ],
-    },
-  ],
-  [
-    "variant price",
-    {
-      variants: [
-        {
-          clientKey: "variant",
-          valueClientKeys: [],
-          sku: null,
-          active: true,
-          nameOverride: null,
-          descriptionLinesOverride: null,
-          unitPriceCents: "Infinity",
-          imageId: null,
-        },
-      ],
-    },
-  ],
-])("rejects a non-finite %s", (_label, override) => {
-  const result = parseCatalogAggregateJson(JSON.stringify(aggregate(override)));
-  expect(result).toHaveProperty("error");
-  expect("error" in result ? result.error : "").toMatch(/inválid/i);
+test("a product needs a name and at least one named variant", () => {
+  expect(parseCatalogProductForm(form({ ...base, name: " " })).ok).toBe(false);
+  expect(parseCatalogProductForm(form({ ...base, variantCount: "0" })).ok).toBe(false);
+  expect(parseCatalogProductForm(form({ ...base, "variant.0.name": "" })).ok).toBe(false);
 });
 
-test("ignores a client-computed variant key", () => {
-  const parsed = parseCatalogAggregateJson(
-    JSON.stringify(
-      aggregate({
-        variants: [
-          {
-            clientKey: "variant",
-            key: "malicious-key",
-            valueClientKeys: [],
-            sku: null,
-            active: true,
-            nameOverride: null,
-            descriptionLinesOverride: null,
-            unitPriceCents: null,
-            imageId: null,
-          },
-        ],
-      })
-    )
-  );
+test("a form without its version is treated as stale", () => {
+  expect(parseCatalogProductForm(form({ ...base, expectedUpdatedAt: "" }))).toEqual({ ok: false, error: STALE_CATALOG_MESSAGE });
+});
 
-  expect(parsed).toMatchObject({ variants: [{ clientKey: "variant" }] });
-  expect("error" in parsed ? parsed : parsed.variants[0]).not.toHaveProperty("key");
+test("an unchecked availability box makes the variant inactive", () => {
+  const inactive = parseCatalogProductForm(form(base));
+  const active = parseCatalogProductForm(form({ ...base, "variant.0.active": "on" }));
+
+  expect(inactive.ok && inactive.input.variants[0].active).toBe(false);
+  expect(active.ok && active.input.variants[0].active).toBe(true);
+});
+
+test("attributes are one 'name: value' per line, split at the first colon", () => {
+  expect(parseAttributes("Capacidade: 400L\nsem dois pontos\nRelação: 3:1\n: vazio")).toEqual([
+    { name: "Capacidade", value: "400L" },
+    { name: "Relação", value: "3:1" },
+  ]);
+  expect(formatAttributes([{ name: "Capacidade", value: "400L" }])).toBe("Capacidade: 400L");
 });

@@ -13,9 +13,8 @@
     "start": "remix-serve ./build/server/index.js",
     "postinstall": "prisma generate",
     "prismaPull": "npx prisma db pull",
-    "prismaPush": "npx prisma db push",
-    "prismaMigrate": "npx prisma migrate dev",
-    "prismaSeed": "npx prisma db seed",
+    "dbStatus": "prisma migrate status",
+    "dbDeploy": "prisma migrate deploy",
     "catalogParse": "node scripts/canva-catalog/parse-catalog.mjs && node scripts/canva-catalog/review-catalog.mjs",
     "envPull": "vercel env pull .env",
     "catalogBuildFamilies": "node scripts/catalog/build-families.mjs",
@@ -25,6 +24,7 @@
     "@prisma/client": "6.3.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-popover": "^1.1.2",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
@@ -43,6 +43,7 @@
     "@vercel/speed-insights": "^1.1.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.3.0",
     "isbot": "^4.1.0",
     "lucide-react": "^0.462.0",
@@ -89,8 +90,5 @@
   },
   "engines": {
     "node": "24.x"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   }
 }

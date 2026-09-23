@@ -17,3 +17,6 @@ data/quotations/**
 # Derived catalog build output
 data/catalog/dropped.json
 data/catalog/review-payload.json
+
+# Supabase CLI local state
+supabase/.temp/
