@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["gru1"],
   "headers": [
     {
       "source": "/(.*)\\.(webp|png|jpg|jpeg|ico|woff2)",
