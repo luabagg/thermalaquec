@@ -1,147 +1,83 @@
-import { expect, test, vi } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 
-const { requireAdminMock, saveQuotationMock, loadQuotationEditorDataMock } = vi.hoisted(() => ({
-  requireAdminMock: vi.fn(),
-  saveQuotationMock: vi.fn(),
-  loadQuotationEditorDataMock: vi.fn(),
+const mocks = vi.hoisted(() => ({
+  requireAdmin: vi.fn(),
+  saveQuotation: vi.fn(),
+  getQuotation: vi.fn(),
+  listClientOptions: vi.fn(),
+  listCatalogPickerProducts: vi.fn(),
+  listCatalogCategories: vi.fn(),
 }));
 
-vi.mock("~/utils/require-admin.server", () => ({
-  requireAdmin: requireAdminMock,
+vi.mock("~/utils/require-admin.server", () => ({ requireAdmin: mocks.requireAdmin }));
+vi.mock("~/models/quotation.server", () => ({ saveQuotation: mocks.saveQuotation, getQuotation: mocks.getQuotation }));
+vi.mock("~/models/client.server", () => ({ listClientOptions: mocks.listClientOptions }));
+vi.mock("~/models/catalog.server", () => ({
+  listCatalogPickerProducts: mocks.listCatalogPickerProducts,
+  listCatalogCategories: mocks.listCatalogCategories,
 }));
 
-vi.mock("~/models/quotation.server", () => ({
-  saveQuotation: saveQuotationMock,
-  loadQuotationEditorData: loadQuotationEditorDataMock,
-}));
+afterEach(() => vi.clearAllMocks());
 
-function buildRequest(form: FormData) {
-  return new Request("http://localhost/admin/quotations/42", {
-    method: "POST",
-    body: form,
-  });
+const user = { user: { id: "user-1", email: "rep@example.com" } };
+
+function post(fields: Record<string, string>) {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(fields)) form.set(key, value);
+  return new Request("http://localhost/admin/quotations/42", { method: "POST", body: form });
 }
 
-test("loader delegates the concurrent narrow load and returns compact picker summaries", async () => {
-  requireAdminMock.mockResolvedValue({ user: { id: "user-1", email: "rep@example.com" } });
-  const summary = {
-    id: 7,
-    slug: "boiler",
-    name: "Boiler",
-    defaultUnitPriceCents: 1000,
-    imageId: null,
-    Image: null,
-    _count: { options: 2, variants: 1 },
-  };
-  loadQuotationEditorDataMock.mockResolvedValueOnce({
-    quotation: { id: 42, title: "Quote" },
-    catalog: [summary],
-  });
+const baseFields = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lineCount: "0", paymentCount: "0" };
 
+test("the editor renders before the catalog finishes loading", async () => {
+  mocks.requireAdmin.mockResolvedValue(user);
+  mocks.getQuotation.mockResolvedValue({ id: 42 });
+  mocks.listClientOptions.mockResolvedValue([]);
+  mocks.listCatalogPickerProducts.mockReturnValue(new Promise(() => {}));
+  mocks.listCatalogCategories.mockResolvedValue([]);
   const { loader } = await import("./admin.quotations.$id");
-  const args = {
-    request: new Request("http://localhost/admin/quotations/42"),
-    params: { id: "42" },
-  } as never;
-  const response = await loader(args);
 
-  expect(loadQuotationEditorDataMock).toHaveBeenCalledWith("user-1", 42);
-  await expect(response.json()).resolves.toMatchObject({
-    quotation: { id: 42, title: "Quote" },
-    catalog: [summary],
-  });
+  const result = await loader({ request: new Request("http://localhost/admin/quotations/42"), params: { id: "42" } } as never);
 
-  loadQuotationEditorDataMock.mockResolvedValueOnce({ quotation: null, catalog: [] });
-  await expect(loader(args)).rejects.toMatchObject({ status: 404 });
+  expect(result.quotation).toEqual({ id: 42 });
+  expect(result.catalog).toBeInstanceOf(Promise);
 });
 
-test("action returns JSON for save and forwards the revision token", async () => {
-  requireAdminMock.mockResolvedValueOnce({ user: { id: "user-1", email: "rep@example.com" } });
-  saveQuotationMock.mockResolvedValueOnce({ ok: true, quotationId: 42, revision: 9 });
-
+test("a save echoes its revision so the editor can ignore stale responses", async () => {
+  mocks.requireAdmin.mockResolvedValue(user);
+  mocks.saveQuotation.mockResolvedValue({ ok: true });
   const { action } = await import("./admin.quotations.$id");
-  const form = new FormData();
-  form.set("intent", "save");
-  form.set("revision", "9");
-  form.set("title", " Heat pump quote ");
-  form.set("issuedAt", "2026-08-29");
-  form.set("status", "final");
-  form.set("location", " Rua Central ");
-  form.set("document", " 12.345.678/0001-90 ");
-  form.set("notes", "Note");
-  form.set("lineCount", "1");
-  form.set("line.0.name", " Boiler ");
-  form.set("line.0.quantity", "2");
-  form.set("line.0.description", "Install");
-  form.set("line.0.price", "123,45");
-  form.set("line.0.catalogItemId", "7");
-  form.set("line.0.catalogResolutionToken", "server-signed-token");
-  form.set("paymentCount", "1");
-  form.set("pay.0.label", " Cash ");
-  form.set("pay.0.amount", "999,00");
-  form.set("pay.0.detail", " upfront ");
 
-  const response = await action({ request: buildRequest(form), params: { id: "42" } } as never);
+  const result = await action({ request: post({ ...baseFields, intent: "autosave", revision: "9" }), params: { id: "42" } } as never);
 
-  expect(response.status).toBe(200);
-  await expect(response.json()).resolves.toEqual({ ok: true, quotationId: 42, revision: 9 });
-  expect(saveQuotationMock).toHaveBeenCalledWith({
-    quotationId: 42,
-    ownerUserId: "user-1",
-    revision: 9,
-    intent: "save",
-    title: " Heat pump quote ",
-    issuedAt: new Date("2026-08-29T12:00:00"),
-    status: "final",
-    location: " Rua Central ",
-    document: " 12.345.678/0001-90 ",
-    notes: "Note",
-    lines: [
-      {
-        name: "Boiler",
-        quantity: 2,
-        descriptionLines: ["Install"],
-        unitPriceCents: 12345,
-        catalogItemId: 7,
-        catalogResolutionToken: "server-signed-token",
-        imageId: null,
-      },
-    ],
-    paymentOptions: [
-      {
-        label: "Cash",
-        amountCents: 99900,
-        detail: " upfront ",
-      },
-    ],
-  });
+  expect(result.data).toEqual({ ok: true, quotationId: 42, revision: 9 });
+  expect(mocks.saveQuotation).toHaveBeenCalledWith(expect.objectContaining({ quotationId: 42, ownerUserId: "user-1", clientId: 3 }));
 });
 
-test("action returns a print target in JSON for save-and-print", async () => {
-  requireAdminMock.mockResolvedValueOnce({ user: { id: "user-1", email: "rep@example.com" } });
-  saveQuotationMock.mockResolvedValueOnce({
-    ok: true,
-    quotationId: 42,
-    revision: 10,
-    redirectTo: "/admin/quotations/42/print?autoprint=1",
-  });
+test("save-and-print answers with the print page", async () => {
+  mocks.requireAdmin.mockResolvedValue(user);
+  mocks.saveQuotation.mockResolvedValue({ ok: true });
+  const { action } = await import("./admin.quotations.$id");
 
-  const { action, shouldRevalidate } = await import("./admin.quotations.$id");
-  const form = new FormData();
-  form.set("intent", "save-print");
-  form.set("revision", "10");
-  form.set("title", "Quote");
+  const result = await action({ request: post({ ...baseFields, intent: "save-print", revision: "10" }), params: { id: "42" } } as never);
 
-  const response = await action({ request: buildRequest(form), params: { id: "42" } } as never);
+  expect(result.data).toMatchObject({ ok: true, redirectTo: "/admin/quotations/42/print?autoprint=1" });
+});
 
-  expect(response.status).toBe(200);
-  await expect(response.json()).resolves.toEqual({
-    ok: true,
-    quotationId: 42,
-    revision: 10,
-    redirectTo: "/admin/quotations/42/print?autoprint=1",
-  });
-  expect(shouldRevalidate({ actionResult: { ok: true }, defaultShouldRevalidate: true } as never)).toBe(false);
-  expect(shouldRevalidate({ actionResult: { ok: false, status: 404, error: "Not found" }, defaultShouldRevalidate: true } as never)).toBe(false);
-  expect(shouldRevalidate({ actionResult: undefined, defaultShouldRevalidate: true } as never)).toBe(true);
+test("a failed save reports its status and error with the revision", async () => {
+  mocks.requireAdmin.mockResolvedValue(user);
+  mocks.saveQuotation.mockResolvedValue({ ok: false, status: 404, error: "Orçamento não encontrado." });
+  const { action } = await import("./admin.quotations.$id");
+
+  const result = await action({ request: post({ ...baseFields, intent: "save", revision: "4" }), params: { id: "42" } } as never);
+
+  expect(result.init?.status).toBe(404);
+  expect(result.data).toEqual({ ok: false, status: 404, error: "Orçamento não encontrado.", revision: 4 });
+});
+
+test("editor saves keep the draft, while a client edit reloads the page data", async () => {
+  const { shouldRevalidate } = await import("./admin.quotations.$id");
+
+  expect(shouldRevalidate({ actionResult: { ok: true, revision: 1 }, defaultShouldRevalidate: true } as never)).toBe(false);
+  expect(shouldRevalidate({ actionResult: { saved: true }, defaultShouldRevalidate: true } as never)).toBe(true);
 });

@@ -7,22 +7,21 @@ import { formatBRL } from "~/utils/quotation";
 import { ChevronDown, Trash2 } from "lucide-react";
 
 export type QuotationEditorLine = {
-  id: number | null;
   clientKey: string;
   name: string;
   quantity: number;
   description: string;
   priceInput: string;
   unitPriceCents: number;
-  catalogItemId: number | null;
-  catalogResolutionToken: string | null;
+  catalogVariantId: number | null;
   imageId: number | null;
   imageUrl: string | null;
   imageThumbnail: string | null;
+  /** Only a line typed by hand starts open; saved and catalog lines start closed. */
+  openOnMount: boolean;
 };
 
 export type QuotationEditorPayment = {
-  id: number | null;
   clientKey: string;
   label: string;
   amountInput: string;
@@ -53,8 +52,8 @@ export const QuotationEditorLineRow = memo(function QuotationEditorLineRow({
 }: QuotationEditorLineRowProps) {
   const imageSrc = line.imageThumbnail ?? line.imageUrl;
   const lineTotal = line.quantity * line.unitPriceCents;
-  // Saved and catalog lines start closed; a blank new line opens so it can be filled in.
-  const [initiallyOpen] = useState(() => !line.name);
+  // Read once: the row must not collapse while the user types.
+  const [initiallyOpen] = useState(line.openOnMount);
 
   return (
     <details
@@ -86,9 +85,7 @@ export const QuotationEditorLineRow = memo(function QuotationEditorLineRow({
         </Button>
       </summary>
       <div className="space-y-2 px-3 pb-3">
-        <input type="hidden" name={`line.${index}.id`} value={line.id ?? ""} />
-        <input type="hidden" name={`line.${index}.catalogItemId`} value={line.catalogItemId ?? ""} />
-        <input type="hidden" name={`line.${index}.catalogResolutionToken`} value={line.catalogResolutionToken ?? ""} />
+        <input type="hidden" name={`line.${index}.catalogVariantId`} value={line.catalogVariantId ?? ""} />
         <input type="hidden" name={`line.${index}.imageId`} value={line.imageId ?? ""} />
         <Input
           name={`line.${index}.name`}

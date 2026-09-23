@@ -13,8 +13,7 @@ export const meta: MetaFunction = () => buildNoIndexMeta(`Orçamentos | ${SITE_N
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { user } = await requireAdmin(request);
-  const quotations = await listQuotations(user.id);
-  return json({ quotations });
+  return { quotations: await listQuotations(user.id) };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -68,7 +67,7 @@ export default function AdminQuotations() {
       <ul className="divide-y divide-border border border-border">
         {quotations.map((q) => {
           const total = quotationTotalCents(q.lines);
-          const issued = new Date(q.issuedAt).toLocaleDateString("pt-BR");
+          const issued = new Date(q.issuedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" });
           return (
             <li key={q.id} className="flex items-stretch gap-2 hover:bg-secondary/50">
               <Link
@@ -77,11 +76,13 @@ export default function AdminQuotations() {
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{q.title}</p>
+                    <p className="font-medium">
+                      Nº {q.id} · {q.client.name}
+                    </p>
                     <StatusBadge status={q.status} />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {q.client.name} · {issued}
+                    {q.client.city}/{q.client.state} · {issued}
                   </p>
                 </div>
                 {total > 0 ? <p className="font-medium sm:text-right">{formatBRL(total)}</p> : null}

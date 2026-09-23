@@ -1,5 +1,5 @@
 import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QuotationDocument } from "~/components/admin/QuotationDocument";
@@ -14,7 +14,7 @@ import { requireAdmin } from "~/utils/require-admin.server";
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: quotationStyles }];
 
 export const meta: MetaFunction<typeof loader> = ({ data }) =>
-  buildNoIndexMeta(`Imprimir ${data?.quotation.title ?? "orçamento"} | ${SITE_NAME}`);
+  buildNoIndexMeta(`Imprimir orçamento nº ${data?.quotation.id ?? ""} | ${SITE_NAME}`);
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const { user } = await requireAdmin(request);
@@ -22,7 +22,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   if (!Number.isFinite(id)) throw redirect("/admin/quotations");
   const quotation = await getQuotation(id, user.id);
   if (!quotation) throw new Response("Not found", { status: 404 });
-  return json({ quotation, rep: resolveQuoteRep(user.email) });
+  return { quotation, rep: resolveQuoteRep(user.email) };
 };
 
 export default function QuotationPrint() {
@@ -95,14 +95,13 @@ export default function QuotationPrint() {
       ) : null}
       <div className="flex justify-center p-4 print:block print:p-0">
         <QuotationDocument
-          title={quotation.title}
           issuedAt={quotation.issuedAt}
           client={quotation.client}
           lines={quotation.lines.map((line) => ({
             ...line,
             clientKey: String(line.id),
-            imageUrl: line.Image?.location ?? null,
-            thumbnailUrl: line.Image?.thumbnail ?? line.Image?.location ?? null,
+            imageUrl: line.image?.location ?? null,
+            thumbnailUrl: line.image?.thumbnail ?? line.image?.location ?? null,
           }))}
           paymentOptions={quotation.paymentOptions.map((option) => ({
             ...option,

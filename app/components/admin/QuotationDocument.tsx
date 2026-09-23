@@ -1,24 +1,29 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import type { QuotationLine, QuotationPaymentOption, QuoteClient } from "@prisma/client";
-
+import { formatClientAddress, formatPhone, type ClientInput } from "~/utils/client";
 import { formatBRL, quotationTotalCents, splitNoteLines } from "~/utils/quotation";
 import { buildQuoteBlocks, paginateQuoteBlocks, type QuoteBlock } from "~/utils/quotation-pages";
 import { formatTaxId, taxIdLabel } from "~/utils/tax-id";
 import { QUOTE_COMPANY, type QuoteRepProfile } from "~/lib/site";
 
+export type QuotationDocumentClient = Pick<
+  ClientInput,
+  "name" | "document" | "phone" | "street" | "number" | "complement" | "district" | "city" | "state"
+>;
+
 type QuotationDocumentProps = {
-  title: string;
   issuedAt: Date | string;
-  client: Pick<QuoteClient, "name" | "location" | "document">;
-  lines: Array<
-    Pick<QuotationLine, "name" | "quantity" | "descriptionLines" | "unitPriceCents"> & {
-      clientKey?: string;
-      imageUrl?: string | null;
-      thumbnailUrl?: string | null;
-    }
-  >;
-  paymentOptions: Array<Pick<QuotationPaymentOption, "label" | "amountCents" | "detail"> & { clientKey?: string }>;
+  client: QuotationDocumentClient;
+  lines: Array<{
+    name: string;
+    quantity: number;
+    descriptionLines: unknown;
+    unitPriceCents: number;
+    clientKey?: string;
+    imageUrl?: string | null;
+    thumbnailUrl?: string | null;
+  }>;
+  paymentOptions: Array<{ label: string; amountCents: number; detail: string | null; clientKey?: string }>;
   notes: string | null;
   rep: QuoteRepProfile;
   /** Dedicated print page: no screen chrome, print stylesheet applies. */
@@ -32,11 +37,12 @@ function asDate(value: Date | string) {
   return value instanceof Date ? value : new Date(value);
 }
 
+/** The issue date is a calendar day stored at UTC midnight, so read it in UTC. */
 function formatDateBR(value: Date | string) {
   const d = asDate(value);
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yy = String(d.getFullYear()).slice(-2);
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const yy = String(d.getUTCFullYear()).slice(-2);
   return `${dd}/${mm}/${yy}`;
 }
 
@@ -130,7 +136,7 @@ type QuotePageProps = QuotationDocumentProps & {
 };
 
 function QuotePage({ blocks, pageIndex, pageCount, measure, ...doc }: QuotePageProps) {
-  const { title, issuedAt, client, lines, paymentOptions, notes, rep, printMode } = doc;
+  const { issuedAt, client, lines, paymentOptions, notes, rep, printMode } = doc;
   const isFirst = pageIndex === 0;
   const pageLines = blocks.flatMap((b) => (b.kind === "line" ? [b.index] : []));
   const pagePayments = blocks.flatMap((b) => (b.kind === "payment" ? [b.index] : []));
@@ -154,11 +160,7 @@ function QuotePage({ blocks, pageIndex, pageCount, measure, ...doc }: QuotePageP
         </div>
       ) : null}
       <article className="quote-doc text-ink">
-        {isFirst ? (
-          <FullHeader title={title} issuedAt={issuedAt} client={client} />
-        ) : (
-          <CompactHeader title={title} issuedAt={issuedAt} client={client} />
-        )}
+        {isFirst ? <FullHeader issuedAt={issuedAt} client={client} /> : <CompactHeader issuedAt={issuedAt} client={client} />}
 
         <div className="quote-doc__body">
           {showTableHead ? (
@@ -200,16 +202,16 @@ function QuotePage({ blocks, pageIndex, pageCount, measure, ...doc }: QuotePageP
       </article>
 
       <footer className="quote-doc__footer">
-        Contato: {rep.phone} | {rep.city} | {rep.email} | {asDate(issuedAt).getFullYear()}
+        Contato: {rep.phone} | {rep.city} | {rep.email} | {asDate(issuedAt).getUTCFullYear()}
         {pageCount > 1 ? ` | Página ${pageIndex + 1} de ${pageCount}` : null}
       </footer>
     </section>
   );
 }
 
-type HeaderProps = Pick<QuotationDocumentProps, "title" | "issuedAt" | "client">;
+type HeaderProps = Pick<QuotationDocumentProps, "issuedAt" | "client">;
 
-function FullHeader({ title, issuedAt, client }: HeaderProps) {
+function FullHeader({ issuedAt, client }: HeaderProps) {
   return (
     <header className="quote-doc__header">
       <div className="quote-doc__header-top">
@@ -226,18 +228,22 @@ function FullHeader({ title, issuedAt, client }: HeaderProps) {
       <dl className="quote-doc__client">
         <div>
           <dt>Cliente</dt>
-          <dd className="quote-doc__client-name">{client.name || title}</dd>
+          <dd className="quote-doc__client-name">{client.name}</dd>
         </div>
-        {client.location ? (
-          <div>
-            <dt>Local</dt>
-            <dd>{client.location}</dd>
-          </div>
-        ) : null}
+        <div>
+          <dt>Local</dt>
+          <dd>{formatClientAddress(client)}</dd>
+        </div>
         {client.document ? (
           <div>
             <dt>{taxIdLabel(client.document)}</dt>
             <dd>{formatTaxId(client.document)}</dd>
+          </div>
+        ) : null}
+        {client.phone ? (
+          <div>
+            <dt>Telefone</dt>
+            <dd>{formatPhone(client.phone)}</dd>
           </div>
         ) : null}
       </dl>
@@ -245,13 +251,13 @@ function FullHeader({ title, issuedAt, client }: HeaderProps) {
   );
 }
 
-function CompactHeader({ title, issuedAt, client }: HeaderProps) {
+function CompactHeader({ issuedAt, client }: HeaderProps) {
   return (
     <header className="quote-doc__header quote-doc__header--compact">
       <img className="quote-doc__mini-logo" src="/quote-logo.webp" alt="" width={48} height={48} />
       <div className="quote-doc__compact-id">
         <p className="quote-doc__company">{QUOTE_COMPANY.legalName}</p>
-        <p className="quote-doc__compact-client">Orçamento · {client.name || title}</p>
+        <p className="quote-doc__compact-client">Orçamento · {client.name}</p>
       </div>
       <div className="quote-doc__date">
         <span>Data</span>
