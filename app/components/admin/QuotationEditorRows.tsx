@@ -1,11 +1,10 @@
-import { memo } from "react";
-import { Trash2 } from "lucide-react";
-
+import { memo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { FileButton } from "~/components/ui/file-button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { formatBRL } from "~/utils/quotation";
+import { ChevronDown, Trash2 } from "lucide-react";
 
 export type QuotationEditorLine = {
   id: number | null;
@@ -53,78 +52,94 @@ export const QuotationEditorLineRow = memo(function QuotationEditorLineRow({
   onUpload,
 }: QuotationEditorLineRowProps) {
   const imageSrc = line.imageThumbnail ?? line.imageUrl;
+  const lineTotal = line.quantity * line.unitPriceCents;
+  // Saved and catalog lines start closed; a blank new line opens so it can be filled in.
+  const [initiallyOpen] = useState(() => !line.name);
 
   return (
-    <div className="space-y-2 border border-border p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs text-muted-foreground">#{index + 1}</p>
+    <details
+      open={initiallyOpen}
+      // Closed fields still submit; open the row so the browser can show a validation error.
+      onInvalidCapture={(e) => (e.currentTarget.open = true)}
+      className="group border border-border"
+    >
+      <summary className="flex cursor-pointer list-none items-center gap-2 p-3 [&::-webkit-details-marker]:hidden">
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+        <span className="text-xs text-muted-foreground">#{index + 1}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">{line.name || "Sem nome"}</span>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          {line.quantity}× {lineTotal > 0 ? formatBRL(lineTotal) : ""}
+        </span>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           className="h-8 text-destructive hover:text-destructive"
-          onClick={() => onRemove(line.clientKey)}
+          onClick={(e) => {
+            e.preventDefault();
+            onRemove(line.clientKey);
+          }}
           aria-label="Remover item"
         >
           <Trash2 className="h-4 w-4" />
           <span className="sr-only">Remover</span>
         </Button>
-      </div>
-      <input type="hidden" name={`line.${index}.id`} value={line.id ?? ""} />
-      <input type="hidden" name={`line.${index}.catalogItemId`} value={line.catalogItemId ?? ""} />
-      <input type="hidden" name={`line.${index}.catalogResolutionToken`} value={line.catalogResolutionToken ?? ""} />
-      <input type="hidden" name={`line.${index}.imageId`} value={line.imageId ?? ""} />
-      <Input
-        name={`line.${index}.name`}
-        value={line.name}
-        onChange={(e) => onChange(line.clientKey, { name: e.target.value })}
-        placeholder="Item"
-        required
-      />
-      <div className="grid grid-cols-2 gap-2">
+      </summary>
+      <div className="space-y-2 px-3 pb-3">
+        <input type="hidden" name={`line.${index}.id`} value={line.id ?? ""} />
+        <input type="hidden" name={`line.${index}.catalogItemId`} value={line.catalogItemId ?? ""} />
+        <input type="hidden" name={`line.${index}.catalogResolutionToken`} value={line.catalogResolutionToken ?? ""} />
+        <input type="hidden" name={`line.${index}.imageId`} value={line.imageId ?? ""} />
         <Input
-          name={`line.${index}.quantity`}
-          type="number"
-          min={1}
-          value={line.quantity}
-          onChange={(e) =>
-            onChange(line.clientKey, {
-              quantity: Math.max(1, Number(e.target.value) || 1),
-            })
-          }
-          placeholder="Qtd"
+          name={`line.${index}.name`}
+          value={line.name}
+          onChange={(e) => onChange(line.clientKey, { name: e.target.value })}
+          placeholder="Item"
+          required
         />
-        <Input
-          name={`line.${index}.price`}
-          value={line.priceInput}
-          onChange={(e) => onChange(line.clientKey, { priceInput: e.target.value })}
-          placeholder="Preço unit."
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            name={`line.${index}.quantity`}
+            type="number"
+            min={1}
+            value={line.quantity}
+            onChange={(e) =>
+              onChange(line.clientKey, {
+                quantity: Math.max(1, Number(e.target.value) || 1),
+              })
+            }
+            placeholder="Qtd"
+          />
+          <Input
+            name={`line.${index}.price`}
+            value={line.priceInput}
+            onChange={(e) => onChange(line.clientKey, { priceInput: e.target.value })}
+            placeholder="Preço unit."
+          />
+        </div>
+        <textarea
+          name={`line.${index}.description`}
+          rows={3}
+          value={line.description}
+          onChange={(e) => onChange(line.clientKey, { description: e.target.value })}
+          placeholder="Descrição (uma linha por bullet)"
+          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         />
+        {imageSrc ? <img src={imageSrc} alt="" className="h-16 w-16 rounded border border-border object-cover" /> : null}
+        <div>
+          <Label htmlFor={`line-img-${line.clientKey}`}>Imagem do item</Label>
+          <FileButton
+            id={`line-img-${line.clientKey}`}
+            className="mt-1"
+            disabled={busy || lineUploading}
+            busy={busy || lineUploading}
+            onFile={(file) => onUpload(line.clientKey, file)}
+          />
+          {uploadError ? <p className="mt-1 text-sm text-destructive">{uploadError}</p> : null}
+        </div>
+        {lineTotal > 0 ? <p className="text-right text-sm text-heat">Valor: {formatBRL(lineTotal)}</p> : null}
       </div>
-      <textarea
-        name={`line.${index}.description`}
-        rows={3}
-        value={line.description}
-        onChange={(e) => onChange(line.clientKey, { description: e.target.value })}
-        placeholder="Descrição (uma linha por bullet)"
-        className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-      />
-      {imageSrc ? <img src={imageSrc} alt="" className="h-16 w-16 rounded border border-border object-cover" /> : null}
-      <div>
-        <Label htmlFor={`line-img-${line.clientKey}`}>Imagem do item</Label>
-        <FileButton
-          id={`line-img-${line.clientKey}`}
-          className="mt-1"
-          disabled={busy || lineUploading}
-          busy={busy || lineUploading}
-          onFile={(file) => onUpload(line.clientKey, file)}
-        />
-        {uploadError ? <p className="mt-1 text-sm text-destructive">{uploadError}</p> : null}
-      </div>
-      {line.quantity * line.unitPriceCents > 0 ? (
-        <p className="text-right text-sm text-heat">Valor: {formatBRL(line.quantity * line.unitPriceCents)}</p>
-      ) : null}
-    </div>
+    </details>
   );
 });
 
