@@ -1,14 +1,10 @@
 import { useRef, useState, type ChangeEvent, type ComponentProps } from "react";
 
-import { useIsomorphicLayoutEffect } from "~/lib/use-isomorphic-layout-effect";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import {
-  caretAfterTaxIdChars,
-  formatTaxId,
-  stripTaxId,
-  taxIdLabel,
-} from "~/utils/tax-id";
+import { useIsomorphicLayoutEffect } from "~/lib/use-isomorphic-layout-effect";
+
+import { caretAfterTaxIdChars, compactTaxId, formatTaxId, taxIdLabel } from "./tax-id";
 
 type TaxIdInputProps = Omit<ComponentProps<"input">, "onChange" | "value" | "defaultValue"> & {
   value?: string;
@@ -17,6 +13,7 @@ type TaxIdInputProps = Omit<ComponentProps<"input">, "onChange" | "value" | "def
   optional?: boolean;
 };
 
+/** A CPF/CNPJ input that punctuates as the user types and keeps the caret in place. Its label follows the kind typed. */
 export function TaxIdInput({
   id,
   name,
@@ -44,7 +41,7 @@ export function TaxIdInput({
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const node = event.target;
     const caret = node.selectionStart ?? node.value.length;
-    const charsBefore = stripTaxId(node.value.slice(0, caret)).length;
+    const charsBefore = compactTaxId(node.value.slice(0, caret)).length;
     const next = formatTaxId(node.value);
     caretRef.current = caretAfterTaxIdChars(next, charsBefore);
     if (!isControlled) setInner(next);

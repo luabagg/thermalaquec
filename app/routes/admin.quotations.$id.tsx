@@ -30,7 +30,7 @@ import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { cn } from "~/lib/utils";
 import { listCatalogCategories, listProductsForQuotation } from "~/admin/catalog/catalog.server";
-import { listClientOptions } from "~/models/client.server";
+import { listClientsForQuotation } from "~/admin/clients/client.server";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
 
@@ -50,7 +50,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   if (!Number.isInteger(id)) throw redirect("/admin/quotations");
   // Not awaited: the catalog streams in after the editor renders.
   const catalog = loadCatalog();
-  const [quotation, clients] = await Promise.all([getQuotation(id, user.id), listClientOptions()]);
+  const [quotation, clients] = await Promise.all([getQuotation(id, user.id), listClientsForQuotation()]);
   if (!quotation) throw new Response("Not found", { status: 404 });
   return { quotation, clients, catalog, salesRep: salesRepForAdmin(user.email) };
 };

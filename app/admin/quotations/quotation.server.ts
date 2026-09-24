@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { todayInBrazil } from "~/lib/calendar-day";
 import prisma from "~/libs/prisma/client.server";
-import { clientFieldsSelect } from "~/models/client.server";
+import { clientContentSelect } from "~/admin/clients/client.server";
 
 import type { QuotationContent } from "./quotation-content";
 
@@ -19,7 +19,7 @@ const storedQuotationSelect = {
   issuedAt: true,
   status: true,
   notes: true,
-  client: { select: clientFieldsSelect },
+  client: { select: clientContentSelect },
   lines: {
     orderBy: { sortOrder: "asc" },
     select: {

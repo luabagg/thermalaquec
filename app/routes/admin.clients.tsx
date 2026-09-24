@@ -2,13 +2,15 @@ import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remi
 import { data, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 
-import { ClientFormFields } from "~/components/admin/ClientFormFields";
+import { formatCityState, formatPhone } from "~/admin/clients/client-display";
+import { parseClientForm } from "~/admin/clients/client-form";
+import { ClientFormFields } from "~/admin/clients/ClientFormFields";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { createClient, listClients } from "~/models/client.server";
-import { formatCityState, formatPhone, formatTaxId, parseClientForm } from "~/utils/client";
+import { createClient, listClients } from "~/admin/clients/client.server";
+import { formatTaxId } from "~/admin/clients/tax-id";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Clientes | ${SITE_NAME}`);
@@ -22,13 +24,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export const action = async ({ request }: ActionFunctionArgs) => {
   await requireAdmin(request);
   const parsed = parseClientForm(await request.formData());
-  if (!parsed.ok) return data({ fieldErrors: parsed.fieldErrors }, { status: 400 });
-  const result = await createClient(parsed.data);
-  if (!result.ok) return data({ fieldErrors: result.fieldErrors }, { status: 400 });
-  return redirect(`/admin/clients/${result.client.id}`);
+  if (!parsed.ok) return data({ errors: parsed.errors }, { status: 400 });
+  const outcome = await createClient(parsed.content);
+  if (!outcome.ok) return data({ errors: outcome.errors }, { status: 400 });
+  return redirect(`/admin/clients/${outcome.client.id}`);
 };
 
-export default function AdminClients() {
+export default function ClientList() {
   const { clients, search } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
@@ -50,8 +52,8 @@ export default function AdminClients() {
         <summary className="cursor-pointer list-none px-4 py-3 font-medium [&::-webkit-details-marker]:hidden">
           + Novo cliente
         </summary>
-        <Form method="post" className="grid gap-4 border-t border-border p-4">
-          <ClientFormFields fieldErrors={actionData?.fieldErrors} />
+        <Form method="post" className="grid grid-cols-1 gap-4 border-t border-border p-4">
+          <ClientFormFields errors={actionData?.errors} />
           <div>
             <Button type="submit" disabled={creating}>
               {creating ? "Salvando…" : "Adicionar cliente"}
@@ -75,9 +77,9 @@ export default function AdminClients() {
               className="flex flex-col gap-1 px-4 py-3 hover:bg-secondary/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
             >
               <div className="min-w-0">
-                <p className="font-medium">{client.name}</p>
+                <p className="break-words font-medium">{client.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {[formatCityState(client), client.document ? formatTaxId(client.document) : null, client.phone ? formatPhone(client.phone) : null]
+                  {[formatCityState(client), client.taxId ? formatTaxId(client.taxId) : null, client.phone ? formatPhone(client.phone) : null]
                     .filter(Boolean)
                     .join(" · ")}
                 </p>

@@ -1,17 +1,19 @@
 import { Link, useFetcher } from "@remix-run/react";
 import { useEffect, useState } from "react";
 
-import { ClientFormFields } from "~/components/admin/ClientFormFields";
+import { ClientFormFields } from "~/admin/clients/ClientFormFields";
 import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import type { action as clientAction } from "~/routes/admin.clients_.$id";
-import { formatCityState, formatClientAddress, formatPhone, formatTaxId, type ClientInput } from "~/utils/client";
+import { formatCityState, formatClientAddress, formatPhone } from "~/admin/clients/client-display";
+import type { ClientContent } from "~/admin/clients/client-form";
+import { formatTaxId } from "~/admin/clients/tax-id";
 
 import { QUOTATION_FIELD } from "../quotation-form";
 
 type Props = {
-  clients: (ClientInput & { id: number })[];
+  clients: (ClientContent & { id: number })[];
   clientId: number;
   onClientChange(clientId: number): void;
 };
@@ -47,7 +49,7 @@ export function QuotationClientField({ clients, clientId, onClientChange }: Prop
         <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm">
           <div className="min-w-0 break-words text-muted-foreground">
             <p>{formatClientAddress(client)}</p>
-            <p>{[client.document ? formatTaxId(client.document) : null, client.phone ? formatPhone(client.phone) : null, client.email].filter(Boolean).join(" · ")}</p>
+            <p>{[client.taxId ? formatTaxId(client.taxId) : null, client.phone ? formatPhone(client.phone) : null, client.email].filter(Boolean).join(" · ")}</p>
           </div>
           <Dialog open={editing} onOpenChange={setEditing}>
             <DialogTrigger asChild>
@@ -64,7 +66,7 @@ export function QuotationClientField({ clients, clientId, onClientChange }: Prop
                 <ClientFormFields
                   idPrefix="editor-client"
                   defaultValues={client}
-                  fieldErrors={fetcher.data && "fieldErrors" in fetcher.data ? fetcher.data.fieldErrors : undefined}
+                  errors={fetcher.data && "errors" in fetcher.data ? fetcher.data.errors : undefined}
                 />
                 <div className="flex gap-2">
                   <Button type="submit" name="intent" value="update" disabled={fetcher.state !== "idle"}>

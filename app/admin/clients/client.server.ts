@@ -1,17 +1,16 @@
 import { Prisma } from "@prisma/client";
 
 import prisma from "~/libs/prisma/client.server";
-import type { ClientField, ClientInput } from "~/utils/client";
 
-export type ClientMutationResult =
-  | { ok: true; client: { id: number } }
-  | { ok: false; fieldErrors: Partial<Record<ClientField, string>> };
+import type { ClientContent, ClientFormErrors } from "./client-form";
 
-/** Every stored client field the forms and the printed quotation use. */
-export const clientFieldsSelect = {
+export type ClientSaveOutcome = { ok: true; client: { id: number } } | { ok: false; errors: ClientFormErrors };
+
+/** The id and every content field: what the forms and the printed quotation use. */
+export const clientContentSelect = {
   id: true,
   name: true,
-  document: true,
+  taxId: true,
   phone: true,
   email: true,
   postalCode: true,
@@ -24,31 +23,31 @@ export const clientFieldsSelect = {
   notes: true,
 } satisfies Prisma.ClientSelect;
 
-const DUPLICATE_DOCUMENT = { document: "Já existe um cliente com este CPF/CNPJ." };
+const DUPLICATE_TAX_ID: ClientFormErrors = { fieldErrors: { taxId: "Já existe um cliente com este CPF/CNPJ." } };
 
 function isUniqueViolation(error: unknown) {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 }
 
-async function saveClient(write: () => Promise<{ id: number }>): Promise<ClientMutationResult> {
+async function saveClient(write: () => Promise<{ id: number }>): Promise<ClientSaveOutcome> {
   try {
     return { ok: true, client: await write() };
   } catch (error) {
-    // document is the only unique column besides the id.
-    if (isUniqueViolation(error)) return { ok: false, fieldErrors: DUPLICATE_DOCUMENT };
+    // The tax id is the only unique column besides the id.
+    if (isUniqueViolation(error)) return { ok: false, errors: DUPLICATE_TAX_ID };
     throw error;
   }
 }
 
-export function createClient(data: ClientInput) {
+export function createClient(data: ClientContent) {
   return saveClient(() => prisma.client.create({ data, select: { id: true } }));
 }
 
-export function updateClient(id: number, data: ClientInput) {
+export function updateClient(id: number, data: ClientContent) {
   return saveClient(() => prisma.client.update({ where: { id }, data, select: { id: true } }));
 }
 
-/** Searches by name, city or document, ignoring case. */
+/** Searches by name, city or tax id, ignoring case and tax id punctuation. */
 export function listClients(search?: string) {
   const term = search?.trim();
   return prisma.client.findMany({
@@ -57,7 +56,7 @@ export function listClients(search?: string) {
           OR: [
             { name: { contains: term, mode: "insensitive" } },
             { city: { contains: term, mode: "insensitive" } },
-            { document: { contains: term.replace(/[^A-Za-z0-9]/g, "").toUpperCase() || term } },
+            { taxId: { contains: term.replace(/[^A-Za-z0-9]/g, "").toUpperCase() || term } },
           ],
         }
       : undefined,
@@ -67,8 +66,8 @@ export function listClients(search?: string) {
 }
 
 /** The client choices of the quotation editor, with the fields its preview prints. */
-export function listClientOptions() {
-  return prisma.client.findMany({ orderBy: { name: "asc" }, select: clientFieldsSelect });
+export function listClientsForQuotation() {
+  return prisma.client.findMany({ orderBy: { name: "asc" }, select: clientContentSelect });
 }
 
 export function getClient(id: number) {

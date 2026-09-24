@@ -7,7 +7,7 @@ const documentProps = {
   issuedAt: "2026-08-29T00:00:00.000Z",
   client: {
     name: "Client",
-    document: null,
+    taxId: null,
     phone: null,
     street: null,
     number: null,

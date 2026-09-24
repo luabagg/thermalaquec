@@ -4,14 +4,14 @@ const mocks = vi.hoisted(() => ({
   requireAdmin: vi.fn(),
   saveQuotation: vi.fn(),
   getQuotation: vi.fn(),
-  listClientOptions: vi.fn(),
+  listClientsForQuotation: vi.fn(),
   listProductsForQuotation: vi.fn(),
   listCatalogCategories: vi.fn(),
 }));
 
 vi.mock("~/utils/require-admin.server", () => ({ requireAdmin: mocks.requireAdmin }));
 vi.mock("~/admin/quotations/quotation.server", () => ({ saveQuotation: mocks.saveQuotation, getQuotation: mocks.getQuotation }));
-vi.mock("~/models/client.server", () => ({ listClientOptions: mocks.listClientOptions }));
+vi.mock("~/admin/clients/client.server", () => ({ listClientsForQuotation: mocks.listClientsForQuotation }));
 vi.mock("~/admin/catalog/catalog.server", () => ({
   listProductsForQuotation: mocks.listProductsForQuotation,
   listCatalogCategories: mocks.listCatalogCategories,
@@ -32,7 +32,7 @@ const baseFields = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lin
 test("the editor renders before the catalog finishes loading", async () => {
   mocks.requireAdmin.mockResolvedValue(user);
   mocks.getQuotation.mockResolvedValue({ id: 42 });
-  mocks.listClientOptions.mockResolvedValue([]);
+  mocks.listClientsForQuotation.mockResolvedValue([]);
   mocks.listProductsForQuotation.mockReturnValue(new Promise(() => {}));
   mocks.listCatalogCategories.mockResolvedValue([]);
   const { loader } = await import("./admin.quotations.$id");

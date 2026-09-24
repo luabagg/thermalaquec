@@ -16,7 +16,7 @@ On 2026-09-23 a Prisma command reset the `public` schema and deleted all data. T
 
 | Table | Holds |
 | --- | --- |
-| `clients` | Clients. Only `name`, `city` and `state` are required. `document` (CPF or CNPJ, also the 2026 alphanumeric CNPJ) is unique. |
+| `clients` | Clients. Only `name`, `city` and `state` are required. The `document` column (CPF or CNPJ, also the 2026 alphanumeric CNPJ) is unique. Prisma calls it `taxId`. |
 | `catalog_categories` | Picker categories, from `scripts/catalog/categories.mjs`. |
 | `catalog_products` | A product line of one brand. |
 | `catalog_variants` | What a quotation line uses. Every product has at least one. `name` is the printed name. `attributes` is `[{ name, value }]` for search and display. |
@@ -44,7 +44,7 @@ Use a disposable local PostgreSQL. Set both URLs on the command, so `.env` does 
 export LOCAL=postgresql://postgres@127.0.0.1:55432/thermal
 POSTGRES_PRISMA_URL=$LOCAL POSTGRES_URL_NON_POOLING=$LOCAL yarn dbDeploy
 POSTGRES_PRISMA_URL=$LOCAL POSTGRES_URL_NON_POOLING=$LOCAL yarn catalogApply
-TEST_DATABASE_URL=$LOCAL yarn test app/models/models.db.test.ts
+TEST_DATABASE_URL=$LOCAL yarn test app/admin/persistence.db.test.ts
 ```
 
 The persistence tests truncate the tables. They refuse a `TEST_DATABASE_URL` that is not on localhost.

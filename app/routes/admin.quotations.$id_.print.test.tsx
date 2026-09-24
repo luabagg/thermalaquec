@@ -9,7 +9,7 @@ const { waitForPrintReadinessMock, searchParamsMock, loaderData } = vi.hoisted((
     quotation: {
       id: 42,
       issuedAt: "2026-08-29T00:00:00.000Z",
-      client: { name: "Client", location: null, document: null },
+      client: { name: "Client", taxId: null },
       lines: [],
       paymentOptions: [],
       notes: null,

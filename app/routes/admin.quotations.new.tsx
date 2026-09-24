@@ -2,14 +2,15 @@ import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remi
 import { data, redirect } from "@remix-run/node";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 
-import { ClientFormFields } from "~/components/admin/ClientFormFields";
+import { ClientFormFields } from "~/admin/clients/ClientFormFields";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { createClient, listClientOptions } from "~/models/client.server";
+import { createClient, listClientsForQuotation } from "~/admin/clients/client.server";
 import { createQuotation } from "~/admin/quotations/quotation.server";
-import { formatCityState, parseClientForm } from "~/utils/client";
+import { formatCityState } from "~/admin/clients/client-display";
+import { parseClientForm } from "~/admin/clients/client-form";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Novo orçamento | ${SITE_NAME}`);
@@ -17,7 +18,7 @@ export const meta: MetaFunction = () => buildNoIndexMeta(`Novo orçamento | ${SI
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await requireAdmin(request);
   const preselected = Number(new URL(request.url).searchParams.get("clientId"));
-  return { clients: await listClientOptions(), preselectedClientId: Number.isInteger(preselected) ? preselected : null };
+  return { clients: await listClientsForQuotation(), preselectedClientId: Number.isInteger(preselected) ? preselected : null };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -27,14 +28,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   let clientId: number;
   if (form.get("mode") === "new") {
     const parsed = parseClientForm(form);
-    if (!parsed.ok) return data({ fieldErrors: parsed.fieldErrors, error: undefined }, { status: 400 });
-    const created = await createClient(parsed.data);
-    if (!created.ok) return data({ fieldErrors: created.fieldErrors, error: undefined }, { status: 400 });
+    if (!parsed.ok) return data({ clientErrors: parsed.errors }, { status: 400 });
+    const created = await createClient(parsed.content);
+    if (!created.ok) return data({ clientErrors: created.errors }, { status: 400 });
     clientId = created.client.id;
   } else {
     clientId = Number(form.get("clientId"));
     if (!Number.isInteger(clientId) || clientId <= 0) {
-      return data({ error: "Selecione um cliente.", fieldErrors: undefined }, { status: 400 });
+      return data({ selectError: "Selecione um cliente." }, { status: 400 });
     }
   }
 
@@ -42,7 +43,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   return redirect(`/admin/quotations/${quotation.id}`);
 };
 
-export default function NewQuotation() {
+export default function NewQuotationPage() {
   const { clients, preselectedClientId } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
@@ -59,7 +60,7 @@ export default function NewQuotation() {
       </div>
 
       {clients.length > 0 ? (
-        <Form method="post" className="grid gap-4 border border-border p-4">
+        <Form method="post" className="grid grid-cols-1 gap-4 border border-border p-4">
           <input type="hidden" name="mode" value="existing" />
           <div className="grid gap-1">
             <Label htmlFor="clientId">Cliente</Label>
@@ -79,16 +80,16 @@ export default function NewQuotation() {
                 </option>
               ))}
             </select>
-            {actionData?.error ? <p className="text-sm text-destructive">{actionData.error}</p> : null}
+            {actionData && "selectError" in actionData ? <p className="text-sm text-destructive">{actionData.selectError}</p> : null}
           </div>
           <Button type="submit">Abrir editor</Button>
         </Form>
       ) : null}
 
-      <Form method="post" className="grid gap-4 border border-border p-4">
+      <Form method="post" className="grid grid-cols-1 gap-4 border border-border p-4">
         <input type="hidden" name="mode" value="new" />
         <h2 className="font-display text-lg font-semibold">{clients.length > 0 ? "Ou cadastre um cliente novo" : "Cadastre o cliente"}</h2>
-        <ClientFormFields idPrefix="new-client" fieldErrors={actionData?.fieldErrors} />
+        <ClientFormFields idPrefix="new-client" errors={actionData && "clientErrors" in actionData ? actionData.clientErrors : undefined} />
         <Button type="submit" variant={clients.length > 0 ? "outline" : "default"}>
           Cadastrar e abrir editor
         </Button>

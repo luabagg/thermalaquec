@@ -1,6 +1,6 @@
 // Persistence rules checked against a real PostgreSQL. Runs only with TEST_DATABASE_URL set to a local
 // database, because every test truncates the tables:
-//   TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55432/thermal yarn test app/models/models.db.test.ts
+//   TEST_DATABASE_URL=postgresql://postgres@127.0.0.1:55432/thermal yarn test app/admin/persistence.db.test.ts
 import type { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vitest";
 
@@ -9,7 +9,7 @@ const url = process.env.TEST_DATABASE_URL;
 type Models = {
   prisma: PrismaClient;
   quotation: typeof import("~/admin/quotations/quotation.server");
-  client: typeof import("./client.server");
+  client: typeof import("~/admin/clients/client.server");
   catalog: typeof import("~/admin/catalog/catalog.server");
 };
 
@@ -23,7 +23,7 @@ describe.skipIf(!url)("persistence", () => {
     m = {
       prisma: (await import("~/libs/prisma/client.server")).default,
       quotation: await import("~/admin/quotations/quotation.server"),
-      client: await import("./client.server"),
+      client: await import("~/admin/clients/client.server"),
       catalog: await import("~/admin/catalog/catalog.server"),
     };
   });
@@ -42,7 +42,7 @@ describe.skipIf(!url)("persistence", () => {
   const OTHER_OWNER = "00000000-0000-4000-8000-000000000002";
   const clientData = {
     name: "Abel",
-    document: null,
+    taxId: null,
     phone: "54991553618",
     email: null,
     postalCode: null,
@@ -146,11 +146,11 @@ describe.skipIf(!url)("persistence", () => {
   });
 
   test("two clients cannot share a CPF/CNPJ", async () => {
-    await m.client.createClient({ ...clientData, document: "52998224725" });
+    await m.client.createClient({ ...clientData, taxId: "52998224725" });
 
-    await expect(m.client.createClient({ ...clientData, name: "Outro", document: "52998224725" })).resolves.toEqual({
+    await expect(m.client.createClient({ ...clientData, name: "Outro", taxId: "52998224725" })).resolves.toEqual({
       ok: false,
-      fieldErrors: { document: expect.any(String) },
+      errors: { fieldErrors: { taxId: expect.any(String) } },
     });
   });
 

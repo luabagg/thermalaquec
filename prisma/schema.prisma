@@ -27,8 +27,8 @@ model Client {
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @updatedAt @map("updated_at")
   name       String      @db.VarChar(150)
-  /// CPF (11 digits) or CNPJ (14 digits), digits only.
-  document   String?     @unique @db.VarChar(14)
+  /// CPF (11 digits) or CNPJ (14 characters, also the 2026 alphanumeric form), without punctuation.
+  taxId      String?     @unique @map("document") @db.VarChar(14)
   /// Digits only, with area code.
   phone      String?     @db.VarChar(13)
   email      String?     @db.VarChar(150)

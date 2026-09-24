@@ -5,16 +5,17 @@ import { calendarDayYear, formatCalendarDayShort } from "~/lib/calendar-day";
 import { formatBRL } from "~/lib/money";
 import { splitBulletText } from "~/lib/text-lines";
 import { useIsomorphicLayoutEffect } from "~/lib/use-isomorphic-layout-effect";
-import { formatClientAddress, formatPhone, type ClientInput } from "~/utils/client";
-import { formatTaxId, taxIdLabel } from "~/utils/tax-id";
+import { formatClientAddress, formatPhone } from "~/admin/clients/client-display";
+import type { ClientContent } from "~/admin/clients/client-form";
+import { formatTaxId, taxIdLabel } from "~/admin/clients/tax-id";
 
 import { ISSUING_COMPANY, type SalesRep } from "../issuer";
 import { lineTotalCents, quotationTotalCents } from "../quotation-content";
 import { buildDocumentBlocks, paginateDocumentBlocks, type DocumentBlock } from "./document-pages";
 
 export type DocumentClient = Pick<
-  ClientInput,
-  "name" | "document" | "phone" | "street" | "number" | "complement" | "district" | "city" | "state"
+  ClientContent,
+  "name" | "taxId" | "phone" | "street" | "number" | "complement" | "district" | "city" | "state"
 >;
 
 export type DocumentLine = {
@@ -242,7 +243,7 @@ function FirstPageHeader({ issuedAt, client }: HeaderProps) {
       <dl className="quotation-doc__client">
         <ClientDetail term="Cliente" className="quotation-doc__client-name" value={client.name} />
         <ClientDetail term="Local" value={formatClientAddress(client)} />
-        {client.document ? <ClientDetail term={taxIdLabel(client.document)} value={formatTaxId(client.document)} /> : null}
+        {client.taxId ? <ClientDetail term={taxIdLabel(client.taxId)} value={formatTaxId(client.taxId)} /> : null}
         {client.phone ? <ClientDetail term="Telefone" value={formatPhone(client.phone)} /> : null}
       </dl>
     </header>
