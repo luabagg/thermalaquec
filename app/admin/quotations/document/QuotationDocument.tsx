@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useMemo, useRef, useState, type CSSProperties, type RefObject } from "react";
 import { flushSync } from "react-dom";
 
 import { calendarDayYear, formatCalendarDayShort } from "~/lib/calendar-day";
@@ -37,7 +37,7 @@ export type QuotationDocumentProps = {
   paymentOptions: DocumentPaymentOption[];
   notes: string | null;
   salesRep: SalesRep;
-  /** Dedicated print page: no screen chrome, print stylesheet applies. */
+  /** The print page: full-size images and no sheet shadow. */
   printMode?: boolean;
 };
 
@@ -51,6 +51,37 @@ function outerHeight(element: Element) {
 
 function sameSizes(a: number[], b: number[]) {
   return a.length === b.length && a.every((size, i) => size === b[i]);
+}
+
+type Fit = { scale: number; height: number };
+
+/** Scales the A4 sheets down to the frame's width on screen. Print ignores it: see the stylesheet. */
+function useFitToWidth(frameRef: RefObject<HTMLElement>, sheetsRef: RefObject<HTMLElement>) {
+  const [fit, setFit] = useState<Fit | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    const frame = frameRef.current;
+    const sheets = sheetsRef.current;
+    if (!frame || !sheets) return;
+    const update = () => {
+      // offsetWidth and offsetHeight are layout sizes, so the transform on the sheets does not change them.
+      const scale = Math.min(1, frame.getBoundingClientRect().width / sheets.offsetWidth);
+      const height = sheets.offsetHeight * scale;
+      setFit((prev) => (prev?.scale === scale && prev.height === height ? prev : { scale, height }));
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(frame);
+    observer.observe(sheets);
+    update();
+    return () => observer.disconnect();
+  }, [frameRef, sheetsRef]);
+
+  return fit;
+}
+
+function fitStyle(fit: Fit | null): CSSProperties | undefined {
+  if (!fit) return undefined;
+  return { "--quotation-scale": fit.scale, "--quotation-fitted-height": `${fit.height}px` } as CSSProperties;
 }
 
 function splitPages(blocks: DocumentBlock[], sizes: number[]) {
@@ -68,6 +99,9 @@ export const QuotationDocument = memo(function QuotationDocument(props: Quotatio
   );
   const [pageSizes, setPageSizes] = useState<number[]>([blocks.length]);
   const measureRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const sheetsRef = useRef<HTMLDivElement>(null);
+  const fit = useFitToWidth(frameRef, sheetsRef);
 
   const measure = useCallback(() => {
     const root = measureRef.current;
@@ -107,10 +141,12 @@ export const QuotationDocument = memo(function QuotationDocument(props: Quotatio
   const pages = splitPages(blocks, pageSizes);
 
   return (
-    <div className="quotation-pages">
-      {pages.map((page, index) => (
-        <DocumentPage key={index} {...props} blocks={page} pageIndex={index} pageCount={pages.length} />
-      ))}
+    <div ref={frameRef} className="quotation-pages" style={fitStyle(fit)}>
+      <div ref={sheetsRef} className="quotation-sheets">
+        {pages.map((page, index) => (
+          <DocumentPage key={index} {...props} blocks={page} pageIndex={index} pageCount={pages.length} />
+        ))}
+      </div>
       {/* Offscreen copy of a first and a later page, laid out at the real page width. */}
       <div ref={measureRef} className="quotation-measure" aria-hidden>
         <DocumentPage {...props} blocks={blocks} pageIndex={0} pageCount={2} measure="first" />
@@ -150,8 +186,8 @@ function DocumentPage({ blocks, pageIndex, pageCount, measure, ...doc }: Documen
   const isFirst = pageIndex === 0;
   const contents = pageContents(blocks);
   const stageClass = [
-    "quotation-stage quotation-page mx-auto",
-    printMode ? "quotation-stage--print" : "shadow-sm print:shadow-none",
+    "quotation-stage quotation-page",
+    printMode ? "" : "shadow-sm print:shadow-none",
     measure ? "quotation-page--measure" : "",
   ].join(" ");
 

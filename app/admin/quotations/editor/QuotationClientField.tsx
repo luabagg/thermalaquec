@@ -28,7 +28,7 @@ export function QuotationClientField({ clients, clientId, onClientChange }: Prop
   }, [saved]);
 
   return (
-    <div className="grid gap-2">
+    <div className="grid grid-cols-1 gap-2">
       <Label htmlFor="clientId">Cliente</Label>
       <select
         id="clientId"
@@ -45,7 +45,7 @@ export function QuotationClientField({ clients, clientId, onClientChange }: Prop
       </select>
       {client ? (
         <div className="flex items-start justify-between gap-3 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm">
-          <div className="min-w-0 text-muted-foreground">
+          <div className="min-w-0 break-words text-muted-foreground">
             <p>{formatClientAddress(client)}</p>
             <p>{[client.document ? formatTaxId(client.document) : null, client.phone ? formatPhone(client.phone) : null, client.email].filter(Boolean).join(" · ")}</p>
           </div>

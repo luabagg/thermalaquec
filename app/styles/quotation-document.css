@@ -1,6 +1,4 @@
-/* Printable orçamento — mirrors Canva Daniel Viana template */
-
-/* Printable orçamento — white page inset on architectural stage */
+/* Printable orçamento: white page inset on an architectural stage, after the Canva template. */
 
 .quotation-stage {
   --quotation-red: #d55711;
@@ -10,7 +8,6 @@
   --quotation-rule: #e4e4e7;
   position: relative;
   width: 210mm;
-  max-width: 100%;
   min-height: 297mm;
   display: flex;
   flex-direction: column;
@@ -22,13 +19,35 @@
   background: #111;
 }
 
+/*
+ * The sheets always lay out at A4 width, as on paper. On a narrower screen the document scales them down
+ * to fit (--quotation-scale), and sets its own height to the scaled height (--quotation-fitted-height).
+ * Forced dark themes would print the white page black, so the document opts out of them.
+ */
 .quotation-pages {
   position: relative;
+  width: 100%;
+  max-width: 210mm;
+  color-scheme: only light;
+}
+
+.quotation-sheets {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   width: 210mm;
-  max-width: 100%;
+}
+
+@media screen {
+  .quotation-pages {
+    height: var(--quotation-fitted-height, auto);
+    overflow: hidden;
+  }
+
+  .quotation-sheets {
+    transform: scale(var(--quotation-scale, 1));
+    transform-origin: top left;
+  }
 }
 
 /* A4 sheet. It grows only when one block is taller than a page. */
@@ -36,18 +55,12 @@
   width: 100%;
 }
 
-/* Print pages keep one layout on every screen, so screen measurements match paper. */
-.quotation-pages:has(.quotation-stage--print) {
-  width: 210mm;
-  max-width: none;
-}
-
-/* Invisible copy used to measure blocks and page capacity. */
+/* Invisible, unscaled copy used to measure blocks and page capacity at paper size. */
 .quotation-measure {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 210mm;
   height: 0;
   overflow: hidden;
   visibility: hidden;
@@ -448,7 +461,8 @@
     display: block !important;
   }
 
-  .quotation-pages {
+  .quotation-pages,
+  .quotation-sheets {
     display: block;
     width: 210mm;
     max-width: none;
@@ -502,57 +516,5 @@
   .quotation-doc__footer {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
-  }
-}
-
-/* Compact screen layout for the editor preview only; print pages opt out above. */
-@media screen and (max-width: 900px) {
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc {
-    margin: 0.75rem 0.75rem 0;
-    padding: 1.25rem;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__logo {
-    right: 1.5rem;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__header:not(.quotation-doc__header--compact) {
-    padding-right: 42mm;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-body {
-    grid-template-columns: 1fr 3rem;
-    grid-template-areas:
-      "name qty"
-      "desc desc"
-      "photo photo";
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-body--no-photo {
-    grid-template-areas:
-      "name qty"
-      "desc desc";
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-name {
-    grid-area: name;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-qty {
-    grid-area: qty;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-desc,
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-desc-empty {
-    grid-area: desc;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-photo {
-    grid-area: photo;
-    justify-self: start;
-  }
-
-  .quotation-stage:not(.quotation-stage--print) .quotation-doc__summary {
-    grid-template-columns: 1fr;
   }
 }

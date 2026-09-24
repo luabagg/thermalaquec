@@ -138,7 +138,8 @@ function QuotationEditor({ quotation, clients, catalog, salesRep }: SerializeFro
     <div className="min-h-screen bg-secondary/60 print:min-h-0 print:bg-white">
       <EditorTopBar quotationId={quotation.id} clientName={client.name} pane={pane} onPaneChange={setPane} />
 
-      <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 lg:grid-cols-[minmax(320px,420px)_1fr] print:block print:max-w-none print:p-0">
+      {/* Zero-minimum columns: a long client or item name wraps or truncates instead of widening the page. */}
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-6 px-4 py-6 lg:grid-cols-[minmax(320px,420px)_minmax(0,1fr)] print:block print:max-w-none print:p-0">
         <Form
           method="post"
           ref={formRef}
@@ -255,10 +256,8 @@ function QuotationEditor({ quotation, clients, catalog, salesRep }: SerializeFro
 
         <div className={cn("space-y-3 self-start lg:sticky lg:top-4 print:static", pane !== "preview" && "hidden lg:block print:block")}>
           {isWide || pane === "preview" ? (
-            <div className="overflow-x-auto border border-border bg-zinc-200/60 p-2 print:flex print:justify-center print:overflow-visible print:border-0 print:bg-white print:p-0 sm:p-4">
-              <div className="origin-top-left min-w-[320px] print:min-w-0">
-                <QuotationPreview {...preview} />
-              </div>
+            <div className="flex justify-center border border-border bg-zinc-200/60 p-2 print:border-0 print:bg-white print:p-0 sm:p-4">
+              <QuotationPreview {...preview} />
             </div>
           ) : null}
         </div>
@@ -291,7 +290,7 @@ function EditorTopBar({ quotationId, clientName, pane, onPaneChange }: EditorTop
               Editar
             </Button>
             <Button type="button" variant={pane === "preview" ? "default" : "outline"} size="sm" onClick={() => onPaneChange("preview")}>
-              Prévia
+              Ver prévia
             </Button>
           </div>
           <Button asChild variant="outline">
