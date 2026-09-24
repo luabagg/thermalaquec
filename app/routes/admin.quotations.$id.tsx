@@ -29,7 +29,7 @@ import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { cn } from "~/lib/utils";
-import { listCatalogCategories, listCatalogPickerProducts } from "~/models/catalog.server";
+import { listCatalogCategories, listProductsForQuotation } from "~/admin/catalog/catalog.server";
 import { listClientOptions } from "~/models/client.server";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
@@ -40,7 +40,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) =>
   buildNoIndexMeta(`Orçamento nº ${data?.quotation.id ?? ""} | ${SITE_NAME}`);
 
 async function loadCatalog() {
-  const [products, categories] = await Promise.all([listCatalogPickerProducts(), listCatalogCategories()]);
+  const [products, categories] = await Promise.all([listProductsForQuotation(), listCatalogCategories()]);
   return { options: toCatalogVariantOptions(products), categories };
 }
 

@@ -1,6 +1,7 @@
 import { expect, test } from "vitest";
 
-import { STALE_CATALOG_MESSAGE, formatAttributes, parseAttributes, parseCatalogProductForm } from "./catalog-admin";
+import { STALE_PRODUCT_MESSAGE, parseCatalogProductForm } from "./product-form";
+import { formatAttributeText, parseAttributeText } from "./variant-attributes";
 
 function form(fields: Record<string, string>) {
   const data = new FormData();
@@ -20,8 +21,8 @@ test("a variant without a price has no catalog price, and a typed price is read 
   const empty = parseCatalogProductForm(form(base));
   const typed = parseCatalogProductForm(form({ ...base, "variant.0.price": "1.234,56" }));
 
-  expect(empty.ok && empty.input.variants[0].priceCents).toBeNull();
-  expect(typed.ok && typed.input.variants[0].priceCents).toBe(123456);
+  expect(empty.ok && empty.content.variants[0].priceCents).toBeNull();
+  expect(typed.ok && typed.content.variants[0].priceCents).toBe(123456);
 });
 
 test("an unreadable price is rejected instead of saved as zero", () => {
@@ -38,21 +39,29 @@ test("a product needs a name and at least one named variant", () => {
 });
 
 test("a form without its version is treated as stale", () => {
-  expect(parseCatalogProductForm(form({ ...base, expectedUpdatedAt: "" }))).toEqual({ ok: false, error: STALE_CATALOG_MESSAGE });
+  expect(parseCatalogProductForm(form({ ...base, expectedUpdatedAt: "" }))).toEqual({ ok: false, error: STALE_PRODUCT_MESSAGE });
 });
 
 test("an unchecked availability box makes the variant inactive", () => {
   const inactive = parseCatalogProductForm(form(base));
   const active = parseCatalogProductForm(form({ ...base, "variant.0.active": "on" }));
 
-  expect(inactive.ok && inactive.input.variants[0].active).toBe(false);
-  expect(active.ok && active.input.variants[0].active).toBe(true);
+  expect(inactive.ok && inactive.content.variants[0].active).toBe(false);
+  expect(active.ok && active.content.variants[0].active).toBe(true);
 });
 
 test("attributes are one 'name: value' per line, split at the first colon", () => {
-  expect(parseAttributes("Capacidade: 400L\nsem dois pontos\nRelação: 3:1\n: vazio")).toEqual([
+  expect(parseAttributeText("Capacidade: 400L\nsem dois pontos\nRelação: 3:1\n: vazio")).toEqual([
     { name: "Capacidade", value: "400L" },
     { name: "Relação", value: "3:1" },
   ]);
-  expect(formatAttributes([{ name: "Capacidade", value: "400L" }])).toBe("Capacidade: 400L");
+  expect(formatAttributeText([{ name: "Capacidade", value: "400L" }])).toBe("Capacidade: 400L");
+});
+
+// A page loaded before a deploy can post the variant count under another name. Refusing it keeps the save from
+// reading zero variants.
+test("a form without a variant count is treated as stale", () => {
+  const withoutCount = Object.fromEntries(Object.entries(base).filter(([key]) => key !== "variantCount"));
+
+  expect(parseCatalogProductForm(form(withoutCount))).toEqual({ ok: false, error: STALE_PRODUCT_MESSAGE });
 });

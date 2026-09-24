@@ -7,18 +7,21 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
-import { createCatalogProduct, listCatalogCategories, listCatalogProducts } from "~/models/catalog.server";
-import { parseCatalogStatus } from "~/utils/catalog-admin";
+import { createCatalogProduct, listCatalogCategories, listCatalogProducts, type ProductStatusFilter } from "~/admin/catalog/catalog.server";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Catálogo | ${SITE_NAME}`);
+
+function parseStatusFilter(value: string | null): ProductStatusFilter {
+  return value === "archived" || value === "all" ? value : "active";
+}
 
 const selectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await requireAdmin(request);
   const url = new URL(request.url);
-  const status = parseCatalogStatus(url.searchParams.get("status"));
+  const status = parseStatusFilter(url.searchParams.get("status"));
   const search = url.searchParams.get("q") ?? "";
   const categoryId = Number(url.searchParams.get("category")) || null;
   const [products, categories] = await Promise.all([
@@ -41,7 +44,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   return redirect(`/admin/catalog/${product.id}`);
 };
 
-export default function AdminCatalog() {
+export default function CatalogList() {
   const { products, categories, status, search, categoryId } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
 
@@ -61,7 +64,7 @@ export default function AdminCatalog() {
         <summary className="cursor-pointer list-none px-4 py-3 font-medium [&::-webkit-details-marker]:hidden">
           + Novo produto
         </summary>
-        <Form method="post" className="grid gap-3 border-t border-border p-4 sm:grid-cols-3">
+        <Form method="post" className="grid grid-cols-1 gap-3 border-t border-border p-4 sm:grid-cols-3">
           <div className="grid gap-1">
             <Label htmlFor="new-name">Nome</Label>
             <Input id="new-name" name="name" required />
@@ -88,7 +91,7 @@ export default function AdminCatalog() {
         </Form>
       </details>
 
-      <Form method="get" className="grid gap-3 border border-border p-4 sm:grid-cols-[1fr_12rem_10rem_auto] sm:items-end">
+      <Form method="get" className="grid grid-cols-1 gap-3 border border-border p-4 sm:grid-cols-[minmax(0,1fr)_12rem_10rem_auto] sm:items-end">
         <div className="grid gap-1">
           <Label htmlFor="catalog-search">Buscar</Label>
           <Input id="catalog-search" name="q" defaultValue={search} placeholder="Produto, marca ou variante" />
@@ -133,7 +136,7 @@ export default function AdminCatalog() {
               )}
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium">{product.name}</span>
+                  <span className="min-w-0 break-words font-medium">{product.name}</span>
                   {product.archivedAt ? (
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">Arquivado</span>
                   ) : null}

@@ -2,28 +2,33 @@ import type { Prisma } from "@prisma/client";
 
 import prisma from "~/libs/prisma/client.server";
 
-export type CatalogListStatus = "active" | "archived" | "all";
+import type { VariantAttribute } from "./variant-attributes";
 
-export type CatalogVariantInput = {
+/** Which products the catalog list shows. */
+export type ProductStatusFilter = "active" | "archived" | "all";
+
+/** What a variant says: the product form submits it and `updateCatalogProduct` stores it. */
+export type VariantContent = {
+  /** Null for a variant the user added in this edit. */
   id: number | null;
   name: string;
-  attributes: { name: string; value: string }[];
+  attributes: VariantAttribute[];
   descriptionLines: string[];
   priceCents: number | null;
   imageId: number | null;
   active: boolean;
 };
 
-export type CatalogProductInput = {
+export type ProductContent = {
   name: string;
   brand: string | null;
   categoryId: number | null;
   descriptionLines: string[];
   imageId: number | null;
-  variants: CatalogVariantInput[];
+  variants: VariantContent[];
 };
 
-export type CatalogMutationResult =
+export type ProductChangeOutcome =
   | { ok: true; id: number }
   | { ok: false; error: "not_found" | "stale" | "invalid"; message?: string };
 
@@ -40,7 +45,7 @@ export function listCatalogProducts({
   status = "active",
   search,
   categoryId,
-}: { status?: CatalogListStatus; search?: string; categoryId?: number | null } = {}) {
+}: { status?: ProductStatusFilter; search?: string; categoryId?: number | null } = {}) {
   const term = search?.trim();
   const where: Prisma.CatalogProductWhereInput = {
     ...(status === "active" ? { archivedAt: null } : status === "archived" ? { archivedAt: { not: null } } : {}),
@@ -100,7 +105,8 @@ export function getCatalogProduct(id: number) {
   });
 }
 
-export type CatalogProductDetail = NonNullable<Awaited<ReturnType<typeof getCatalogProduct>>>;
+/** A product with its variants, as the product editor loads it. */
+export type StoredProduct = NonNullable<Awaited<ReturnType<typeof getCatalogProduct>>>;
 
 /** Creates a product with one variant of the same name, because a quotation line always uses a variant. */
 export async function createCatalogProduct(data: { name: string; brand: string | null; categoryId: number | null }) {
@@ -113,7 +119,7 @@ export async function createCatalogProduct(data: { name: string; brand: string |
 // Interactive transactions run one statement per round trip; far from the database a large product needs time.
 const TRANSACTION_TIMEOUT_MS = 20_000;
 
-function variantData(variant: CatalogVariantInput, sortOrder: number) {
+function variantColumns(variant: VariantContent, sortOrder: number) {
   return {
     name: variant.name,
     attributes: variant.attributes,
@@ -132,8 +138,8 @@ function variantData(variant: CatalogVariantInput, sortOrder: number) {
 export async function updateCatalogProduct(
   id: number,
   expectedUpdatedAt: Date,
-  input: CatalogProductInput,
-): Promise<CatalogMutationResult> {
+  input: ProductContent,
+): Promise<ProductChangeOutcome> {
   if (input.variants.length === 0) return { ok: false, error: "invalid", message: "O produto precisa de pelo menos uma variante." };
 
   return prisma.$transaction(async (tx) => {
@@ -168,7 +174,7 @@ export async function updateCatalogProduct(
     if (keptIds.length < storedById.size) {
       await tx.catalogVariant.deleteMany({ where: { productId: id, id: { notIn: keptIds } } });
     }
-    const rows = input.variants.map((variant, sortOrder) => ({ id: variant.id, data: variantData(variant, sortOrder) }));
+    const rows = input.variants.map((variant, sortOrder) => ({ id: variant.id, data: variantColumns(variant, sortOrder) }));
     const created = rows.filter((row) => row.id === null).map((row) => ({ ...row.data, productId: id }));
     if (created.length) await tx.catalogVariant.createMany({ data: created });
     // Only changed rows are written, so a typical edit of a large product stays a few statements.
@@ -183,13 +189,13 @@ export async function updateCatalogProduct(
 
 // jsonb returns object keys shortest first; { name, value } already has that order, so the texts compare equal.
 // A false "changed" only costs one extra update, never a lost edit.
-function sameVariant(stored: Record<string, unknown>, next: ReturnType<typeof variantData>) {
+function sameVariant(stored: Record<string, unknown>, next: ReturnType<typeof variantColumns>) {
   return (Object.keys(next) as (keyof typeof next)[]).every(
     (field) => JSON.stringify(stored[field]) === JSON.stringify(next[field]),
   );
 }
 
-async function setArchived(id: number, expectedUpdatedAt: Date, archivedAt: Date | null): Promise<CatalogMutationResult> {
+async function setArchived(id: number, expectedUpdatedAt: Date, archivedAt: Date | null): Promise<ProductChangeOutcome> {
   const result = await prisma.catalogProduct.updateMany({ where: { id, updatedAt: expectedUpdatedAt }, data: { archivedAt } });
   return result.count ? { ok: true, id } : { ok: false, error: "stale" };
 }
@@ -203,13 +209,13 @@ export function restoreCatalogProduct(id: number, expectedUpdatedAt: Date) {
 }
 
 /** Deleting is always safe: quotation lines keep their copied name, price and bullets. */
-export async function deleteCatalogProduct(id: number, expectedUpdatedAt: Date): Promise<CatalogMutationResult> {
+export async function deleteCatalogProduct(id: number, expectedUpdatedAt: Date): Promise<ProductChangeOutcome> {
   const result = await prisma.catalogProduct.deleteMany({ where: { id, updatedAt: expectedUpdatedAt } });
   return result.count ? { ok: true, id } : { ok: false, error: "stale" };
 }
 
 /** What the quotation picker offers: active variants of products that are not archived. */
-export function listCatalogPickerProducts() {
+export function listProductsForQuotation() {
   return prisma.catalogProduct.findMany({
     where: { archivedAt: null, variants: { some: { active: true } } },
     orderBy: { name: "asc" },
@@ -237,5 +243,3 @@ export function listCatalogPickerProducts() {
     },
   });
 }
-
-export type CatalogPickerProductRecord = Awaited<ReturnType<typeof listCatalogPickerProducts>>[number];

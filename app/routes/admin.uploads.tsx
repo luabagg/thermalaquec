@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { createImageFromUpload } from "~/models/image.server";
+import { createImageFromUpload } from "~/admin/images/image.server";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {

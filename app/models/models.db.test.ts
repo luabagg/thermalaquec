@@ -10,7 +10,7 @@ type Models = {
   prisma: PrismaClient;
   quotation: typeof import("~/admin/quotations/quotation.server");
   client: typeof import("./client.server");
-  catalog: typeof import("./catalog.server");
+  catalog: typeof import("~/admin/catalog/catalog.server");
 };
 
 describe.skipIf(!url)("persistence", () => {
@@ -24,7 +24,7 @@ describe.skipIf(!url)("persistence", () => {
       prisma: (await import("~/libs/prisma/client.server")).default,
       quotation: await import("~/admin/quotations/quotation.server"),
       client: await import("./client.server"),
-      catalog: await import("./catalog.server"),
+      catalog: await import("~/admin/catalog/catalog.server"),
     };
   });
 
@@ -218,7 +218,7 @@ describe.skipIf(!url)("persistence", () => {
     const archived = await seedProduct(["Arquivado"]);
     await m.prisma.catalogProduct.update({ where: { id: archived.id }, data: { archivedAt: new Date() } });
 
-    const products = await m.catalog.listCatalogPickerProducts();
+    const products = await m.catalog.listProductsForQuotation();
 
     expect(products.flatMap((product) => product.variants.map((variant) => variant.name))).toEqual(["Boiler 400L"]);
   });

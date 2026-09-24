@@ -3,6 +3,8 @@ import sharp from "sharp";
 import prisma from "~/libs/prisma/client.server";
 import { putPublicObject } from "~/libs/supabase/storage.server";
 
+import type { ImageFolder } from "./upload-image";
+
 const SUPPORTED = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_BYTES = 4_500_000; // under Vercel function body limit
 const GENERATED_CACHE_CONTROL = "31536000, immutable";
@@ -15,7 +17,7 @@ async function toWebpDerivative(source: Buffer, maxSize: number) {
     .toBuffer();
 }
 
-export async function createImageFromUpload(file: File, folder: "quotes" | "catalog") {
+export async function createImageFromUpload(file: File, folder: ImageFolder) {
   if (file.type === "image/gif") {
     throw new Response("GIF não suportado", { status: 400 });
   }
@@ -57,8 +59,4 @@ export async function createImageFromUpload(file: File, folder: "quotes" | "cata
     data: { location: uploaded.url, thumbnail: thumbnail.url },
     select: { id: true, location: true, thumbnail: true },
   });
-}
-
-export async function getImage(id: number) {
-  return prisma.image.findUnique({ where: { id } });
 }
