@@ -5,7 +5,7 @@ import {
   completeRevisionSave,
   initialRevisionState,
   markRevisionEdited,
-} from "./quotation-revision";
+} from "./save-revisions";
 
 test("a stale save completion preserves a newer edit's dirty state", () => {
   let state = markRevisionEdited(initialRevisionState());
@@ -30,7 +30,7 @@ test("a matching revision clears dirty state", () => {
 test("save-and-print emits one navigation effect for one completion", () => {
   const begun = beginRevisionSave(markRevisionEdited(initialRevisionState()));
   const response = {
-    ok: true,
+    ok: true as const,
     revision: begun.requestRevision,
     redirectTo: "/admin/quotations/42/print?autoprint=1",
   };

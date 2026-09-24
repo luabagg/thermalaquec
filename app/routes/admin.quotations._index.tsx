@@ -5,8 +5,9 @@ import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { cn } from "~/lib/utils";
-import { deleteQuotation, listQuotations } from "~/models/quotation.server";
-import { formatBRL, quotationTotalCents } from "~/utils/quotation";
+import { deleteQuotation, listQuotations } from "~/admin/quotations/quotation.server";
+import { quotationTotalCents } from "~/admin/quotations/quotation-content";
+import { formatBRL } from "~/lib/money";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction = () => buildNoIndexMeta(`Orçamentos | ${SITE_NAME}`);
@@ -44,7 +45,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export default function AdminQuotations() {
+export default function QuotationList() {
   const { quotations } = useLoaderData<typeof loader>();
 
   return (
@@ -65,24 +66,24 @@ export default function AdminQuotations() {
       </div>
 
       <ul className="divide-y divide-border border border-border">
-        {quotations.map((q) => {
-          const total = quotationTotalCents(q.lines);
-          const issued = new Date(q.issuedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+        {quotations.map((quotation) => {
+          const total = quotationTotalCents(quotation.lines);
+          const issued = new Date(quotation.issuedAt).toLocaleDateString("pt-BR", { timeZone: "UTC" });
           return (
-            <li key={q.id} className="flex items-stretch gap-2 hover:bg-secondary/50">
+            <li key={quotation.id} className="flex items-stretch gap-2 hover:bg-secondary/50">
               <Link
-                to={`/admin/quotations/${q.id}`}
+                to={`/admin/quotations/${quotation.id}`}
                 className="flex min-w-0 flex-1 flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-medium">
-                      Nº {q.id} · {q.client.name}
+                      Nº {quotation.id} · {quotation.client.name}
                     </p>
-                    <StatusBadge status={q.status} />
+                    <StatusBadge status={quotation.status} />
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {q.client.city}/{q.client.state} · {issued}
+                    {quotation.client.city}/{quotation.client.state} · {issued}
                   </p>
                 </div>
                 {total > 0 ? <p className="font-medium sm:text-right">{formatBRL(total)}</p> : null}
@@ -95,7 +96,7 @@ export default function AdminQuotations() {
                 }}
               >
                 <input type="hidden" name="intent" value="delete" />
-                <input type="hidden" name="id" value={q.id} />
+                <input type="hidden" name="id" value={quotation.id} />
                 <Button type="submit" variant="destructive" size="sm">
                   Excluir
                 </Button>

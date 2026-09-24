@@ -21,7 +21,7 @@ import {
   type CatalogProductDetail,
 } from "~/models/catalog.server";
 import { STALE_CATALOG_MESSAGE, formatAttributes, parseCatalogProductForm } from "~/utils/catalog-admin";
-import { formatBRL } from "~/utils/quotation";
+import { formatBRL } from "~/lib/money";
 import { requireAdmin } from "~/utils/require-admin.server";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) =>

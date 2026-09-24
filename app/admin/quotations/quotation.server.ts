@@ -1,8 +1,10 @@
-import type { Prisma, QuotationStatus } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
+import { todayInBrazil } from "~/lib/calendar-day";
 import prisma from "~/libs/prisma/client.server";
 import { clientFieldsSelect } from "~/models/client.server";
-import { todayInBrazil } from "~/utils/quotation-form";
+
+import type { QuotationContent } from "./quotation-content";
 
 export const DEFAULT_WARRANTY_NOTES = [
   "Garantia de 3 anos nas bombas de calor",
@@ -11,8 +13,8 @@ export const DEFAULT_WARRANTY_NOTES = [
   "Venda toda feita diretamente pela Thermal Aquecimento",
 ].join("\n");
 
-/** Everything the editor and the printed document need. */
-const quotationDocumentSelect = {
+/** A quotation with its client, lines and payment options: everything the editor and the printed document need. */
+const storedQuotationSelect = {
   id: true,
   issuedAt: true,
   status: true,
@@ -37,10 +39,10 @@ const quotationDocumentSelect = {
   },
 } satisfies Prisma.QuotationSelect;
 
-export type QuotationDocumentRecord = Prisma.QuotationGetPayload<{ select: typeof quotationDocumentSelect }>;
+export type StoredQuotation = Prisma.QuotationGetPayload<{ select: typeof storedQuotationSelect }>;
 
 export function getQuotation(id: number, ownerUserId: string) {
-  return prisma.quotation.findFirst({ where: { id, ownerUserId }, select: quotationDocumentSelect });
+  return prisma.quotation.findFirst({ where: { id, ownerUserId }, select: storedQuotationSelect });
 }
 
 export function listQuotations(ownerUserId: string) {
@@ -75,29 +77,9 @@ export async function deleteQuotation(id: number, ownerUserId: string) {
   return result.count > 0;
 }
 
-export type QuotationLineInput = {
-  name: string;
-  quantity: number;
-  descriptionLines: string[];
-  unitPriceCents: number;
-  catalogVariantId: number | null;
-  imageId: number | null;
-};
+export type QuotationSave = QuotationContent & { quotationId: number; ownerUserId: string };
 
-export type QuotationPaymentInput = { label: string; amountCents: number; detail: string | null };
-
-export type QuotationSaveInput = {
-  quotationId: number;
-  ownerUserId: string;
-  clientId: number;
-  issuedAt?: Date;
-  status: QuotationStatus;
-  notes: string | null;
-  lines: QuotationLineInput[];
-  paymentOptions: QuotationPaymentInput[];
-};
-
-export type QuotationSaveResult = { ok: true } | { ok: false; status: 400 | 404; error: string };
+export type QuotationSaveOutcome = { ok: true } | { ok: false; status: 400 | 404; error: string };
 
 /** Keeps only the ids that still exist, so a line never fails on a catalog item or image deleted meanwhile. */
 async function existingIds(tx: Prisma.TransactionClient, model: "catalogVariant" | "image", ids: (number | null)[]) {
@@ -110,11 +92,8 @@ async function existingIds(tx: Prisma.TransactionClient, model: "catalogVariant"
   return new Set(rows.map((row) => row.id));
 }
 
-/**
- * Replaces the quotation's header, lines and payment options in one transaction.
- * Lines carry their own copy of name, price, bullets and image, so they need no server-side resolution.
- */
-export async function saveQuotation(input: QuotationSaveInput): Promise<QuotationSaveResult> {
+/** Replaces the quotation's header, lines and payment options in one transaction. */
+export async function saveQuotation(input: QuotationSave): Promise<QuotationSaveOutcome> {
   return prisma.$transaction(async (tx) => {
     const owned = await tx.quotation.findFirst({
       where: { id: input.quotationId, ownerUserId: input.ownerUserId },

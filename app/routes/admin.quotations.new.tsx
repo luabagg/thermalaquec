@@ -8,7 +8,7 @@ import { Label } from "~/components/ui/label";
 import { buildNoIndexMeta } from "~/lib/seo";
 import { SITE_NAME } from "~/lib/site";
 import { createClient, listClientOptions } from "~/models/client.server";
-import { createQuotation } from "~/models/quotation.server";
+import { createQuotation } from "~/admin/quotations/quotation.server";
 import { formatCityState, parseClientForm } from "~/utils/client";
 import { requireAdmin } from "~/utils/require-admin.server";
 

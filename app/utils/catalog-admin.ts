@@ -1,7 +1,7 @@
 import type { CatalogListStatus, CatalogProductInput } from "~/models/catalog.server";
-import { attributeList } from "~/utils/catalog-picker";
-import { parseBRLToCents } from "~/utils/quotation";
-import { splitBullets } from "~/utils/quotation-form";
+import { readVariantAttributes } from "~/admin/catalog/variant-attributes";
+import { parseBRLToCents } from "~/lib/money";
+import { splitTextLines } from "~/lib/text-lines";
 
 export const STALE_CATALOG_MESSAGE = "Este produto foi alterado em outra aba. Recarregue e tente novamente.";
 
@@ -29,7 +29,7 @@ export function parseAttributes(raw: string) {
 }
 
 export function formatAttributes(value: unknown) {
-  return attributeList(value)
+  return readVariantAttributes(value)
     .map((attribute) => `${attribute.name}: ${attribute.value}`)
     .join("\n");
 }
@@ -60,7 +60,7 @@ export function parseCatalogProductForm(form: FormData): CatalogProductForm {
       id: positiveId(form, `variant.${i}.id`),
       name: variantName,
       attributes: parseAttributes(String(form.get(`variant.${i}.attributes`) ?? "")),
-      descriptionLines: splitBullets(String(form.get(`variant.${i}.description`) ?? "")),
+      descriptionLines: splitTextLines(String(form.get(`variant.${i}.description`) ?? "")),
       priceCents,
       imageId: positiveId(form, `variant.${i}.imageId`),
       active: form.get(`variant.${i}.active`) === "on",
@@ -75,7 +75,7 @@ export function parseCatalogProductForm(form: FormData): CatalogProductForm {
       name,
       brand: text(form, "brand") || null,
       categoryId: positiveId(form, "categoryId"),
-      descriptionLines: splitBullets(String(form.get("description") ?? "")),
+      descriptionLines: splitTextLines(String(form.get("description") ?? "")),
       imageId: positiveId(form, "imageId"),
       variants,
     },

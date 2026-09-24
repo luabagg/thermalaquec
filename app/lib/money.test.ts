@@ -11,7 +11,7 @@ test("formatBRL caches a single Intl.NumberFormat instance and preserves output"
   const numberFormatSpy = vi.spyOn(Intl, "NumberFormat").mockImplementation(((locales?: Intl.LocalesArgument, options?: Intl.NumberFormatOptions) =>
     new RealNumberFormat(locales, options)) as typeof Intl.NumberFormat);
 
-  const { formatBRL } = await import("./quotation");
+  const { formatBRL } = await import("./money");
   const referenceFormatter = new RealNumberFormat("pt-BR", brlFormatterOptions);
 
   expect(numberFormatSpy).toHaveBeenCalledTimes(1);

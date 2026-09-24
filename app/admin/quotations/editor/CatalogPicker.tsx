@@ -5,28 +5,28 @@ import { useMemo, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
-import { filterCatalogPickerItems, type CatalogPickerItem } from "~/utils/catalog-picker";
-import { formatBRL } from "~/utils/quotation";
+import { filterCatalogVariantOptions, type CatalogVariantOption } from "~/admin/quotations/editor/catalog-variant-options";
+import { formatBRL } from "~/lib/money";
 
 export type CatalogPickerCategory = { id: number; name: string; color: string };
 
 type Props = {
   /** Null while the catalog is still loading. */
-  items: CatalogPickerItem[] | null;
+  options: CatalogVariantOption[] | null;
   categories: CatalogPickerCategory[];
-  /** Receives the chosen variants in the order they were selected. */
-  onAdd(items: CatalogPickerItem[]): void;
+  /** Receives the chosen options in the order they were selected. */
+  onAdd(options: CatalogVariantOption[]): void;
 };
 
-/** Consecutive items of one product form a group with the product name as heading. */
-function groupRuns(items: CatalogPickerItem[]) {
-  const runs: { key: string; heading: string | null; items: CatalogPickerItem[] }[] = [];
-  for (const item of items) {
+/** Consecutive options of one product form a group with the product name as heading. */
+function groupByProduct(options: CatalogVariantOption[]) {
+  const runs: { key: string; heading: string | null; options: CatalogVariantOption[] }[] = [];
+  for (const option of options) {
     const last = runs[runs.length - 1];
-    if (last && item.group !== null && last.heading === item.group && last.items[0].productId === item.productId) {
-      last.items.push(item);
+    if (last && option.group !== null && last.heading === option.group && last.options[0].productId === option.productId) {
+      last.options.push(option);
     } else {
-      runs.push({ key: `${item.productId}-${item.variantId}`, heading: item.group, items: [item] });
+      runs.push({ key: `${option.productId}-${option.variantId}`, heading: option.group, options: [option] });
     }
   }
   return runs;
@@ -36,21 +36,21 @@ function CategoryDot({ color }: { color: string }) {
   return <span aria-hidden className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />;
 }
 
-export function CatalogPicker({ items, categories, onAdd }: Props) {
+export function CatalogPicker({ options, categories, onAdd }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" className="w-full justify-between font-normal" disabled={!items}>
-          {items ? "Adicionar do catálogo…" : "Carregando catálogo…"}
+        <Button type="button" variant="outline" className="w-full justify-between font-normal" disabled={!options}>
+          {options ? "Adicionar do catálogo…" : "Carregando catálogo…"}
           <ChevronsUpDown className="h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="flex w-[min(var(--radix-popover-trigger-width),calc(100vw-2rem))] min-w-[min(22rem,calc(100vw-2rem))] flex-col p-0">
-        {items ? (
+        {options ? (
           <CatalogPickerPanel
-            items={items}
+            options={options}
             categories={categories}
             onAdd={(selected) => {
               onAdd(selected);
@@ -63,23 +63,23 @@ export function CatalogPicker({ items, categories, onAdd }: Props) {
   );
 }
 
-type PanelProps = { items: CatalogPickerItem[]; categories: CatalogPickerCategory[]; onAdd(items: CatalogPickerItem[]): void };
+type PanelProps = { options: CatalogVariantOption[]; categories: CatalogPickerCategory[]; onAdd(options: CatalogVariantOption[]): void };
 
 /** Search, category filter and multi-selection. Closing the popover discards the selection. */
-export function CatalogPickerPanel({ items, categories, onAdd }: PanelProps) {
+export function CatalogPickerPanel({ options, categories, onAdd }: PanelProps) {
   const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [selected, setSelected] = useState<number[]>([]);
   const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
-  const itemById = useMemo(() => new Map(items.map((item) => [item.variantId, item])), [items]);
-  const visible = useMemo(() => filterCatalogPickerItems(items, search, categoryId), [items, search, categoryId]);
+  const optionById = useMemo(() => new Map(options.map((option) => [option.variantId, option])), [options]);
+  const visible = useMemo(() => filterCatalogVariantOptions(options, search, categoryId), [options, search, categoryId]);
 
   function toggle(variantId: number) {
     setSelected((current) => (current.includes(variantId) ? current.filter((id) => id !== variantId) : [...current, variantId]));
   }
 
   function addSelected() {
-    onAdd(selected.flatMap((id) => itemById.get(id) ?? []));
+    onAdd(selected.flatMap((id) => optionById.get(id) ?? []));
     setSelected([]);
     setSearch("");
   }
@@ -114,20 +114,20 @@ export function CatalogPickerPanel({ items, categories, onAdd }: PanelProps) {
       </div>
       <Command.List className="min-h-0 flex-1 overflow-y-auto p-1">
         <Command.Empty className="px-3 py-6 text-center text-sm text-muted-foreground">Nada encontrado.</Command.Empty>
-        {groupRuns(visible).map((run) => (
+        {groupByProduct(visible).map((run) => (
           <Command.Group
             key={run.key}
             heading={run.heading ?? undefined}
             className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground"
           >
-            {run.items.map((item) => {
-              const isSelected = selected.includes(item.variantId);
-              const category = item.categoryId === null ? undefined : categoryById.get(item.categoryId);
+            {run.options.map((option) => {
+              const isSelected = selected.includes(option.variantId);
+              const category = option.categoryId === null ? undefined : categoryById.get(option.categoryId);
               return (
                 <Command.Item
-                  key={item.variantId}
-                  value={String(item.variantId)}
-                  onSelect={() => toggle(item.variantId)}
+                  key={option.variantId}
+                  value={String(option.variantId)}
+                  onSelect={() => toggle(option.variantId)}
                   // Rows outside the scrolled view skip layout, which keeps opening the full catalog fast.
                   className="flex cursor-pointer items-start gap-2 rounded-sm px-2 py-1.5 text-sm [contain-intrinsic-size:auto_2.75rem] [content-visibility:auto] data-[selected=true]:bg-secondary"
                 >
@@ -143,16 +143,16 @@ export function CatalogPickerPanel({ items, categories, onAdd }: PanelProps) {
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5">
                       {categoryId === null && category ? <CategoryDot color={category.color} /> : null}
-                      <span className="min-w-0 break-words">{item.name}</span>
+                      <span className="min-w-0 break-words">{option.name}</span>
                     </span>
-                    {item.attributes.length > 0 ? (
+                    {option.attributes.length > 0 ? (
                       <span className="mt-0.5 block text-xs text-muted-foreground">
-                        {item.attributes.map((attribute) => attribute.value).join(" · ")}
+                        {option.attributes.map((attribute) => attribute.value).join(" · ")}
                       </span>
                     ) : null}
                   </span>
-                  {item.unitPriceCents !== null ? (
-                    <span className="shrink-0 text-xs text-muted-foreground">{formatBRL(item.unitPriceCents)}</span>
+                  {option.unitPriceCents !== null ? (
+                    <span className="shrink-0 text-xs text-muted-foreground">{formatBRL(option.unitPriceCents)}</span>
                   ) : null}
                   <span className="sr-only">{isSelected ? "selecionado" : ""}</span>
                 </Command.Item>

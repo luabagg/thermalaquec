@@ -2,12 +2,12 @@
 
 /* Printable orçamento — white page inset on architectural stage */
 
-.quote-stage {
-  --quote-red: #d55711;
-  --quote-ink: #141414;
-  --quote-muted: #71717a;
-  --quote-bar: #1f1f1f;
-  --quote-rule: #e4e4e7;
+.quotation-stage {
+  --quotation-red: #d55711;
+  --quotation-ink: #141414;
+  --quotation-muted: #71717a;
+  --quotation-bar: #1f1f1f;
+  --quotation-rule: #e4e4e7;
   position: relative;
   width: 210mm;
   max-width: 100%;
@@ -15,14 +15,14 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  color: var(--quote-ink);
+  color: var(--quotation-ink);
   font-family: "IBM Plex Sans", system-ui, sans-serif;
   font-size: 11px;
   line-height: 1.35;
   background: #111;
 }
 
-.quote-pages {
+.quotation-pages {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -32,18 +32,18 @@
 }
 
 /* A4 sheet. It grows only when one block is taller than a page. */
-.quote-page {
+.quotation-page {
   width: 100%;
 }
 
 /* Print pages keep one layout on every screen, so screen measurements match paper. */
-.quote-pages:has(.quote-stage--print) {
+.quotation-pages:has(.quotation-stage--print) {
   width: 210mm;
   max-width: none;
 }
 
 /* Invisible copy used to measure blocks and page capacity. */
-.quote-measure {
+.quotation-measure {
   position: absolute;
   top: 0;
   left: 0;
@@ -54,11 +54,11 @@
   pointer-events: none;
 }
 
-.quote-page--measure {
+.quotation-page--measure {
   height: 297mm;
 }
 
-.quote-stage__bg {
+.quotation-stage__bg {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -69,7 +69,7 @@
   pointer-events: none;
 }
 
-.quote-doc {
+.quotation-doc {
   position: relative;
   z-index: 1;
   flex: 1;
@@ -82,28 +82,28 @@
   min-height: 0;
 }
 
-.quote-doc__body {
+.quotation-doc__body {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-.quote-doc__header {
+.quotation-doc__header {
   margin-bottom: 1.25rem;
   padding-right: 44mm;
 }
 
-.quote-doc__header--compact {
+.quotation-doc__header--compact {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding-right: 0;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--quote-rule);
+  border-bottom: 1px solid var(--quotation-rule);
 }
 
-.quote-doc__mini-logo {
+.quotation-doc__mini-logo {
   width: 12mm;
   height: 12mm;
   object-fit: cover;
@@ -111,19 +111,19 @@
   flex-shrink: 0;
 }
 
-.quote-doc__compact-id {
+.quotation-doc__compact-id {
   flex: 1;
   min-width: 0;
 }
 
-.quote-doc__compact-client {
+.quotation-doc__compact-client {
   margin: 0.1rem 0 0;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.8rem;
   overflow-wrap: anywhere;
 }
 
-.quote-doc__header-top {
+.quotation-doc__header-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -131,71 +131,71 @@
   margin-bottom: 0.35rem;
 }
 
-.quote-doc__title {
+.quotation-doc__title {
   margin: 0;
   font-family: "Outfit", system-ui, sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--quote-red);
+  color: var(--quotation-red);
   letter-spacing: -0.02em;
 }
 
-.quote-doc__company {
+.quotation-doc__company {
   margin: 0;
   font-weight: 700;
   font-size: 0.95rem;
 }
 
-.quote-doc__tax {
+.quotation-doc__tax {
   margin: 0.15rem 0 0.85rem;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.8rem;
 }
 
-.quote-doc__client {
+.quotation-doc__client {
   margin: 0;
   display: grid;
   gap: 0.35rem;
 }
 
-.quote-doc__client > div {
+.quotation-doc__client > div {
   display: grid;
   grid-template-columns: 4.5rem 1fr;
   gap: 0.5rem;
   align-items: baseline;
 }
 
-.quote-doc__client dt {
+.quotation-doc__client dt {
   margin: 0;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.8rem;
 }
 
-.quote-doc__client dd {
+.quotation-doc__client dd {
   margin: 0;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
 }
 
-.quote-doc__client-name {
-  color: var(--quote-ink) !important;
+.quotation-doc__client-name {
+  color: var(--quotation-ink) !important;
   font-weight: 700;
 }
 
-.quote-doc__date {
+.quotation-doc__date {
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.85rem;
   flex-shrink: 0;
 }
 
-.quote-doc__date strong {
-  color: var(--quote-muted);
+.quotation-doc__date strong {
+  color: var(--quotation-muted);
   font-weight: 500;
 }
 
-.quote-doc__logo {
+.quotation-doc__logo {
   position: absolute;
   top: 0;
   right: 20mm;
@@ -209,7 +209,7 @@
   box-sizing: border-box;
 }
 
-.quote-doc__logo img {
+.quotation-doc__logo img {
   width: 38mm;
   height: 38mm;
   max-width: none;
@@ -218,7 +218,7 @@
   display: block;
 }
 
-.quote-doc__logo-person {
+.quotation-doc__logo-person {
   position: absolute;
   left: 0;
   right: 0;
@@ -235,11 +235,11 @@
   line-height: 1.2;
 }
 
-.quote-doc__table-head {
+.quotation-doc__table-head {
   display: grid;
   grid-template-columns: 1.5rem minmax(0, 1fr) 4rem minmax(0, 1.4fr) 3.5rem;
   gap: 0.5rem;
-  background: var(--quote-bar);
+  background: var(--quotation-bar);
   color: #fff;
   padding: 0.45rem 0.75rem;
   font-size: 0.75rem;
@@ -248,97 +248,97 @@
   text-transform: none;
 }
 
-.quote-doc__table-head span:first-child {
+.quotation-doc__table-head span:first-child {
   grid-column: 1 / 3;
 }
 
-.quote-doc__table-head span:nth-child(2) {
+.quotation-doc__table-head span:nth-child(2) {
   grid-column: 3;
   text-align: center;
 }
 
-.quote-doc__table-head span:nth-child(3) {
+.quotation-doc__table-head span:nth-child(3) {
   grid-column: 4 / -1;
 }
 
-.quote-doc__lines {
+.quotation-doc__lines {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.quote-doc__line {
+.quotation-doc__line {
   padding: 0.9rem 0 0.65rem;
-  border-bottom: 1px solid var(--quote-rule);
+  border-bottom: 1px solid var(--quotation-rule);
 }
 
-.quote-doc__line-main {
+.quotation-doc__line-main {
   display: grid;
   grid-template-columns: 1.5rem minmax(0, 1fr) 4rem minmax(0, 1.4fr) 3.5rem;
   gap: 0.5rem;
   align-items: center;
 }
 
-.quote-doc__line-num {
-  color: var(--quote-muted);
+.quotation-doc__line-num {
+  color: var(--quotation-muted);
   font-size: 0.85rem;
   line-height: 1.3;
   text-align: center;
 }
 
-.quote-doc__line-body {
+.quotation-doc__line-body {
   display: contents;
 }
 
-.quote-doc__line-name {
+.quotation-doc__line-name {
   min-width: 0;
   margin: 0;
   overflow-wrap: anywhere;
   font-weight: 500;
-  color: var(--quote-ink);
+  color: var(--quotation-ink);
 }
 
-.quote-doc__line-qty {
+.quotation-doc__line-qty {
   text-align: center;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
 }
 
-.quote-doc__line-desc {
+.quotation-doc__line-desc {
   min-width: 0;
   margin: 0;
   padding-left: 1rem;
   overflow-wrap: anywhere;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.78rem;
 }
 
-.quote-doc__line-desc-empty {
+.quotation-doc__line-desc-empty {
   display: block;
   min-height: 1rem;
 }
 
-.quote-doc__line-photo {
+.quotation-doc__line-photo {
   width: 3.2rem;
   height: 3.2rem;
   background: #f4f4f5;
-  border: 1px solid var(--quote-rule);
+  border: 1px solid var(--quotation-rule);
   justify-self: end;
   object-fit: cover;
   display: block;
 }
 
-.quote-doc__line-price {
+.quotation-doc__line-price {
   margin: 0.55rem 0 0;
   text-align: right;
-  color: var(--quote-red);
+  color: var(--quotation-red);
   font-size: 0.9rem;
 }
 
-.quote-doc__line-price strong {
+.quotation-doc__line-price strong {
   font-weight: 700;
 }
 
-.quote-doc__summary {
+.quotation-doc__summary {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
   gap: 1.5rem;
@@ -346,72 +346,72 @@
   align-items: start;
 }
 
-.quote-doc__total-label {
+.quotation-doc__total-label {
   display: block;
-  color: var(--quote-red);
+  color: var(--quotation-red);
   font-weight: 700;
   font-size: 1.12rem;
   margin-bottom: 0.2rem;
 }
 
-.quote-doc__total-value {
+.quotation-doc__total-value {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--quote-ink);
+  color: var(--quotation-ink);
 }
 
-.quote-doc__notes {
+.quotation-doc__notes {
   margin: 0;
   padding-left: 1.1rem;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.68rem;
   line-height: 1.4;
 }
 
-.quote-doc__notes li + li {
+.quotation-doc__notes li + li {
   margin-top: 0.2rem;
 }
 
-.quote-doc__payments h2 {
+.quotation-doc__payments h2 {
   margin: 1.5rem 0 0.6rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   text-transform: lowercase;
 }
 
-.quote-doc__payments ul {
+.quotation-doc__payments ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.quote-doc__payments li {
+.quotation-doc__payments li {
   display: grid;
   grid-template-columns: minmax(10rem, 1.4fr) auto;
   gap: 0.25rem 1rem;
   padding: 0.325rem 0;
-  color: var(--quote-muted);
+  color: var(--quotation-muted);
   font-size: 0.85rem;
 }
 
-.quote-doc__pay-amount {
+.quotation-doc__payment-amount {
   font-weight: 700;
-  color: var(--quote-ink);
+  color: var(--quotation-ink);
   justify-self: end;
 }
 
-.quote-doc__pay-detail {
+.quotation-doc__payment-detail {
   grid-column: 1 / -1;
   font-size: 0.78rem;
 }
 
-.quote-doc__footer {
+.quotation-doc__footer {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
   margin-top: auto;
-  background: var(--quote-red);
+  background: var(--quotation-red);
   color: #fff;
   text-align: center;
   padding: 0.65rem 1rem;
@@ -438,8 +438,8 @@
     display: none !important;
   }
 
-  /* Collapse screen chrome so only .quote-stage is measured. */
-  .quote-print-page {
+  /* Collapse screen chrome so only .quotation-stage is measured. */
+  .quotation-print-page {
     min-height: 0 !important;
     height: auto !important;
     padding: 0 !important;
@@ -448,17 +448,17 @@
     display: block !important;
   }
 
-  .quote-pages {
+  .quotation-pages {
     display: block;
     width: 210mm;
     max-width: none;
   }
 
-  .quote-measure {
+  .quotation-measure {
     display: none;
   }
 
-  .quote-stage {
+  .quotation-stage {
     width: 210mm !important;
     max-width: none !important;
     min-height: 297mm;
@@ -470,7 +470,7 @@
     -webkit-print-color-adjust: exact;
   }
 
-  .quote-doc {
+  .quotation-doc {
     display: flex;
     overflow: visible;
     width: auto;
@@ -481,25 +481,25 @@
     margin: 8mm 11mm 0;
   }
 
-  .quote-page:last-of-type {
+  .quotation-page:last-of-type {
     break-after: auto;
   }
 
-  .quote-doc__line,
-  .quote-doc__payments li,
-  .quote-doc__footer {
+  .quotation-doc__line,
+  .quotation-doc__payments li,
+  .quotation-doc__footer {
     break-inside: avoid;
   }
 
-  .quote-doc__line-photo {
+  .quotation-doc__line-photo {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  .quote-stage__bg,
-  .quote-doc__logo,
-  .quote-doc__table-head,
-  .quote-doc__footer {
+  .quotation-stage__bg,
+  .quotation-doc__logo,
+  .quotation-doc__table-head,
+  .quotation-doc__footer {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
@@ -507,20 +507,20 @@
 
 /* Compact screen layout for the editor preview only; print pages opt out above. */
 @media screen and (max-width: 900px) {
-  .quote-stage:not(.quote-stage--print) .quote-doc {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc {
     margin: 0.75rem 0.75rem 0;
     padding: 1.25rem;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__logo {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__logo {
     right: 1.5rem;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__header:not(.quote-doc__header--compact) {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__header:not(.quotation-doc__header--compact) {
     padding-right: 42mm;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-body {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-body {
     grid-template-columns: 1fr 3rem;
     grid-template-areas:
       "name qty"
@@ -528,31 +528,31 @@
       "photo photo";
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-body--no-photo {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-body--no-photo {
     grid-template-areas:
       "name qty"
       "desc desc";
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-name {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-name {
     grid-area: name;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-qty {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-qty {
     grid-area: qty;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-desc,
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-desc-empty {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-desc,
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-desc-empty {
     grid-area: desc;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__line-photo {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__line-photo {
     grid-area: photo;
     justify-self: start;
   }
 
-  .quote-stage:not(.quote-stage--print) .quote-doc__summary {
+  .quotation-stage:not(.quotation-stage--print) .quotation-doc__summary {
     grid-template-columns: 1fr;
   }
 }

@@ -2,12 +2,15 @@ import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "@remix-run
 import { redirect } from "@remix-run/node";
 import { Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QuotationDocument } from "~/components/admin/QuotationDocument";
+
+import { waitForPrintReadiness } from "~/admin/quotations/document/print-readiness";
+import { QuotationDocument, type QuotationDocumentProps } from "~/admin/quotations/document/QuotationDocument";
+import { salesRepForAdmin } from "~/admin/quotations/issuer";
+import { getQuotation, type StoredQuotation } from "~/admin/quotations/quotation.server";
 import { Button } from "~/components/ui/button";
 import { buildNoIndexMeta } from "~/lib/seo";
-import { SITE_NAME, resolveQuoteRep } from "~/lib/site";
-import { getQuotation } from "~/models/quotation.server";
-import { waitForPrintReadiness } from "~/utils/print-readiness";
+import { SITE_NAME } from "~/lib/site";
+import { readStringList } from "~/lib/text-lines";
 import quotationStyles from "~/styles/quotation-document.css?url";
 import { requireAdmin } from "~/utils/require-admin.server";
 
@@ -22,11 +25,34 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   if (!Number.isFinite(id)) throw redirect("/admin/quotations");
   const quotation = await getQuotation(id, user.id);
   if (!quotation) throw new Response("Not found", { status: 404 });
-  return { quotation, rep: resolveQuoteRep(user.email) };
+  return { quotation, salesRep: salesRepForAdmin(user.email) };
 };
 
+function storedQuotationToDocument(quotation: StoredQuotation): Omit<QuotationDocumentProps, "salesRep"> {
+  return {
+    issuedAt: quotation.issuedAt,
+    client: quotation.client,
+    lines: quotation.lines.map((line) => ({
+      rowKey: String(line.id),
+      name: line.name,
+      quantity: line.quantity,
+      descriptionLines: readStringList(line.descriptionLines),
+      unitPriceCents: line.unitPriceCents,
+      imageUrl: line.image?.location ?? null,
+      thumbnailUrl: line.image?.thumbnail ?? null,
+    })),
+    paymentOptions: quotation.paymentOptions.map((option) => ({
+      rowKey: String(option.id),
+      label: option.label,
+      amountCents: option.amountCents,
+      detail: option.detail,
+    })),
+    notes: quotation.notes,
+  };
+}
+
 export default function QuotationPrint() {
-  const { quotation, rep } = useLoaderData<typeof loader>();
+  const { quotation, salesRep } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const printRequestInFlightRef = useRef(false);
@@ -46,7 +72,7 @@ export default function QuotationPrint() {
     setIsPreparingPrint(true);
 
     try {
-      const root = document.querySelector(".quote-pages");
+      const root = document.querySelector(".quotation-pages");
       await waitForPrintReadiness(root);
       if (!isMountedRef.current) return;
 
@@ -75,10 +101,10 @@ export default function QuotationPrint() {
   }, [autoPrintRequested, startPrint]);
 
   return (
-    <div className="quote-print-page min-h-screen bg-zinc-800 print:min-h-0 print:bg-white">
+    <div className="quotation-print-page min-h-screen bg-zinc-800 print:min-h-0 print:bg-white">
       <div className="no-print flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <Button asChild variant="outline" size="sm">
-          <Link to={`/admin/quotations/${quotation.id}`}>Voltar ao builder</Link>
+          <Link to={`/admin/quotations/${quotation.id}`}>Voltar ao editor</Link>
         </Button>
         <Button size="sm" onClick={() => void startPrint("manual")} disabled={isPreparingPrint}>
           {isPreparingPrint ? "Preparando..." : "Imprimir / PDF"}
@@ -94,23 +120,7 @@ export default function QuotationPrint() {
         </div>
       ) : null}
       <div className="flex justify-center p-4 print:block print:p-0">
-        <QuotationDocument
-          issuedAt={quotation.issuedAt}
-          client={quotation.client}
-          lines={quotation.lines.map((line) => ({
-            ...line,
-            clientKey: String(line.id),
-            imageUrl: line.image?.location ?? null,
-            thumbnailUrl: line.image?.thumbnail ?? line.image?.location ?? null,
-          }))}
-          paymentOptions={quotation.paymentOptions.map((option) => ({
-            ...option,
-            clientKey: String(option.id),
-          }))}
-          notes={quotation.notes}
-          rep={rep}
-          printMode
-        />
+        <QuotationDocument {...storedQuotationToDocument(quotation)} salesRep={salesRep} printMode />
       </div>
     </div>
   );

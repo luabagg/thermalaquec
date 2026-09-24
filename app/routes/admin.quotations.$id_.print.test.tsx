@@ -8,15 +8,14 @@ const { waitForPrintReadinessMock, searchParamsMock, loaderData } = vi.hoisted((
   loaderData: {
     quotation: {
       id: 42,
-      title: "Quote",
       issuedAt: "2026-08-29T00:00:00.000Z",
       client: { name: "Client", location: null, document: null },
       lines: [],
       paymentOptions: [],
       notes: null,
     },
-    rep: {
-      brandPerson: "Rep",
+    salesRep: {
+      name: "Rep",
       phone: "(11) 99999-9999",
       city: "Cidade",
       email: "rep@example.com",
@@ -24,22 +23,22 @@ const { waitForPrintReadinessMock, searchParamsMock, loaderData } = vi.hoisted((
   },
 }));
 
-vi.mock("~/utils/print-readiness", () => ({
+vi.mock("~/admin/quotations/document/print-readiness", () => ({
   waitForPrintReadiness: waitForPrintReadinessMock,
 }));
 vi.mock("~/components/ui/button", () => ({
   Button: ({ asChild, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { asChild?: boolean }) =>
     asChild ? children : <button {...props}>{children}</button>,
 }));
-vi.mock("~/components/admin/QuotationDocument", () => ({
-  QuotationDocument: () => <div className="quote-stage" />,
+vi.mock("~/admin/quotations/document/QuotationDocument", () => ({
+  QuotationDocument: () => <div className="quotation-stage" />,
 }));
 vi.mock("@remix-run/react", () => ({
   Link: ({ to, children }: AnchorHTMLAttributes<HTMLAnchorElement> & { to: string }) => <a href={to}>{children}</a>,
   useLoaderData: () => loaderData,
   useSearchParams: () => [searchParamsMock, vi.fn()],
 }));
-vi.mock("~/models/quotation.server", () => ({
+vi.mock("~/admin/quotations/quotation.server", () => ({
   getQuotation: vi.fn(),
 }));
 vi.mock("~/utils/require-admin.server", () => ({

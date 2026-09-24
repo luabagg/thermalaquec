@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { filterCatalogPickerItems, toCatalogPickerItems } from "./catalog-picker";
+import { filterCatalogVariantOptions, toCatalogVariantOptions } from "./catalog-variant-options";
 
 const image = (name: string) => ({ location: `https://cdn.test/${name}.webp`, thumbnail: `https://cdn.test/${name}-thumb.webp` });
 
@@ -48,33 +48,33 @@ const products = [
   },
 ];
 
-const items = toCatalogPickerItems(products);
+const options = toCatalogVariantOptions(products);
 
 test("search ignores accents and case", () => {
-  expect(filterCatalogPickerItems(items, "VALVULA", null).map((item) => item.variantId)).toEqual([101]);
+  expect(filterCatalogVariantOptions(options, "VALVULA", null).map((option) => option.variantId)).toEqual([101]);
 });
 
 test("every search word must match, across name, brand and attributes", () => {
-  expect(filterCatalogPickerItems(items, "warma 600l", null).map((item) => item.variantId)).toEqual([202]);
-  expect(filterCatalogPickerItems(items, "warma valvula", null)).toEqual([]);
+  expect(filterCatalogVariantOptions(options, "warma 600l", null).map((option) => option.variantId)).toEqual([202]);
+  expect(filterCatalogVariantOptions(options, "warma valvula", null)).toEqual([]);
 });
 
 test("a category narrows the list, and no category shows all", () => {
-  expect(filterCatalogPickerItems(items, "", 20).map((item) => item.variantId)).toEqual([201, 202]);
-  expect(filterCatalogPickerItems(items, "", null)).toHaveLength(3);
+  expect(filterCatalogVariantOptions(options, "", 20).map((option) => option.variantId)).toEqual([201, 202]);
+  expect(filterCatalogVariantOptions(options, "", null)).toHaveLength(3);
 });
 
 test("a variant uses its own image when it has one, else the product image", () => {
-  const [, withProductImage, withOwnImage] = items;
+  const [, withProductImage, withOwnImage] = options;
 
   expect(withProductImage).toMatchObject({ imageId: 7, imageUrl: image("boiler").location });
   expect(withOwnImage).toMatchObject({ imageId: 9, imageUrl: image("boiler-600").location });
 });
 
 test("the line bullets are the product bullets then the variant bullets, without repeats", () => {
-  expect(items[1].descriptionLines).toEqual(["Garantia de 5 anos", "Isolamento em PU"]);
+  expect(options[1].descriptionLines).toEqual(["Garantia de 5 anos", "Isolamento em PU"]);
 });
 
 test("only products with several variants are grouped", () => {
-  expect(items.map((item) => item.group)).toEqual([null, "Boiler Warma", "Boiler Warma"]);
+  expect(options.map((option) => option.group)).toEqual([null, "Boiler Warma", "Boiler Warma"]);
 });

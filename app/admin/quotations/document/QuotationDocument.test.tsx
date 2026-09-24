@@ -2,7 +2,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { expect, test } from "vitest";
 
 import { QuotationDocument } from "./QuotationDocument";
-import { updateEditorRow } from "~/utils/quotation-editor-state";
 
 const documentProps = {
   issuedAt: "2026-08-29T00:00:00.000Z",
@@ -19,7 +18,7 @@ const documentProps = {
   },
   lines: [
     {
-      clientKey: "line-1",
+      rowKey: "line-1",
       name: "Boiler",
       quantity: 1,
       descriptionLines: [],
@@ -30,7 +29,7 @@ const documentProps = {
   ],
   paymentOptions: [],
   notes: null,
-  rep: { brandPerson: "Rep", phone: "1", city: "City", email: "rep@example.com" },
+  salesRep: { name: "Rep", phone: "1", city: "City", email: "rep@example.com" },
 };
 
 test("QuotationDocument uses the thumbnail on screen and print asset in print mode", () => {
@@ -41,15 +40,4 @@ test("QuotationDocument uses the thumbnail on screen and print asset in print mo
   expect(screen).not.toContain('src="https://cdn.test/print.webp"');
   expect(print).toContain('src="https://cdn.test/print.webp"');
   expect(print).not.toContain('src="https://cdn.test/thumb.webp"');
-});
-
-test("updating one editor row preserves unaffected row identity for memoized rendering", () => {
-  const first = { clientKey: "first", name: "Boiler" };
-  const unaffected = { clientKey: "second", name: "Pump" };
-
-  const next = updateEditorRow([first, unaffected], "first", (row) => ({ ...row, name: "New boiler" }));
-
-  expect(next[0]).not.toBe(first);
-  expect(next[0].name).toBe("New boiler");
-  expect(next[1]).toBe(unaffected);
 });

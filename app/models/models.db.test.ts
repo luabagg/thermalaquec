@@ -8,7 +8,7 @@ const url = process.env.TEST_DATABASE_URL;
 
 type Models = {
   prisma: PrismaClient;
-  quotation: typeof import("./quotation.server");
+  quotation: typeof import("~/admin/quotations/quotation.server");
   client: typeof import("./client.server");
   catalog: typeof import("./catalog.server");
 };
@@ -22,7 +22,7 @@ describe.skipIf(!url)("persistence", () => {
     process.env.POSTGRES_URL_NON_POOLING = url;
     m = {
       prisma: (await import("~/libs/prisma/client.server")).default,
-      quotation: await import("./quotation.server"),
+      quotation: await import("~/admin/quotations/quotation.server"),
       client: await import("./client.server"),
       catalog: await import("./catalog.server"),
     };

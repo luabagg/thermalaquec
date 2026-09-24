@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { parseQuotationForm, todayInBrazil } from "./quotation-form";
+import { STALE_EDITOR_MESSAGE, parseQuotationForm } from "./quotation-form";
 
 function form(fields: Record<string, string>) {
   const data = new FormData();
@@ -8,7 +8,7 @@ function form(fields: Record<string, string>) {
   return data;
 }
 
-const base = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lineCount: "0", paymentCount: "0" };
+const base = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lineCount: "0", paymentOptionCount: "0" };
 
 test("a quotation needs a client", () => {
   expect(parseQuotationForm(form({ ...base, clientId: "" }))).toEqual({ error: "Selecione um cliente." });
@@ -43,8 +43,11 @@ test("lines keep their order, price in cents and catalog link; nameless rows are
   ]);
 });
 
-test("a quotation created late in the evening in Brazil is dated that day, not the next UTC day", () => {
-  // 22:30 in São Paulo (UTC-3) is already 01:30 of the next day in UTC.
-  expect(todayInBrazil(new Date("2026-09-24T01:30:00.000Z")).toISOString()).toBe("2026-09-23T00:00:00.000Z");
-  expect(todayInBrazil(new Date("2026-09-23T03:30:00.000Z")).toISOString()).toBe("2026-09-23T00:00:00.000Z");
+// A page loaded before a deploy can post row counts under other names. Reading a missing count as zero rows
+// would make the save delete every stored line or payment option.
+test("a form without a row count is refused, not read as zero rows", () => {
+  const olderPage = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lineCount: "0", paymentCount: "2" };
+
+  expect(parseQuotationForm(form(olderPage))).toEqual({ error: STALE_EDITOR_MESSAGE });
+  expect(parseQuotationForm(form({ ...base, lineCount: "abc" }))).toEqual({ error: STALE_EDITOR_MESSAGE });
 });

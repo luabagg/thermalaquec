@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("~/utils/require-admin.server", () => ({ requireAdmin: mocks.requireAdmin }));
-vi.mock("~/models/quotation.server", () => ({ saveQuotation: mocks.saveQuotation, getQuotation: mocks.getQuotation }));
+vi.mock("~/admin/quotations/quotation.server", () => ({ saveQuotation: mocks.saveQuotation, getQuotation: mocks.getQuotation }));
 vi.mock("~/models/client.server", () => ({ listClientOptions: mocks.listClientOptions }));
 vi.mock("~/models/catalog.server", () => ({
   listCatalogPickerProducts: mocks.listCatalogPickerProducts,
@@ -27,7 +27,7 @@ function post(fields: Record<string, string>) {
   return new Request("http://localhost/admin/quotations/42", { method: "POST", body: form });
 }
 
-const baseFields = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lineCount: "0", paymentCount: "0" };
+const baseFields = { clientId: "3", issuedAt: "2026-09-23", status: "draft", lineCount: "0", paymentOptionCount: "0" };
 
 test("the editor renders before the catalog finishes loading", async () => {
   mocks.requireAdmin.mockResolvedValue(user);
@@ -50,7 +50,7 @@ test("a save echoes its revision so the editor can ignore stale responses", asyn
 
   const result = await action({ request: post({ ...baseFields, intent: "autosave", revision: "9" }), params: { id: "42" } } as never);
 
-  expect(result.data).toEqual({ ok: true, quotationId: 42, revision: 9 });
+  expect(result.data).toEqual({ ok: true, revision: 9 });
   expect(mocks.saveQuotation).toHaveBeenCalledWith(expect.objectContaining({ quotationId: 42, ownerUserId: "user-1", clientId: 3 }));
 });
 

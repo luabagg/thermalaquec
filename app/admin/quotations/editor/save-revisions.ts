@@ -1,9 +1,10 @@
-export type SaveCompletion = {
-  ok: boolean;
-  revision: number;
-  redirectTo?: string;
-  error?: string;
-};
+// Autosave and manual saves overlap with typing. Each save carries a request revision, and the action echoes it
+// back, so the editor applies only the answer to its latest save and keeps edits made while that save ran.
+
+/** What the editor action answers to a save. */
+export type SaveResponse =
+  | { ok: true; revision: number; redirectTo?: string }
+  | { ok: false; status: number; error: string; revision: number };
 
 export type RevisionState = {
   draftRevision: number;
@@ -48,7 +49,7 @@ export function beginRevisionSave(state: RevisionState): { state: RevisionState;
 
 export function completeRevisionSave(
   state: RevisionState,
-  completion: SaveCompletion,
+  completion: SaveResponse,
 ): { state: RevisionState; effect: CompletionEffect } {
   const pending = state.pending;
   if (
@@ -70,7 +71,7 @@ export function completeRevisionSave(
   if (!completion.ok) {
     return {
       state: completedState,
-      effect: { type: "error", message: completion.error ?? "Falha ao salvar" },
+      effect: { type: "error", message: completion.error },
     };
   }
 

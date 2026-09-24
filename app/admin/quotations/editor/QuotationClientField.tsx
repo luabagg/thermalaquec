@@ -8,15 +8,16 @@ import { Label } from "~/components/ui/label";
 import type { action as clientAction } from "~/routes/admin.clients_.$id";
 import { formatCityState, formatClientAddress, formatPhone, formatTaxId, type ClientInput } from "~/utils/client";
 
-export type EditorClient = ClientInput & { id: number };
+import { QUOTATION_FIELD } from "../quotation-form";
 
 type Props = {
-  clients: EditorClient[];
+  clients: (ClientInput & { id: number })[];
   clientId: number;
   onClientChange(clientId: number): void;
 };
 
-export function EditorClientSection({ clients, clientId, onClientChange }: Props) {
+/** Picks the quotation's client, and edits that client's record in a dialog without leaving the editor. */
+export function QuotationClientField({ clients, clientId, onClientChange }: Props) {
   const client = clients.find((candidate) => candidate.id === clientId);
   const [editing, setEditing] = useState(false);
   const fetcher = useFetcher<typeof clientAction>();
@@ -31,7 +32,7 @@ export function EditorClientSection({ clients, clientId, onClientChange }: Props
       <Label htmlFor="clientId">Cliente</Label>
       <select
         id="clientId"
-        name="clientId"
+        name={QUOTATION_FIELD.clientId}
         value={clientId}
         onChange={(event) => onClientChange(Number(event.target.value))}
         className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
